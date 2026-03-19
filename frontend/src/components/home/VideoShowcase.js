@@ -1,16 +1,33 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { FiPlay, FiPause, FiVolume2, FiVolumeX } from 'react-icons/fi';
-import Button from '@/components/ui/Button';
 
 export default function VideoShowcase() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [showThumbnail, setShowThumbnail] = useState(true);
+  const [videoUrl, setVideoUrl] = useState('/videos/showcase.mp4');
   const videoRef = useRef(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${apiUrl}/api/settings/showcase_video`);
+        const result = await res.json();
+        
+        if (result.status === 'success' && result.data?.url) {
+          setVideoUrl(result.data.url);
+        }
+      } catch (error) {
+        console.error('Failed to fetch video settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handlePlayPause = () => {
     if (videoRef.current) {
@@ -34,13 +51,13 @@ export default function VideoShowcase() {
   return (
     <section className="relative h-[80vh] overflow-hidden">
       {/* Video Background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 bg-black">
         {showThumbnail ? (
           <Image
-            src="https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2070"
+            src="https://picsum.photos/seed/33oywj/800/600"
             alt="Video Thumbnail"
             fill
-            className="object-cover"
+            className="object-cover opacity-80"
           />
         ) : (
           <video
@@ -50,7 +67,7 @@ export default function VideoShowcase() {
             muted={isMuted}
             playsInline
           >
-            <source src="/videos/showcase.mp4" type="video/mp4" />
+            <source src={videoUrl} type="video/mp4" />
           </video>
         )}
         
@@ -73,12 +90,12 @@ export default function VideoShowcase() {
             </span>
 
             {/* Title */}
-            <h2 className="text-5xl md:text-7xl font-serif font-bold mb-6">
+            <h2 className="text-5xl md:text-7xl font-serif font-bold mb-6 drop-shadow-lg">
               Discover Your <span className="text-primary-400">African Dream</span>
             </h2>
 
             {/* Description */}
-            <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto drop-shadow-md">
               Watch our story and see why discerning travelers choose Nyle for unforgettable African adventures.
             </p>
 
@@ -86,7 +103,7 @@ export default function VideoShowcase() {
             <div className="flex items-center justify-center space-x-4">
               <button
                 onClick={handlePlayPause}
-                className="w-20 h-20 bg-primary-600 rounded-full flex items-center justify-center hover:bg-primary-700 transition-colors group"
+                className="w-20 h-20 bg-primary-600 rounded-full flex items-center justify-center hover:bg-primary-700 transition-colors group z-10"
               >
                 {isPlaying ? (
                   <FiPause className="w-8 h-8 text-white" />
@@ -97,7 +114,7 @@ export default function VideoShowcase() {
 
               <button
                 onClick={handleMute}
-                className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+                className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors z-10"
               >
                 {isMuted ? (
                   <FiVolumeX className="w-5 h-5 text-white" />

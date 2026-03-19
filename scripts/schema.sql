@@ -383,3 +383,18 @@ INSERT INTO destinations (name, slug, country, region, description, best_time_to
 ('Diani Beach', 'diani-beach', 'Kenya', 'Coast', 'Pristine white sand beaches along the Indian Ocean with luxury resorts.', 'December to March', 'KES', ARRAY['English', 'Swahili'], true, -4.2770, 39.5946),
 ('Amboseli National Park', 'amboseli', 'Kenya', 'Rift Valley', 'Home to large elephant herds with stunning views of Mount Kilimanjaro.', 'June to October', 'KES', ARRAY['English', 'Swahili', 'Maa'], true, -2.6424, 37.2625),
 ('Lake Nakuru', 'lake-nakuru', 'Kenya', 'Rift Valley', 'Famous for flamingos and rhino sanctuary.', 'January to March', 'KES', ARRAY['English', 'Swahili'], true, -0.3031, 36.0800);
+
+-- Admin logs table
+CREATE TABLE admin_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    admin_id UUID REFERENCES users(id),
+    action VARCHAR(255) NOT NULL,
+    details JSONB DEFAULT '{}',
+    ip_address INET,
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Index for admin logs
+CREATE INDEX idx_admin_logs_admin ON admin_logs(admin_id);
+CREATE INDEX idx_admin_logs_created ON admin_logs(created_at);

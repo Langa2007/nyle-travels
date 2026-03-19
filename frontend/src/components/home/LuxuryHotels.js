@@ -1,27 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   FiStar, 
   FiMapPin, 
-  FiWifi, 
-  FiCoffee, 
   FiHeart,
-  FiDollarSign,
   FiChevronRight 
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 
-const hotels = [
+const defaultHotels = [
   {
     id: 1,
     name: 'Mara Serena Safari Lodge',
     slug: 'mara-serena',
     destination: 'Maasai Mara',
-    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070',
+    image: 'https://picsum.photos/seed/hotel1/800/600',
     rating: 5,
     price: 850,
     amenities: ['Pool', 'Spa', 'Restaurant', 'WiFi'],
@@ -33,7 +30,7 @@ const hotels = [
     name: 'Almanara Luxury Resort',
     slug: 'almanara',
     destination: 'Diani Beach',
-    image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2070',
+    image: 'https://picsum.photos/seed/hotel2/800/600',
     rating: 5,
     price: 650,
     amenities: ['Private Beach', 'Spa', 'Fine Dining', 'Infinity Pool'],
@@ -45,7 +42,7 @@ const hotels = [
     name: 'Ol Donyo Wuas Lodge',
     slug: 'ol-donyo-wuas',
     destination: 'Amboseli',
-    image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070',
+    image: 'https://picsum.photos/seed/hotel3/800/600',
     rating: 5,
     price: 1200,
     amenities: ['Private Pools', 'Stargazing', 'Safari', 'Gourmet Meals'],
@@ -57,7 +54,7 @@ const hotels = [
     name: 'Giraffe Manor',
     slug: 'giraffe-manor',
     destination: 'Nairobi',
-    image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070',
+    image: 'https://picsum.photos/seed/hotel4/800/600',
     rating: 5,
     price: 950,
     amenities: ['Giraffe Feeding', 'Garden', 'Fine Dining', 'Heritage'],
@@ -68,6 +65,27 @@ const hotels = [
 
 export default function LuxuryHotels() {
   const [wishlist, setWishlist] = useState([]);
+  const [hotels, setHotels] = useState(defaultHotels);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${apiUrl}/api/settings`);
+        const result = await res.json();
+        
+        if (result.status === 'success' && result.data?.hotels_images) {
+          setHotels(prev => prev.map((item, index) => ({
+            ...item,
+            image: result.data.hotels_images[index] || item.image
+          })));
+        }
+      } catch (error) {
+        console.error('Failed to fetch hotels settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const toggleWishlist = (hotelId) => {
     setWishlist(prev =>

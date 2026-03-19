@@ -18,6 +18,7 @@ import hotelRoutes from './routes/hotelRoutes.js';
 import destinationRoutes from './routes/destinationRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import settingsRoutes from './routes/settingsRoutes.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -77,6 +78,7 @@ app.use('/api/hotels', hotelRoutes);
 app.use('/api/destinations', destinationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -97,7 +99,7 @@ const startServer = async () => {
     
     app.listen(PORT, () => {
       console.log(` Nyle Travel API running on port ${PORT}`);
-      console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(` Environment: ${process.env.NODE_ENV || 'production'}`);
       console.log(` Health check: http://localhost:${PORT}/health`);
     });
   } catch (error) {

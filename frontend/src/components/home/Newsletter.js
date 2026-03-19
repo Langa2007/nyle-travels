@@ -30,7 +30,7 @@ export default function Newsletter() {
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
-          src="https://images.unsplash.com/photo-1531973576160-7125cd845d78?q=80&w=2070"
+          src="https://picsum.photos/seed/wmkm5b/800/600"
           alt="Newsletter Background"
           fill
           className="object-cover"

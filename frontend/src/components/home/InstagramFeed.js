@@ -10,7 +10,7 @@ import Button from '@/components/ui/Button';
 const instagramPosts = [
   {
     id: 1,
-    image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068',
+    image: 'https://picsum.photos/seed/efr52f/800/600',
     likes: 1234,
     comments: 56,
     caption: 'Sunset views in Maasai Mara 🦁🌅',
@@ -18,7 +18,7 @@ const instagramPosts = [
   },
   {
     id: 2,
-    image: 'https://images.unsplash.com/photo-1547970810-dc1eac37d174?q=80&w=2069',
+    image: 'https://picsum.photos/seed/syv2td/800/600',
     likes: 2345,
     comments: 89,
     caption: 'Luxury tented camp under the stars ✨',
@@ -26,7 +26,7 @@ const instagramPosts = [
   },
   {
     id: 3,
-    image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2070',
+    image: 'https://picsum.photos/seed/xvue2/800/600',
     likes: 3456,
     comments: 123,
     caption: 'Pristine beaches of Diani 🏖️',
@@ -34,7 +34,7 @@ const instagramPosts = [
   },
   {
     id: 4,
-    image: 'https://images.unsplash.com/photo-1547483238-f400e65ccd56?q=80&w=2070',
+    image: 'https://picsum.photos/seed/30nl4f/800/600',
     likes: 4567,
     comments: 234,
     caption: 'Summit day on Kilimanjaro 🏔️',
@@ -42,7 +42,7 @@ const instagramPosts = [
   },
   {
     id: 5,
-    image: 'https://images.unsplash.com/photo-1549362157-6c7e6e3e33e4?q=80&w=2070',
+    image: 'https://picsum.photos/seed/5pjwia/800/600',
     likes: 5678,
     comments: 345,
     caption: 'Elephant family in Amboseli 🐘',
@@ -50,7 +50,7 @@ const instagramPosts = [
   },
   {
     id: 6,
-    image: 'https://images.unsplash.com/photo-1523805009345-7448845a9e53?q=80&w=2072',
+    image: 'https://picsum.photos/seed/22q29q/800/600',
     likes: 6789,
     comments: 456,
     caption: 'Rare leopard sighting in Samburu 🐆',

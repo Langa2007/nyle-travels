@@ -63,17 +63,17 @@ const socialLinks = [
 const awards = [
   {
     name: 'World Travel Awards',
-    image: 'https://res.cloudinary.com/nyle/image/upload/v1/awards/wta-logo',
+    image: 'https://picsum.photos/seed/logo_pi6hmk9/200/200',
     year: '2023',
   },
   {
     name: 'Luxury Travel Guide',
-    image: 'https://res.cloudinary.com/nyle/image/upload/v1/awards/ltg-logo',
+    image: 'https://picsum.photos/seed/logo_wsbe0d/200/200',
     year: '2023',
   },
   {
     name: 'African Travel Awards',
-    image: 'https://res.cloudinary.com/nyle/image/upload/v1/awards/ata-logo',
+    image: 'https://picsum.photos/seed/logo_mf6v16/200/200',
     year: '2023',
   },
 ];
@@ -84,7 +84,7 @@ export default function Footer() {
       {/* Decorative Background */}
       <div className="absolute inset-0 opacity-10">
         <Image
-          src="https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2070"
+          src="https://picsum.photos/seed/930b59/800/600"
           alt="Footer Background"
           fill
           className="object-cover"
@@ -106,13 +106,8 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="inline-block mb-6">
               <div className="flex items-center space-x-2">
-                <div className="relative w-12 h-12">
-                  <Image
-                    src="/images/logo-white.svg"
-                    alt="Nyle Travel"
-                    fill
-                    className="object-contain"
-                  />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-600 flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-xl font-serif">N</span>
                 </div>
                 <span className="font-serif text-2xl font-bold text-white">
                   Nyle<span className="text-primary-400">Travel</span>

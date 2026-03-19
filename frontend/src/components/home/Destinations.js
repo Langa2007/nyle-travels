@@ -1,19 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiMapPin, FiChevronRight } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 
-const destinations = [
+const defaultDestinations = [
   {
     id: 1,
     name: 'Maasai Mara',
     country: 'Kenya',
     slug: 'maasai-mara',
-    image: 'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2070',
+    image: 'https://picsum.photos/seed/dest1/800/600',
     description: 'Witness the Great Migration and the Big Five in Africa\'s most famous reserve.',
     tours: 24,
     hotels: 18,
@@ -24,7 +24,7 @@ const destinations = [
     name: 'Diani Beach',
     country: 'Kenya',
     slug: 'diani-beach',
-    image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=2025',
+    image: 'https://picsum.photos/seed/dest2/800/600',
     description: 'Pristine white sands and crystal-clear waters of the Indian Ocean.',
     tours: 15,
     hotels: 32,
@@ -35,7 +35,7 @@ const destinations = [
     name: 'Amboseli',
     country: 'Kenya',
     slug: 'amboseli',
-    image: 'https://images.unsplash.com/photo-1549362157-6c7e6e3e33e4?q=80&w=2070',
+    image: 'https://picsum.photos/seed/dest3/800/600',
     description: 'Iconic views of Mount Kilimanjaro and large elephant herds.',
     tours: 18,
     hotels: 12,
@@ -46,7 +46,7 @@ const destinations = [
     name: 'Tsavo',
     country: 'Kenya',
     slug: 'tsavo',
-    image: 'https://images.unsplash.com/photo-1523805009345-7448845a9e53?q=80&w=2072',
+    image: 'https://picsum.photos/seed/dest4/800/600',
     description: 'Kenya\'s largest national park with diverse landscapes and wildlife.',
     tours: 20,
     hotels: 15,
@@ -57,7 +57,7 @@ const destinations = [
     name: 'Lake Nakuru',
     country: 'Kenya',
     slug: 'lake-nakuru',
-    image: 'https://images.unsplash.com/photo-1455218873509-8097305ee378?q=80&w=2070',
+    image: 'https://picsum.photos/seed/dest5/800/600',
     description: 'Famous for flamingos and rhino sanctuary.',
     tours: 12,
     hotels: 8,
@@ -68,7 +68,7 @@ const destinations = [
     name: 'Samburu',
     country: 'Kenya',
     slug: 'samburu',
-    image: 'https://images.unsplash.com/photo-1523805009345-7448845a9e53?q=80&w=2072',
+    image: 'https://picsum.photos/seed/dest6/800/600',
     description: 'Unique wildlife species and rich Samburu culture.',
     tours: 14,
     hotels: 10,
@@ -83,6 +83,27 @@ const fadeInUp = {
 
 export default function Destinations() {
   const [hoveredId, setHoveredId] = useState(null);
+  const [destinations, setDestinations] = useState(defaultDestinations);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${apiUrl}/api/settings`);
+        const result = await res.json();
+        
+        if (result.status === 'success' && result.data?.destinations_images) {
+          setDestinations(prev => prev.map((item, index) => ({
+            ...item,
+            image: result.data.destinations_images[index] || item.image
+          })));
+        }
+      } catch (error) {
+        console.error('Failed to fetch destination settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

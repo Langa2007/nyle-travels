@@ -1,3 +1,15 @@
 .node_modules/
 .next/
 out/
+logs/
+.env
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env
+admin-frontend/node_modules/
+admin-frontend/.next/
+admin-frontend/out/
+admin-frontend/.env
+/ .next/
+/ out/

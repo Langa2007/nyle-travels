@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { FiClock, FiUsers, FiMapPin, FiStar, FiHeart } from 'react-icons/fi';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
@@ -12,13 +12,13 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-const featuredTours = [
+const defaultTours = [
   {
     id: 1,
     name: 'The Great Migration Safari',
     slug: 'great-migration-safari',
     destination: 'Maasai Mara',
-    image: 'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2070',
+    image: 'https://picsum.photos/seed/tour1/800/600',
     duration: '7 Days',
     maxGroupSize: 8,
     price: 4500,
@@ -37,7 +37,7 @@ const featuredTours = [
     name: 'Coastal Luxury Retreat',
     slug: 'coastal-luxury-retreat',
     destination: 'Diani Beach',
-    image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=2025',
+    image: 'https://picsum.photos/seed/tour2/800/600',
     duration: '5 Days',
     maxGroupSize: 2,
     price: 3200,
@@ -56,7 +56,7 @@ const featuredTours = [
     name: 'Kilimanjaro Climb - Luxury Route',
     slug: 'kilimanjaro-luxury-climb',
     destination: 'Kilimanjaro',
-    image: 'https://images.unsplash.com/photo-1547483238-f400e65ccd56?q=80&w=2070',
+    image: 'https://picsum.photos/seed/tour3/800/600',
     duration: '8 Days',
     maxGroupSize: 6,
     price: 5800,
@@ -75,7 +75,7 @@ const featuredTours = [
     name: 'Amboseli Elephant Experience',
     slug: 'amboseli-elephant-experience',
     destination: 'Amboseli',
-    image: 'https://images.unsplash.com/photo-1549362157-6c7e6e3e33e4?q=80&w=2070',
+    image: 'https://picsum.photos/seed/tour4/800/600',
     duration: '4 Days',
     maxGroupSize: 10,
     price: 2800,
@@ -94,7 +94,7 @@ const featuredTours = [
     name: 'Samburu Cultural Safari',
     slug: 'samburu-cultural-safari',
     destination: 'Samburu',
-    image: 'https://images.unsplash.com/photo-1523805009345-7448845a9e53?q=80&w=2072',
+    image: 'https://picsum.photos/seed/tour5/800/600',
     duration: '6 Days',
     maxGroupSize: 8,
     price: 3900,
@@ -112,6 +112,27 @@ const featuredTours = [
 
 export default function FeaturedTours() {
   const [wishlist, setWishlist] = useState([]);
+  const [tours, setTours] = useState(defaultTours);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${apiUrl}/api/settings`);
+        const result = await res.json();
+        
+        if (result.status === 'success' && result.data?.tours_images) {
+          setTours(prev => prev.map((item, index) => ({
+            ...item,
+            image: result.data.tours_images[index] || item.image
+          })));
+        }
+      } catch (error) {
+        console.error('Failed to fetch tours settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const toggleWishlist = (tourId) => {
     setWishlist(prev =>
@@ -143,7 +164,7 @@ export default function FeaturedTours() {
         }}
         className="featured-tours-slider"
       >
-        {featuredTours.map((tour) => (
+        {tours.map((tour) => (
           <SwiperSlide key={tour.id}>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}

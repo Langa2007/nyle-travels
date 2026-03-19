@@ -16,7 +16,7 @@ const offers = [
     discount: 20,
     code: 'EARLYBIRD20',
     validUntil: new Date('2024-06-30'),
-    image: 'https://images.unsplash.com/photo-1547970810-dc1eac37d174?q=80&w=2069',
+    image: 'https://picsum.photos/seed/dnanf/800/600',
     type: 'Early Bird',
   },
   {
@@ -26,7 +26,7 @@ const offers = [
     discount: 15,
     code: 'HONEYMOON15',
     validUntil: new Date('2024-12-31'),
-    image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=2025',
+    image: 'https://picsum.photos/seed/qii2pf/800/600',
     type: 'Romance',
   },
   {
@@ -36,7 +36,7 @@ const offers = [
     discount: 25,
     code: 'FAMILY25',
     validUntil: new Date('2024-08-31'),
-    image: 'https://images.unsplash.com/photo-1523805009345-7448845a9e53?q=80&w=2072',
+    image: 'https://picsum.photos/seed/o4lgl9/800/600',
     type: 'Family',
   },
 ];

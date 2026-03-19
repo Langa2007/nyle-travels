@@ -1,66 +1,51 @@
-import pkg from 'pg';
-const { Pool } = pkg;
-import dotenv from 'dotenv';
+import pkg from "pg";
+import dotenv from "dotenv";
 
 dotenv.config();
+const { Pool } = pkg;
+
+const connectionString =
+  process.env.DATABASE_URL_NEON ||
+  process.env.DATABASE_URL_LOCAL ||
+  process.env.DATABASE_URL;
+
+if (!connectionString) {
+  console.error(" Missing all database URLs in environment");
+  process.exit(1);
+}
 
 const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionString,
+  ssl: {
+    require: true,
+    rejectUnauthorized: false,
+  },
 });
 
-// Test database connection
-export const testConnection = async () => {
+// Ensure 'public' schema is always used
+pool.on("connect", (client) => {
+  client.query('SET search_path TO public');
+  console.log(" Default schema set to 'public'");
+});
+
+pool.query("SELECT current_database()", (err, res) => {
+  if (err) {
+    console.error(" DB Connection Error:", err.message);
+  } else {
+    console.log(" Connected to DB:", res?.rows?.[0]);
+  }
+});
+
+export const connectDB = async () => {
   try {
     const client = await pool.connect();
-    console.log(' Database connected successfully');
+    console.log(" PostgreSQL connection successful!");
     client.release();
-    return true;
-  } catch (error) {
-    console.error(' Database connection failed:', error.message);
-    throw error;
+  } catch (err) {
+    console.error(" Database connection error:", err.message);
+    process.exit(1);
   }
 };
 
-// Query helper
-export const query = async (text, params) => {
-  const start = Date.now();
-  try {
-    const result = await pool.query(text, params);
-    const duration = Date.now() - start;
-    console.log('Executed query:', { text, duration, rows: result.rowCount });
-    return result;
-  } catch (error) {
-    console.error('Query error:', { text, error: error.message });
-    throw error;
-  }
-};
-
-// Transaction helper
-export const transaction = async (callback) => {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    const result = await callback(client);
-    await client.query('COMMIT');
-    return result;
-  } catch (error) {
-    await client.query('ROLLBACK');
-    throw error;
-  } finally {
-    client.release();
-  }
-};
-
-export default {
-  query,
-  transaction,
-  testConnection,
-  pool
-};
+export { pool };
+export default pool;

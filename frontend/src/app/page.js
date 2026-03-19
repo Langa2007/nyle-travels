@@ -7,7 +7,7 @@ import Destinations from '@/components/home/Destinations';
 import LuxuryHotels from '@/components/home/LuxuryHotels';
 import Testimonials from '@/components/home/Testimonials';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
-import Newsletter from '@/components/home/Newsletter';
+import CallToAction from '@/components/home/CallToAction';
 import InstagramFeed from '@/components/home/InstagramFeed';
 import Stats from '@/components/home/Stats';
 import VideoShowcase from '@/components/home/VideoShowcase';
@@ -191,8 +191,8 @@ export default function Home() {
       {/* Partners */}
       <Partners />
 
-      {/* Newsletter */}
-      <Newsletter />
+      {/* Call To Action */}
+      <CallToAction />
     </div>
   );
 }

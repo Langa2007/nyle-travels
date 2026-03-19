@@ -8,30 +8,6 @@ import { FiSearch, FiMapPin, FiCalendar, FiUsers } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import DatePicker from '@/components/common/DatePicker';
 
-const heroSlides = [
-  {
-    id: 1,
-    image: 'https://images.unsplash.com/photo-1547970810-dc1eac37d174?q=80&w=2069',
-    title: 'Luxury Safari Experience',
-    subtitle: 'Witness the Great Migration',
-    description: 'Experience the untamed beauty of Africa in unparalleled luxury',
-  },
-  {
-    id: 2,
-    image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068',
-    title: 'Pristine Beach Retreats',
-    subtitle: 'Indian Ocean Paradise',
-    description: 'Relax on white sandy beaches with world-class amenities',
-  },
-  {
-    id: 3,
-    image: 'https://images.unsplash.com/photo-1580069688146-b0d142d4d64c?q=80&w=2070',
-    title: 'Mountain Majesty',
-    subtitle: 'Climb Kilimanjaro',
-    description: 'Conquer Africa\'s highest peak in style',
-  },
-];
-
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchParams, setSearchParams] = useState({
@@ -40,12 +16,71 @@ export default function Hero() {
     guests: 2,
   });
 
+  const [heroSlides, setHeroSlides] = useState([
+    {
+      id: 1,
+      image: 'https://picsum.photos/seed/bj6tly/800/600',
+      title: 'Luxury Safari Experience',
+      subtitle: 'Witness the Great Migration',
+      description: 'Experience the untamed beauty of Africa in unparalleled luxury',
+    },
+    {
+      id: 2,
+      image: 'https://picsum.photos/seed/7dt4ou/800/600',
+      title: 'Pristine Beach Retreats',
+      subtitle: 'Indian Ocean Paradise',
+      description: 'Relax on white sandy beaches with world-class amenities',
+    },
+    {
+      id: 3,
+      image: 'https://picsum.photos/seed/f92ta9/800/600',
+      title: 'Mountain Majesty',
+      subtitle: 'Climb Kilimanjaro',
+      description: 'Conquer Africa\'s highest peak in style',
+    },
+    {
+      id: 4,
+      image: 'https://picsum.photos/seed/7gup6o/800/600',
+      title: 'Cultural Immersion',
+      subtitle: 'Meet Local Tribes',
+      description: 'Discover the rich heritage and traditions of East Africa',
+    },
+    {
+      id: 5,
+      image: 'https://picsum.photos/seed/60xk0t/800/600',
+      title: 'Majestic Waterfalls',
+      subtitle: 'Victoria Falls & Beyond',
+      description: 'Witness the breathtaking power of nature firsthand',
+    }
+  ]);
+
   useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${apiUrl}/api/settings/hero_images`);
+        const result = await res.json();
+        
+        if (result.status === 'success' && result.data && Array.isArray(result.data)) {
+          setHeroSlides(prev => prev.map((slide, index) => ({
+            ...slide,
+            image: result.data[index] || slide.image
+          })));
+        }
+      } catch (error) {
+        console.error('Failed to fetch hero settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  useEffect(() => {
+    // 30 Seconds timeframe
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 8000);
+    }, 30000);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroSlides.length]);
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
@@ -84,10 +119,10 @@ export default function Hero() {
             <span className="inline-block px-4 py-1 border border-white/30 rounded-full text-sm mb-6 backdrop-blur-sm">
               {heroSlides[currentSlide].subtitle}
             </span>
-            <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6">
+            <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6 drop-shadow-lg">
               {heroSlides[currentSlide].title}
             </h1>
-            <p className="text-xl md:text-2xl text-gray-200 mb-12 max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-gray-200 mb-12 max-w-2xl mx-auto drop-shadow-md">
               {heroSlides[currentSlide].description}
             </p>
           </motion.div>
@@ -116,8 +151,8 @@ export default function Hero() {
                   </select>
                 </div>
 
-                <div className="relative">
-                  <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" />
+                <div className="relative w-full z-50">
+                  <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 z-10" />
                   <DatePicker
                     selected={searchParams.date}
                     onChange={(date) => setSearchParams({ ...searchParams, date })}
