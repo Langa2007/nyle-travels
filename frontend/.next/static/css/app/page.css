@@ -805,8 +805,7 @@
 
 .react-datepicker__aria-live {
   position: absolute;
-  -webkit-clip-path: circle(0);
-          clip-path: circle(0);
+  clip-path: circle(0);
   border: 0;
   height: 1px;
   margin: -1px;
@@ -916,8 +915,7 @@
 }
 .swiper-backface-hidden .swiper-slide {
   transform: translateZ(0);
-  -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 /* 3D Effects */
 .swiper-3d.swiper-css-mode .swiper-wrapper {
@@ -969,8 +967,7 @@
   scroll-snap-stop: always;
 }
 .swiper-css-mode.swiper-centered.swiper-horizontal > .swiper-wrapper > .swiper-slide:first-child {
-  -webkit-margin-start: var(--swiper-centered-offset-before);
-          margin-inline-start: var(--swiper-centered-offset-before);
+  margin-inline-start: var(--swiper-centered-offset-before);
 }
 .swiper-css-mode.swiper-centered.swiper-horizontal > .swiper-wrapper::before {
   height: 100%;
@@ -978,8 +975,7 @@
   width: var(--swiper-centered-offset-after);
 }
 .swiper-css-mode.swiper-centered.swiper-vertical > .swiper-wrapper > .swiper-slide:first-child {
-  -webkit-margin-before: var(--swiper-centered-offset-before);
-          margin-block-start: var(--swiper-centered-offset-before);
+  margin-block-start: var(--swiper-centered-offset-before);
 }
 .swiper-css-mode.swiper-centered.swiper-vertical > .swiper-wrapper::before {
   width: 100%;
@@ -1101,7 +1097,8 @@
 .swiper-button-next svg {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  -o-object-fit: contain;
+     object-fit: contain;
   transform-origin: center;
 }
 .swiper-rtl .swiper-button-prev svg,
@@ -1128,7 +1125,6 @@
   font-size: var(--swiper-navigation-size);
   text-transform: none !important;
   letter-spacing: 0;
-  font-feature-settings: ;
   font-variant: initial;
   line-height: 1;
 }
