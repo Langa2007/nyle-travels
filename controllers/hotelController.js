@@ -1,7 +1,7 @@
 import { Hotel } from '../models/Hotel.js';
 import { Destination } from '../models/Destination.js';
 import AppError from '../utils/AppError.js';
-import catchAsync from '../utils/catchAsync.js';
+import catchAsync from '../utils/CatchAsync.js';
 import { cloudinaryService } from '../services/cloudinaryService.js';
 import { googleMapsService } from '../services/googleMapsService.js';
 

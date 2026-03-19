@@ -1,7 +1,7 @@
 import { Review } from '../models/Review.js';
 import { Booking } from '../models/Booking.js';
 import AppError from '../utils/AppError.js';
-import catchAsync from '../utils/catchAsync.js';
+import catchAsync from '../utils/CatchAsync.js';
 import { cloudinaryService } from '../services/cloudinaryService.js';
 
 export const createReview = catchAsync(async (req, res, next) => {

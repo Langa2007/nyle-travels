@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { User } from '../models/user.js';
 import { sendWelcomeEmail, sendPasswordResetEmail } from '../services/emailService.js';
 import AppError from '../utils/AppError.js';
-import catchAsync from '../utils/catchAsync.js';
+import catchAsync from '../utils/CatchAsync.js';
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {

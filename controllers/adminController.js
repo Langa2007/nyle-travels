@@ -1,7 +1,7 @@
 import { query, transaction } from '../config/db.js';
 import AppError from '../utils/AppError.js';
-import catchAsync from '../utils/catchAsync.js';
-import { User } from '../models/User.js';
+import catchAsync from '../utils/CatchAsync.js';
+import { User } from '../models/user.js';
 import { TourPackage } from '../models/TourPackage.js';
 import { Booking } from '../models/Booking.js';
 import { Payment } from '../models/Payment.js';

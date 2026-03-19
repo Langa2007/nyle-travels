@@ -2,7 +2,7 @@ import { Booking } from '../models/Booking.js';
 import { TourPackage } from '../models/TourPackage.js';
 import { sendBookingConfirmation } from '../services/emailService.js';
 import AppError from '../utils/AppError.js';
-import catchAsync from '../utils/catchAsync.js';
+import catchAsync from '../utils/CatchAsync.js';
 
 export const createBooking = catchAsync(async (req, res, next) => {
   const { tour_package_id, start_date, guests, ...bookingData } = req.body;

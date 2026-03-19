@@ -1,5 +1,5 @@
 import AppError from '../utils/AppError.js';
-import catchAsync from '../utils/catchAsync.js';
+import catchAsync from '../utils/CatchAsync.js';
 
 export const restrictToAdmin = catchAsync(async (req, res, next) => {
   if (!req.user || req.user.role !== 'admin') {

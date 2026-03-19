@@ -1,7 +1,7 @@
 import { Payment } from '../models/Payment.js';
 import { Booking } from '../models/Booking.js';
 import AppError from '../utils/AppError.js';
-import catchAsync from '../utils/catchAsync.js';
+import catchAsync from '../utils/CatchAsync.js';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);

@@ -1,7 +1,7 @@
 import { TourPackage } from '../models/TourPackage.js';
 import { Destination } from '../models/Destination.js';
 import AppError from '../utils/AppError.js';
-import catchAsync from '../utils/catchAsync.js';
+import catchAsync from '../utils/CatchAsync.js';
 import { cloudinaryService } from '../services/cloudinaryService.js';
 
 export const getAllTours = catchAsync(async (req, res, next) => {
