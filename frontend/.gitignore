@@ -13,3 +13,7 @@ admin-frontend/out/
 admin-frontend/.env
 / .next/
 / out/
+/ build
+.env.local
+
+/src/generated/prisma

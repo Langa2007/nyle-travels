@@ -1,5 +1,5 @@
 import { query } from '../config/db.js';
-import cloudinary from '../config/cloudinary.js';
+import cloudinary from '../services/cloudinaryService.js';
 import streamifier from 'streamifier';
 
 export const getSettings = async (req, res, next) => {
