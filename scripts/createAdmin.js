@@ -9,17 +9,22 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
+const connectionString = 
+  process.env.DATABASE_URL_NEON || 
+  process.env.DATABASE_URL_LOCAL || 
+  `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
+
 const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  connectionString,
+  ssl: connectionString.includes('neon.tech') ? {
+    require: true,
+    rejectUnauthorized: false
+  } : false
 });
 
 async function main() {
-  const email = process.argv[2] || 'admin@nyle.com';
-  const plainPassword = process.argv[3] || 'adminpassword';
+  const email = process.argv[2] || 'fidellanga67@gmail.com';
+  const plainPassword = process.argv[3] || 'Stephanie@2007';
   
   try {
     const checkUser = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
