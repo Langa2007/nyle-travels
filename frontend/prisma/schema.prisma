@@ -1,13 +1,79 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email                String    @unique @db.VarChar(255)
+  phone                String?   @db.VarChar(50)
+  password_hash        String?   @db.VarChar(255) // Optional for Google Login users
+  first_name           String    @db.VarChar(100)
+  last_name            String    @db.VarChar(100)
+  date_of_birth        DateTime? @db.Date
+  nationality          String?   @db.VarChar(100)
+  passport_number      String?   @db.VarChar(50)
+  passport_expiry      DateTime? @db.Date
+  profile_image        String?   @db.VarChar(500)
+  role                String?   @default("user") @db.VarChar(50)
+  email_verified       DateTime? // NextAuth expects this to be DateTime
+  phone_verified       Boolean?  @default(false)
+  two_factor_enabled    Boolean?  @default(false)
+  two_factor_secret     String?   @db.Text
+  refresh_token        String?   @db.Text
+  password_reset_token  String?   @db.Text
+  password_reset_expires DateTime? @db.Timestamp(6)
+  email_verification_token String? @db.Text
+  last_login           DateTime? @db.Timestamp(6)
+  preferences          Json?     @default("{}")
+  created_at           DateTime? @default(now()) @db.Timestamp(6)
+  updated_at           DateTime? @default(now()) @db.Timestamp(6)
+  deleted_at           DateTime? @db.Timestamp(6)
+  accounts             Account[]
+  sessions             Session[]
+
+  @@map("users")
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String  @db.Uuid
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }

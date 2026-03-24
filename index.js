@@ -40,17 +40,23 @@ app.use(helmet({
 }));
 
 // CORS configuration
+const normalizeOrigin = (value) => value ? value.replace(/\/+$/, '') : value;
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:3000',
-  process.env.ADMIN_FRONTEND_URL || 'http://localhost:3001',
-  'http://localhost:3001' // Explicitly allow 3001 just in case
-];
+  normalizeOrigin(process.env.FRONTEND_URL),
+  normalizeOrigin(process.env.ADMIN_FRONTEND_URL),
+  normalizeOrigin(process.env.FRONTEND_URL_REMOTE),
+  normalizeOrigin(process.env.ADMIN_FRONTEND_URL_REMOTE),
+].filter(Boolean);
 
 app.use(cors({
   origin: function(origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin) || allowedOrigins.some((o) => origin.startsWith(o))) {
       callback(null, true);
     } else {
+      console.log('CORS Blocked Origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -109,10 +115,16 @@ const startServer = async () => {
     // Test database connection
     await testConnection();
     
+    const apiBaseUrl = (() => {
+      const raw = process.env.NEXT_PUBLIC_API_URL_REMOTE || process.env.NEXT_PUBLIC_API_URL || '';
+      if (!raw) return '';
+      return raw.replace(/\/api\/?$/, '');
+    })();
+
     app.listen(PORT, () => {
       console.log(` Nyle Travel API running on port ${PORT}`);
       console.log(` Environment: ${process.env.NODE_ENV || 'production'}`);
-      console.log(` Health check: http://localhost:${PORT}/health`);
+      console.log(` Health check: ${apiBaseUrl ? `${apiBaseUrl}/health` : '/health'}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

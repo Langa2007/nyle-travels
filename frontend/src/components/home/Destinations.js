@@ -88,8 +88,12 @@ export default function Destinations() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-        const res = await fetch(`${apiUrl}/api/settings`);
+        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
+        if (!apiUrl) {
+          console.warn('NEXT_PUBLIC_API_URL is not set. Skipping destinations fetch.');
+          return;
+        }
+        const res = await fetch(`${apiUrl}/settings`);
         const result = await res.json();
         
         if (result.status === 'success' && result.data?.destinations_images) {

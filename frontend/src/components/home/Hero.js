@@ -57,8 +57,12 @@ export default function Hero() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-        const res = await fetch(`${apiUrl}/api/settings/hero_images`);
+        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
+        if (!apiUrl) {
+          console.warn('NEXT_PUBLIC_API_URL is not set. Skipping hero settings fetch.');
+          return;
+        }
+        const res = await fetch(`${apiUrl}/settings/hero_images`);
         const result = await res.json();
         
         if (result.status === 'success' && result.data && Array.isArray(result.data)) {

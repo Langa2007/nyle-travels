@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
+if (!API_URL) {
+  console.warn('NEXT_PUBLIC_API_URL is not set. API calls will use relative URLs.');
+}
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },

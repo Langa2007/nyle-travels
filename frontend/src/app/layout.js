@@ -2,6 +2,7 @@
 import { Inter, Playfair_Display, Montserrat, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import { NextAuthProvider } from '@/context/NextAuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { ThemeProvider } from '@/context/ThemeContext';
@@ -11,26 +12,26 @@ import Toast from '@/components/ui/Toast';
 import LoadingBar from '@/components/ui/LoadingBar';
 import { Analytics } from '@vercel/analytics/react';
 
-const inter = Inter({ 
-  subsets: ['latin'], 
+const inter = Inter({
+  subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
 });
 
-const playfair = Playfair_Display({ 
-  subsets: ['latin'], 
+const playfair = Playfair_Display({
+  subsets: ['latin'],
   variable: '--font-playfair',
   display: 'swap',
 });
 
-const montserrat = Montserrat({ 
-  subsets: ['latin'], 
+const montserrat = Montserrat({
+  subsets: ['latin'],
   variable: '--font-montserrat',
   display: 'swap',
 });
 
-const cormorant = Cormorant_Garamond({ 
-  subsets: ['latin'], 
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-cormorant',
   display: 'swap',
@@ -54,11 +55,11 @@ export const metadata = {
   openGraph: {
     title: 'Nyle Travel & Tours - Luxury African Safaris',
     description: 'Experience the ultimate luxury African safari with Nyle Travel.',
-    url: 'https://nyletravel.com',
+    url: 'https://nyletravels.com',
     siteName: 'Nyle Travel',
     images: [
       {
-        url: 'https://nyletravel.com/og-image.jpg',
+        url: 'https://nyletravels.com/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Nyle Travel Luxury Safari',
@@ -71,7 +72,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Nyle Travel & Tours - Luxury African Safaris',
     description: 'Experience the ultimate luxury African safari with Nyle Travel.',
-    images: ['https://nyletravel.com/twitter-image.jpg'],
+    images: ['https://nyletravels.com/twitter-image.jpg'],
   },
   robots: {
     index: true,
@@ -90,7 +91,7 @@ export const metadata = {
     apple: '/apple-touch-icon.png',
   },
   manifest: '/site.webmanifest',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://nyletravels.com'),
 };
 
 export const viewport = {
@@ -102,26 +103,28 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html 
-      lang="en" 
+    <html
+      lang="en"
       className={`${inter.variable} ${playfair.variable} ${montserrat.variable} ${cormorant.variable}`}
     >
       <body className="font-sans antialiased bg-white text-gray-900">
         <ThemeProvider>
-          <AuthProvider>
-            <CartProvider>
-              <WishlistProvider>
-                <LoadingBar />
-                <Navbar />
-                <main className="min-h-screen">
-                  {children}
-                </main>
-                <Footer />
-                <Toast />
-                <Analytics />
-              </WishlistProvider>
-            </CartProvider>
-          </AuthProvider>
+          <NextAuthProvider>
+            <AuthProvider>
+              <CartProvider>
+                <WishlistProvider>
+                  <LoadingBar />
+                  <Navbar />
+                  <main className="min-h-screen">
+                    {children}
+                  </main>
+                  <Footer />
+                  <Toast />
+                  <Analytics />
+                </WishlistProvider>
+              </CartProvider>
+            </AuthProvider>
+          </NextAuthProvider>
         </ThemeProvider>
       </body>
     </html>
