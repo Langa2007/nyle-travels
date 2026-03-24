@@ -32,17 +32,22 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (credentials) => {
-    const response = await api.post('/auth/login', credentials);
-    const { token, user: userData } = response.data;
-    
-    if (userData.role !== 'admin' && userData.role !== 'super_admin') {
-      throw new Error('Access denied. Admin privileges required.');
-    }
+    try {
+      const response = await api.post('/auth/login', credentials);
+      const { token, user: userData } = response.data;
+      
+      if (userData.role !== 'admin' && userData.role !== 'super_admin') {
+        throw new Error('Access denied. Admin privileges required.');
+      }
 
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
-    return userData;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      console.error('Login error:', error.response?.data || error.message);
+      throw error;
+    }
   };
 
   const logout = () => {
