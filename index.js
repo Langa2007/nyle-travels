@@ -46,6 +46,8 @@ const allowedOrigins = [
   normalizeOrigin(process.env.ADMIN_FRONTEND_URL),
   normalizeOrigin(process.env.FRONTEND_URL_REMOTE),
   normalizeOrigin(process.env.ADMIN_FRONTEND_URL_REMOTE),
+  normalizeOrigin(process.env.DEV_FRONTEND_URL),
+  normalizeOrigin(process.env.DEV_ADMIN_FRONTEND_URL),
 ].filter(Boolean);
 
 app.use(cors({
@@ -53,7 +55,11 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.includes(origin) || allowedOrigins.some((o) => origin.startsWith(o))) {
+    const isAllowed = allowedOrigins.includes(normalizeOrigin(origin)) || 
+                     allowedOrigins.some((o) => origin.startsWith(o)) ||
+                     origin.endsWith('.vercel.app');
+    
+    if (isAllowed) {
       callback(null, true);
     } else {
       console.log('CORS Blocked Origin:', origin);
