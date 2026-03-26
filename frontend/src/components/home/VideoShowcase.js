@@ -8,23 +8,26 @@ import { FiPlay, FiPause, FiVolume2, FiVolumeX } from 'react-icons/fi';
 export default function VideoShowcase() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-  const [showThumbnail, setShowThumbnail] = useState(true);
+  const [title, setTitle] = useState('Discover Your African Dream');
+  const [description, setDescription] = useState('Watch our story and see why discerning travelers choose Nyle for unforgettable African adventures.');
   const [videoUrl, setVideoUrl] = useState('/videos/showcase.mp4');
+  const [thumbnail, setThumbnail] = useState('https://picsum.photos/seed/33oywj/800/600');
   const videoRef = useRef(null);
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) {
-          console.warn('NEXT_PUBLIC_API_URL is not set. Skipping video showcase fetch.');
-          return;
-        }
-        const res = await fetch(`${apiUrl}/settings/showcase_video`);
+        if (!apiUrl) return;
+        
+        const res = await fetch(`${apiUrl}/settings/showcase_video_section`);
         const result = await res.json();
         
-        if (result.status === 'success' && result.data?.url) {
-          setVideoUrl(result.data.url);
+        if (result.status === 'success' && result.data) {
+          if (result.data.url) setVideoUrl(result.data.url);
+          if (result.data.title) setTitle(result.data.title);
+          if (result.data.description) setDescription(result.data.description);
+          if (result.data.thumbnail) setThumbnail(result.data.thumbnail);
         }
       } catch (error) {
         console.error('Failed to fetch video settings:', error);
@@ -58,7 +61,7 @@ export default function VideoShowcase() {
       <div className="absolute inset-0 bg-black">
         {showThumbnail ? (
           <Image
-            src="https://picsum.photos/seed/33oywj/800/600"
+            src={thumbnail}
             alt="Video Thumbnail"
             fill
             className="object-cover opacity-80"
@@ -95,12 +98,16 @@ export default function VideoShowcase() {
 
             {/* Title */}
             <h2 className="text-5xl md:text-7xl font-serif font-bold mb-6 drop-shadow-lg">
-              Discover Your <span className="text-primary-400">African Dream</span>
+              {title.split(' ').map((word, i, arr) => (
+                <span key={i}>
+                  {i === arr.length - 2 ? <span className="text-primary-400">{word} </span> : word + ' '}
+                </span>
+              ))}
             </h2>
 
             {/* Description */}
             <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto drop-shadow-md">
-              Watch our story and see why discerning travelers choose Nyle for unforgettable African adventures.
+              {description}
             </p>
 
             {/* Video Controls */}

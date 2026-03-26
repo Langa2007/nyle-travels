@@ -37,6 +37,27 @@ export const updateSettings = async (req, res, next) => {
   }
 };
 
+// Explicit Section Handlers (for better structure and future validation)
+export const getSectionSettings = async (req, res, next) => {
+  const { section } = req.params;
+  req.params.key = `${section}_sections`;
+  if (section === 'safaris') req.params.key = 'featured_safaris';
+  if (section === 'video') req.params.key = 'showcase_video_section';
+  return getSettings(req, res, next);
+};
+
+export const updateSectionSettings = async (req, res, next) => {
+  const { section } = req.params;
+  const key = section.endsWith('s') ? `${section}_sections` : `${section}_sections`;
+  // Special naming for existing keys
+  let targetKey = key;
+  if (section === 'safaris') targetKey = 'featured_safaris';
+  if (section === 'video') targetKey = 'showcase_video_section';
+  
+  req.body = { [targetKey]: req.body };
+  return updateSettings(req, res, next);
+};
+
 export const uploadMedia = async (req, res, next) => {
   try {
     if (!req.file) {

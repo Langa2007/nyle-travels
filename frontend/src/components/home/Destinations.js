@@ -89,17 +89,17 @@ export default function Destinations() {
     const fetchSettings = async () => {
       try {
         const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) {
-          console.warn('NEXT_PUBLIC_API_URL is not set. Skipping destinations fetch.');
-          return;
-        }
-        const res = await fetch(`${apiUrl}/settings`);
+        if (!apiUrl) return;
+        
+        const res = await fetch(`${apiUrl}/settings/destinations_sections`);
         const result = await res.json();
         
-        if (result.status === 'success' && result.data?.destinations_images) {
-          setDestinations(prev => prev.map((item, index) => ({
+        if (result.status === 'success' && result.data && Array.isArray(result.data) && result.data.length > 0) {
+          setDestinations(result.data.map((item, index) => ({
+            ...defaultDestinations[index % defaultDestinations.length],
             ...item,
-            image: result.data.destinations_images[index] || item.image
+            id: item.id || defaultDestinations[index % defaultDestinations.length].id,
+            image: item.image || defaultDestinations[index % defaultDestinations.length].image
           })));
         }
       } catch (error) {

@@ -58,17 +58,18 @@ export default function Hero() {
     const fetchSettings = async () => {
       try {
         const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) {
-          console.warn('NEXT_PUBLIC_API_URL is not set. Skipping hero settings fetch.');
-          return;
-        }
-        const res = await fetch(`${apiUrl}/settings/hero_images`);
+        if (!apiUrl) return;
+        
+        const res = await fetch(`${apiUrl}/settings/hero_sections`);
         const result = await res.json();
         
-        if (result.status === 'success' && result.data && Array.isArray(result.data)) {
-          setHeroSlides(prev => prev.map((slide, index) => ({
-            ...slide,
-            image: result.data[index] || slide.image
+        if (result.status === 'success' && result.data && Array.isArray(result.data) && result.data.length > 0) {
+          setHeroSlides(result.data.map((slide, index) => ({
+            id: slide.id || index + 1,
+            image: slide.image || `https://picsum.photos/seed/hero${index}/800/600`,
+            title: slide.title || 'Luxury Safari Experience',
+            subtitle: slide.subtitle || 'Witness the Great Migration',
+            description: slide.description || 'Experience the untamed beauty of Africa in unparalleled luxury',
           })));
         }
       } catch (error) {

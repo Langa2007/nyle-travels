@@ -71,17 +71,17 @@ export default function LuxuryHotels() {
     const fetchSettings = async () => {
       try {
         const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) {
-          console.warn('NEXT_PUBLIC_API_URL is not set. Skipping luxury hotels fetch.');
-          return;
-        }
-        const res = await fetch(`${apiUrl}/settings`);
+        if (!apiUrl) return;
+        
+        const res = await fetch(`${apiUrl}/settings/luxury_stays_sections`);
         const result = await res.json();
         
-        if (result.status === 'success' && result.data?.hotels_images) {
-          setHotels(prev => prev.map((item, index) => ({
+        if (result.status === 'success' && result.data && Array.isArray(result.data) && result.data.length > 0) {
+          setHotels(result.data.map((item, index) => ({
+            ...defaultHotels[index % defaultHotels.length],
             ...item,
-            image: result.data.hotels_images[index] || item.image
+            id: item.id || defaultHotels[index % defaultHotels.length].id,
+            image: item.image || defaultHotels[index % defaultHotels.length].image
           })));
         }
       } catch (error) {

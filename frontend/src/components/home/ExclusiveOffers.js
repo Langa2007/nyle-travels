@@ -8,7 +8,7 @@ import { FiClock, FiPercent, FiGift, FiChevronRight } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import Countdown from 'react-countdown';
 
-const offers = [
+const defaultOffers = [
   {
     id: 1,
     title: 'Early Bird Safari',
@@ -68,6 +68,33 @@ const CountdownRenderer = ({ days, hours, minutes, seconds, completed }) => {
 
 export default function ExclusiveOffers() {
   const [copiedCode, setCopiedCode] = useState(null);
+  const [activeOffers, setActiveOffers] = useState(defaultOffers);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
+        if (!apiUrl) return;
+        
+        const res = await fetch(`${apiUrl}/settings/exclusive_offers_sections`);
+        const result = await res.json();
+        
+        if (result.status === 'success' && result.data && Array.isArray(result.data) && result.data.length > 0) {
+          setActiveOffers(result.data.map((item, index) => ({
+            ...defaultOffers[index % defaultOffers.length],
+            ...item,
+            id: item.id || defaultOffers[index % defaultOffers.length].id,
+            image: item.image || defaultOffers[index % defaultOffers.length].image,
+            validUntil: item.validUntil ? new Date(item.validUntil) : defaultOffers[index % defaultOffers.length].validUntil,
+            type: item.type || defaultOffers[index % defaultOffers.length].type
+          })));
+        }
+      } catch (error) {
+        console.error('Failed to fetch offers settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const copyCode = (code) => {
     navigator.clipboard.writeText(code);
@@ -98,7 +125,7 @@ export default function ExclusiveOffers() {
 
         {/* Offers Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {offers.map((offer, index) => (
+          {activeOffers.map((offer, index) => (
             <motion.div
               key={offer.id}
               initial={{ opacity: 0, y: 20 }}

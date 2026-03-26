@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { FiCalendar, FiUser, FiTag, FiChevronRight } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 
-const blogPosts = [
+const defaultBlogPosts = [
   {
     id: 1,
     title: 'Ultimate Guide to the Great Migration',
@@ -54,9 +54,35 @@ const blogPosts = [
 ];
 
 export default function TravelBlog() {
+  const [posts, setPosts] = useState(defaultBlogPosts);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
+        if (!apiUrl) return;
+        
+        const res = await fetch(`${apiUrl}/settings/blog_posts_sections`);
+        const result = await res.json();
+        
+        if (result.status === 'success' && result.data && Array.isArray(result.data) && result.data.length > 0) {
+          setPosts(result.data.map((item, index) => ({
+            ...defaultBlogPosts[index % defaultBlogPosts.length],
+            ...item,
+            id: item.id || defaultBlogPosts[index % defaultBlogPosts.length].id,
+            image: item.image || defaultBlogPosts[index % defaultBlogPosts.length].image
+          })));
+        }
+      } catch (error) {
+        console.error('Failed to fetch blog settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      {blogPosts.map((post, index) => (
+      {posts.map((post, index) => (
         <motion.article
           key={post.id}
           initial={{ opacity: 0, y: 20 }}

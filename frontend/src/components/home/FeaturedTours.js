@@ -118,17 +118,17 @@ export default function FeaturedTours() {
     const fetchSettings = async () => {
       try {
         const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) {
-          console.warn('NEXT_PUBLIC_API_URL is not set. Skipping featured tours fetch.');
-          return;
-        }
-        const res = await fetch(`${apiUrl}/settings`);
+        if (!apiUrl) return;
+        
+        const res = await fetch(`${apiUrl}/settings/featured_safaris`);
         const result = await res.json();
         
-        if (result.status === 'success' && result.data?.tours_images) {
-          setTours(prev => prev.map((item, index) => ({
+        if (result.status === 'success' && result.data && Array.isArray(result.data) && result.data.length > 0) {
+          setTours(result.data.map((item, index) => ({
+            ...defaultTours[index % defaultTours.length],
             ...item,
-            image: result.data.tours_images[index] || item.image
+            id: item.id || defaultTours[index % defaultTours.length].id,
+            image: item.image || defaultTours[index % defaultTours.length].image
           })));
         }
       } catch (error) {

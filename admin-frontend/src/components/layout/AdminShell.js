@@ -57,6 +57,7 @@ const menuItems = [
   {
     section: 'System',
     items: [
+      { href: '/admin/media', label: 'Site Content', icon: FiFileText },
       { href: '/admin/settings', label: 'Settings', icon: FiSettings },
       { href: '/admin/audit-logs', label: 'Audit Logs', icon: FiShield },
     ]
