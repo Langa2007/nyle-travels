@@ -11,7 +11,12 @@ import {
   FiPlus, 
   FiTrash2, 
   FiChevronUp, 
-  FiChevronDown 
+  FiChevronDown,
+  FiPackage,
+  FiStar,
+  FiMap,
+  FiDollarSign,
+  FiFileText
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import { adminAPI } from '@/lib/AdminApi';
@@ -144,7 +149,7 @@ export default function MediaManagement() {
     }
   };
 
-  const renderSectionHeader = (title, description, icon) => (
+  const renderSectionHeader = (title, description, Icon) => (
     <div className="flex items-center space-x-3 mb-6 border-b border-gray-100 pb-4">
       <div className="p-3 bg-primary-50 text-primary-600 rounded-xl">
         <Icon size={24} />

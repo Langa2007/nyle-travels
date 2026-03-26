@@ -19,6 +19,7 @@ import destinationRoutes from './routes/destinationRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -106,6 +107,7 @@ app.use('/api/destinations', destinationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
