@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 84" role="img" aria-labelledby="sarovaTitle sarovaDesc">
+  <title id="sarovaTitle">Sarova wordmark</title>
+  <desc id="sarovaDesc">Minimal leaf emblem with Sarova text.</desc>
+  <path fill="#0f766e" d="M33 62c0-21 11-38 33-49 4 12 4 23 1 33-5 16-17 28-34 34Z"/>
+  <path fill="#14b8a6" d="M42 55c11-7 20-17 27-31 1 20-8 35-27 46Z"/>
+  <text x="88" y="37" fill="#111827" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="2">SAROVA</text>
+  <text x="88" y="58" fill="#4b5563" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" letter-spacing="1">HOTELS &amp; RESORTS</text>
+</svg>

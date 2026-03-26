@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --text-main: #1e293b;
+  --text-muted: #475569;
+  --text-bold: #0f172a;
 }
 
 @theme inline {
@@ -43,15 +46,26 @@
   --radius-2xl: 1.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Global utility for high contrast text */
+.text-high-contrast {
+  color: var(--text-bold) !important;
+}
+
+.text-main-contrast {
+  color: var(--text-main) !important;
+}
+
+.text-muted-contrast {
+  color: var(--text-muted) !important;
+}
+
+/* Force dark text for common Tailwind classes if needed, 
+   but it's better to update the components to use stronger classes. */

@@ -65,7 +65,7 @@ const StatCard = ({ title, value, change, icon: Icon, color }) => (
       )}
     </div>
     <h3 className="text-2xl font-bold text-gray-900 mb-1">{value}</h3>
-    <p className="text-sm text-gray-600">{title}</p>
+    <p className="text-sm font-bold text-gray-700">{title}</p>
   </motion.div>
 );
 
@@ -77,12 +77,12 @@ const ActivityItem = ({ activity }) => (
       'bg-purple-500'
     }`} />
     <div className="flex-1">
-      <p className="text-sm font-medium text-gray-900">
+      <p className="text-sm font-bold text-gray-900">
         {activity.type === 'booking' && 'New booking created'}
         {activity.type === 'user' && 'New user registered'}
-        {activity.type === 'payment' && 'Payment received'}
+        {activity.type === 'payment' && 'New payment received'}
       </p>
-      <p className="text-xs text-gray-500">{activity.reference}</p>
+      <p className="text-xs font-semibold text-gray-600">{activity.reference}</p>
     </div>
     <span className="text-xs text-gray-400">
       {new Date(activity.created_at).toLocaleTimeString()}
@@ -255,7 +255,7 @@ export default function AdminDashboard() {
           
           {/* Quick Actions */}
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <h4 className="text-sm font-semibold text-gray-500 mb-3">Quick Actions</h4>
+            <h4 className="text-sm font-bold text-gray-700 mb-3">Quick Actions</h4>
             <div className="grid grid-cols-2 gap-2">
               <Button variant="outline" size="sm" href="/admin/users/new">
                 Add User
@@ -292,7 +292,7 @@ export default function AdminDashboard() {
                     />
                   </div>
                 </div>
-                <span className="text-sm text-gray-600">{dest.bookings} bookings</span>
+                <span className="text-sm font-bold text-gray-800">{dest.bookings} bookings</span>
               </div>
             ))}
           </div>

@@ -9,51 +9,33 @@ import 'swiper/css';
 const partners = [
   {
     id: 1,
-    name: 'Emirates',
-    logo: 'https://picsum.photos/seed/logo_nsmbz9/200/200',
-    url: '#',
+    name: 'Kenya Airways',
+    logo: '/brands/kenya-airways.svg',
   },
   {
     id: 2,
-    name: 'Kenya Airways',
-    logo: 'https://picsum.photos/seed/logo_16okag/200/200',
-    url: '#',
+    name: 'KWS',
+    logo: '/brands/kws.svg',
   },
   {
     id: 3,
-    name: 'Marriott',
-    logo: 'https://picsum.photos/seed/logo_7qyf0y/200/200',
-    url: '#',
+    name: 'OGO',
+    logo: '/brands/ogo.svg',
   },
   {
     id: 4,
-    name: 'Hilton',
-    logo: 'https://picsum.photos/seed/logo_nni8mh/200/200',
-    url: '#',
+    name: 'Safarilink',
+    logo: '/brands/safarilink.svg',
   },
   {
     id: 5,
-    name: 'Four Seasons',
-    logo: 'https://picsum.photos/seed/logo_etfh8i/200/200',
-    url: '#',
+    name: 'Serena Hotels',
+    logo: '/brands/serena-hotels.svg',
   },
   {
     id: 6,
-    name: 'American Express',
-    logo: 'https://picsum.photos/seed/logo_q3pj4n/200/200',
-    url: '#',
-  },
-  {
-    id: 7,
-    name: 'Visa',
-    logo: 'https://picsum.photos/seed/logo_h37ljt/200/200',
-    url: '#',
-  },
-  {
-    id: 8,
-    name: 'Mastercard',
-    logo: 'https://picsum.photos/seed/logo_pgo8g4/200/200',
-    url: '#',
+    name: 'Sarova',
+    logo: '/brands/sarova.svg',
   },
 ];
 
@@ -99,22 +81,21 @@ export default function Partners() {
         >
           {partners.map((partner) => (
             <SwiperSlide key={partner.id}>
-              <motion.a
-                href={partner.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block grayscale hover:grayscale-0 transition-all duration-300"
-                whileHover={{ scale: 1.05 }}
+              <motion.div
+                className="flex h-20 items-center justify-center opacity-70 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+                whileHover={{ scale: 1.04, y: -2 }}
               >
-                <div className="relative h-16 w-full">
+                <div className="flex h-16 w-full items-center justify-center">
                   <Image
                     src={partner.logo}
                     alt={partner.name}
-                    fill
-                    className="object-contain"
+                    width={220}
+                    height={72}
+                    sizes="220px"
+                    className="h-14 w-auto object-contain"
                   />
                 </div>
-              </motion.a>
+              </motion.div>
             </SwiperSlide>
           ))}
         </Swiper>

@@ -255,7 +255,7 @@ export default function MediaManagement() {
             className={`flex items-center space-x-2 px-6 py-3 rounded-t-xl text-sm font-bold whitespace-nowrap transition-all ${
               activeTab === tab.id 
                 ? 'bg-white border-x border-t border-gray-200 text-primary-600 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
             }`}
           >
             <tab.icon size={16} />
@@ -278,7 +278,7 @@ export default function MediaManagement() {
               )}
               <button 
                 onClick={() => handleAddField('hero_sections')}
-                className="w-full py-4 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400 hover:border-primary-300 hover:text-primary-500 transition-all flex items-center justify-center space-x-2"
+                className="w-full py-4 border-2 border-dashed border-gray-300 rounded-2xl text-gray-500 hover:border-primary-300 hover:text-primary-600 transition-all flex items-center justify-center space-x-2 font-bold"
               >
                 <FiPlus />
                 <span>Add Hero Slide</span>

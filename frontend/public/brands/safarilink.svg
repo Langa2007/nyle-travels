@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 84" role="img" aria-labelledby="slTitle slDesc">
+  <title id="slTitle">Safarilink wordmark</title>
+  <desc id="slDesc">Minimal plane trail icon with Safarilink text.</desc>
+  <path fill="#0284c7" d="M21 47h32l16-20 9 4-10 16h22l8 8H67l-11 17-8-3 5-14H21z"/>
+  <text x="112" y="37" fill="#111827" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="1.5">Safarilink</text>
+  <text x="112" y="58" fill="#4b5563" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" letter-spacing="0.9">KENYA AIR CHARTERS</text>
+</svg>

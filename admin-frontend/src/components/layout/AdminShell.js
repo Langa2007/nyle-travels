@@ -125,7 +125,7 @@ export default function AdminShell({ children }) {
           {menuItems.map((section) => (
             <div key={section.section}>
               {sidebarOpen && (
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 px-4">
                   {section.section}
                 </h3>
               )}
@@ -140,8 +140,8 @@ export default function AdminShell({ children }) {
                         href={item.href}
                         className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${
                           isActive
-                            ? 'bg-primary-600 text-white'
-                            : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                            ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/20'
+                            : 'text-gray-200 hover:bg-gray-700/50 hover:text-white'
                         }`}
                       >
                         <Icon className="w-5 h-5 flex-shrink-0" />
@@ -231,8 +231,8 @@ export default function AdminShell({ children }) {
               {/* User Menu */}
               <div className="flex items-center space-x-3">
                 <div className="text-right">
-                  <p className="text-sm font-medium">{user.first_name} {user.last_name}</p>
-                  <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                  <p className="text-sm font-bold text-gray-900">{user.first_name} {user.last_name}</p>
+                  <p className="text-xs text-gray-600 font-semibold capitalize">{user.role}</p>
                 </div>
                 <button
                   onClick={logout}

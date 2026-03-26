@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 84" role="img" aria-labelledby="serenaTitle serenaDesc">
+  <title id="serenaTitle">Serena Hotels wordmark</title>
+  <desc id="serenaDesc">Minimal gold emblem with Serena Hotels text.</desc>
+  <path fill="#b45309" d="M46 16 68 31 58 59 34 59 24 31Z"/>
+  <path fill="#fbbf24" d="M46 25 57 33 52 49H40l-5-16Z"/>
+  <text x="88" y="36" fill="#111827" font-family="Georgia, 'Times New Roman', serif" font-size="25" font-weight="700" letter-spacing="1">SERENA</text>
+  <text x="88" y="58" fill="#4b5563" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" letter-spacing="1.2">HOTELS &amp; SAFARIS</text>
+</svg>
