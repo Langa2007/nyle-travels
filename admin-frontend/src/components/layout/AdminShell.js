@@ -67,15 +67,23 @@ export default function AdminShell({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
+    if (!loading && (!user || (user.role !== 'admin' && user.role !== 'super_admin'))) {
       router.push('/login');
       toast.error('Access denied. Admin privileges required.');
     }
-  }, [user, router]);
+  }, [user, loading, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!user) return null;
 
