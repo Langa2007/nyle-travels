@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const response = await api.post('/auth/login', credentials);
-      const { token, user: userData } = response.data;
+      const { token, data: { user: userData } } = response.data;
       
       if (userData.role !== 'admin' && userData.role !== 'super_admin') {
         throw new Error('Access denied. Admin privileges required.');

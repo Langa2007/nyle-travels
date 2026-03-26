@@ -34,6 +34,9 @@ const require = createRequire(import.meta.url);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy for rate limiting (behind Render/Vercel/etc)
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
