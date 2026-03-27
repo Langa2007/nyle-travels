@@ -1,6 +1,5 @@
 import { query } from '../config/db.js';
-import cloudinary from '../services/cloudinaryService.js';
-import streamifier from 'streamifier';
+import cloudinaryService from '../services/cloudinaryService.js';
 
 export const getSettings = async (req, res, next) => {
   try {
@@ -76,21 +75,13 @@ export const uploadMedia = async (req, res, next) => {
 
     const isVideo = req.file.mimetype.startsWith('video');
 
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: 'nyle_travels/settings',
-        resource_type: isVideo ? 'video' : 'image',
-      },
-      (error, result) => {
-        if (error) {
-          console.error(error);
-          return res.status(500).json({ status: 'error', message: 'Failed to upload media' });
-        }
-        res.status(200).json({ status: 'success', data: { url: result.secure_url } });
-      }
+    const result = await cloudinaryService.uploadFromBuffer(
+      req.file.buffer,
+      'nyle-travels/settings',
+      { resource_type: isVideo ? 'video' : 'image' }
     );
 
-    streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+    res.status(200).json({ status: 'success', data: { url: result.secure_url } });
   } catch (error) {
     next(error);
   }
