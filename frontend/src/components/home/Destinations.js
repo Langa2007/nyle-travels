@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiMapPin, FiChevronRight } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
+import { fetchSettings } from '@/utils/settings';
 
 const defaultDestinations = [
   {
@@ -86,27 +87,18 @@ export default function Destinations() {
   const [destinations, setDestinations] = useState(defaultDestinations);
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) return;
-        
-        const res = await fetch(`${apiUrl}/settings/destinations_sections`);
-        const result = await res.json();
-        
-        if (result.status === 'success' && result.data && Array.isArray(result.data) && result.data.length > 0) {
-          setDestinations(result.data.map((item, index) => ({
-            ...defaultDestinations[index % defaultDestinations.length],
-            ...item,
-            id: item.id || defaultDestinations[index % defaultDestinations.length].id,
-            image: item.image || defaultDestinations[index % defaultDestinations.length].image
-          })));
-        }
-      } catch (error) {
-        console.error('Failed to fetch destination settings:', error);
+    const loadDestinations = async () => {
+      const data = await fetchSettings('destinations_sections');
+      if (data && Array.isArray(data) && data.length > 0) {
+        setDestinations(data.map((item, index) => ({
+          ...defaultDestinations[index % defaultDestinations.length],
+          ...item,
+          id: item.id || defaultDestinations[index % defaultDestinations.length].id,
+          image: item.image || defaultDestinations[index % defaultDestinations.length].image
+        })));
       }
     };
-    fetchSettings();
+    loadDestinations();
   }, []);
 
   return (

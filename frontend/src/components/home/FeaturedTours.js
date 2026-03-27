@@ -8,9 +8,9 @@ import { FiClock, FiUsers, FiMapPin, FiStar, FiHeart } from 'react-icons/fi';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import Button from '@/components/ui/Button';
-import 'swiper/css';
-import 'swiper/css/navigation';
+import { fetchSettings } from '@/utils/settings';
 import 'swiper/css/pagination';
+import { fetchSettings } from '@/utils/settings';
 
 const defaultTours = [
   {
@@ -115,27 +115,18 @@ export default function FeaturedTours() {
   const [tours, setTours] = useState(defaultTours);
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) return;
-        
-        const res = await fetch(`${apiUrl}/settings/featured_safaris`);
-        const result = await res.json();
-        
-        if (result.status === 'success' && result.data && Array.isArray(result.data) && result.data.length > 0) {
-          setTours(result.data.map((item, index) => ({
-            ...defaultTours[index % defaultTours.length],
-            ...item,
-            id: item.id || defaultTours[index % defaultTours.length].id,
-            image: item.image || defaultTours[index % defaultTours.length].image
-          })));
-        }
-      } catch (error) {
-        console.error('Failed to fetch tours settings:', error);
+    const loadTours = async () => {
+      const data = await fetchSettings('safaris');
+      if (data && Array.isArray(data) && data.length > 0) {
+        setTours(data.map((item, index) => ({
+          ...defaultTours[index % defaultTours.length],
+          ...item,
+          id: item.id || defaultTours[index % defaultTours.length].id,
+          image: item.image || defaultTours[index % defaultTours.length].image
+        })));
       }
     };
-    fetchSettings();
+    loadTours();
   }, []);
 
   const toggleWishlist = (tourId) => {

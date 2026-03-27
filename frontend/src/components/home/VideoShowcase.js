@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { FiPlay, FiPause, FiVolume2, FiVolumeX } from 'react-icons/fi';
+import { fetchSettings } from '@/utils/settings';
 
 export default function VideoShowcase() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -16,26 +17,17 @@ export default function VideoShowcase() {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) return;
-        
-        const res = await fetch(`${apiUrl}/settings/showcase_video_section`);
-        const result = await res.json();
-        
-        if (result.status === 'success' && result.data) {
-          if (result.data.url) setVideoUrl(result.data.url);
-          if (result.data.title) setTitle(result.data.title);
-          if (result.data.description) setDescription(result.data.description);
-          if (result.data.thumbnail) setThumbnail(result.data.thumbnail);
-          setShowThumbnail(true);
-        }
-      } catch (error) {
-        console.error('Failed to fetch video settings:', error);
+    const loadVideoSettings = async () => {
+      const data = await fetchSettings('video');
+      if (data) {
+        if (data.url) setVideoUrl(data.url);
+        if (data.title) setTitle(data.title);
+        if (data.description) setDescription(data.description);
+        if (data.thumbnail) setThumbnail(data.thumbnail);
+        setShowThumbnail(true);
       }
     };
-    fetchSettings();
+    loadVideoSettings();
   }, []);
 
   const handlePlayPause = () => {

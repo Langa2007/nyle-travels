@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiMapPin, FiCalendar, FiUsers } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import DatePicker from '@/components/common/DatePicker';
+import { fetchSettings } from '@/utils/settings';
 
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -55,28 +56,19 @@ export default function Hero() {
   ]);
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) return;
-        
-        const res = await fetch(`${apiUrl}/settings/hero_sections`);
-        const result = await res.json();
-        
-        if (result.status === 'success' && result.data && Array.isArray(result.data) && result.data.length > 0) {
-          setHeroSlides(result.data.map((slide, index) => ({
-            id: slide.id || index + 1,
-            image: slide.image || `https://picsum.photos/seed/hero${index}/800/600`,
-            title: slide.title || 'Luxury Safari Experience',
-            subtitle: slide.subtitle || 'Witness the Great Migration',
-            description: slide.description || 'Experience the untamed beauty of Africa in unparalleled luxury',
-          })));
-        }
-      } catch (error) {
-        console.error('Failed to fetch hero settings:', error);
+    const loadHeroSlides = async () => {
+      const data = await fetchSettings('hero_sections');
+      if (data && Array.isArray(data) && data.length > 0) {
+        setHeroSlides(data.map((slide, index) => ({
+          id: slide.id || index + 1,
+          image: slide.image || `https://picsum.photos/seed/hero${index}/800/600`,
+          title: slide.title || 'Luxury Safari Experience',
+          subtitle: slide.subtitle || 'Witness the Great Migration',
+          description: slide.description || 'Experience the untamed beauty of Africa in unparalleled luxury',
+        })));
       }
     };
-    fetchSettings();
+    loadHeroSlides();
   }, []);
 
   useEffect(() => {

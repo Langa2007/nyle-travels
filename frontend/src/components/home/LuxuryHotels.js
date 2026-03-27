@@ -11,6 +11,7 @@ import {
   FiChevronRight 
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
+import { fetchSettings } from '@/utils/settings';
 
 const defaultHotels = [
   {
@@ -68,27 +69,18 @@ export default function LuxuryHotels() {
   const [hotels, setHotels] = useState(defaultHotels);
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) return;
-        
-        const res = await fetch(`${apiUrl}/settings/luxury_stays_sections`);
-        const result = await res.json();
-        
-        if (result.status === 'success' && result.data && Array.isArray(result.data) && result.data.length > 0) {
-          setHotels(result.data.map((item, index) => ({
-            ...defaultHotels[index % defaultHotels.length],
-            ...item,
-            id: item.id || defaultHotels[index % defaultHotels.length].id,
-            image: item.image || defaultHotels[index % defaultHotels.length].image
-          })));
-        }
-      } catch (error) {
-        console.error('Failed to fetch hotels settings:', error);
+    const loadHotels = async () => {
+      const data = await fetchSettings('luxury_stays');
+      if (data && Array.isArray(data) && data.length > 0) {
+        setHotels(data.map((item, index) => ({
+          ...defaultHotels[index % defaultHotels.length],
+          ...item,
+          id: item.id || defaultHotels[index % defaultHotels.length].id,
+          image: item.image || defaultHotels[index % defaultHotels.length].image
+        })));
       }
     };
-    fetchSettings();
+    loadHotels();
   }, []);
 
   const toggleWishlist = (hotelId) => {

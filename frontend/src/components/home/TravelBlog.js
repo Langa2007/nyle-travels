@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiCalendar, FiUser, FiTag, FiChevronRight } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
+import { fetchSettings } from '@/utils/settings';
 
 const defaultBlogPosts = [
   {
@@ -58,27 +59,18 @@ export default function TravelBlog() {
   const [posts, setPosts] = useState(defaultBlogPosts);
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) return;
-        
-        const res = await fetch(`${apiUrl}/settings/blog_posts_sections`);
-        const result = await res.json();
-        
-        if (result.status === 'success' && result.data && Array.isArray(result.data) && result.data.length > 0) {
-          setPosts(result.data.map((item, index) => ({
-            ...defaultBlogPosts[index % defaultBlogPosts.length],
-            ...item,
-            id: item.id || defaultBlogPosts[index % defaultBlogPosts.length].id,
-            image: item.image || defaultBlogPosts[index % defaultBlogPosts.length].image
-          })));
-        }
-      } catch (error) {
-        console.error('Failed to fetch blog settings:', error);
+    const loadPosts = async () => {
+      const data = await fetchSettings('blog');
+      if (data && Array.isArray(data) && data.length > 0) {
+        setPosts(data.map((item, index) => ({
+          ...defaultBlogPosts[index % defaultBlogPosts.length],
+          ...item,
+          id: item.id || defaultBlogPosts[index % defaultBlogPosts.length].id,
+          image: item.image || defaultBlogPosts[index % defaultBlogPosts.length].image
+        })));
       }
     };
-    fetchSettings();
+    loadPosts();
   }, []);
 
   return (

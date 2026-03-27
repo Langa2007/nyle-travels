@@ -40,9 +40,16 @@ export const updateSettings = async (req, res, next) => {
 // Explicit Section Handlers (for better structure and future validation)
 export const getSectionSettings = async (req, res, next) => {
   const { section } = req.params;
-  req.params.key = `${section}_sections`;
-  if (section === 'safaris') req.params.key = 'featured_safaris';
-  if (section === 'video') req.params.key = 'showcase_video_section';
+  let key = `${section}_sections`;
+  
+  if (section === 'safaris') key = 'featured_safaris';
+  if (section === 'video') key = 'showcase_video_section';
+  if (section === 'blog') key = 'blog_posts_sections';
+  if (section === 'offers') key = 'exclusive_offers_sections';
+  if (section === 'stays') key = 'luxury_stays_sections';
+  if (section === 'destinations') key = 'destinations_sections';
+  
+  req.params.key = key;
   return getSettings(req, res, next);
 };
 

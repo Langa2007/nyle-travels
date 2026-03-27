@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { FiClock, FiPercent, FiGift, FiChevronRight } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import Countdown from 'react-countdown';
+import { fetchSettings } from '@/utils/settings';
 
 const defaultOffers = [
   {
@@ -71,29 +72,20 @@ export default function ExclusiveOffers() {
   const [activeOffers, setActiveOffers] = useState(defaultOffers);
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) return;
-        
-        const res = await fetch(`${apiUrl}/settings/exclusive_offers_sections`);
-        const result = await res.json();
-        
-        if (result.status === 'success' && result.data && Array.isArray(result.data) && result.data.length > 0) {
-          setActiveOffers(result.data.map((item, index) => ({
-            ...defaultOffers[index % defaultOffers.length],
-            ...item,
-            id: item.id || defaultOffers[index % defaultOffers.length].id,
-            image: item.image || defaultOffers[index % defaultOffers.length].image,
-            validUntil: item.validUntil ? new Date(item.validUntil) : defaultOffers[index % defaultOffers.length].validUntil,
-            type: item.type || defaultOffers[index % defaultOffers.length].type
-          })));
-        }
-      } catch (error) {
-        console.error('Failed to fetch offers settings:', error);
+    const loadOffers = async () => {
+      const data = await fetchSettings('offers');
+      if (data && Array.isArray(data) && data.length > 0) {
+        setActiveOffers(data.map((item, index) => ({
+          ...defaultOffers[index % defaultOffers.length],
+          ...item,
+          id: item.id || defaultOffers[index % defaultOffers.length].id,
+          image: item.image || defaultOffers[index % defaultOffers.length].image,
+          validUntil: item.validUntil ? new Date(item.validUntil) : defaultOffers[index % defaultOffers.length].validUntil,
+          type: item.type || defaultOffers[index % defaultOffers.length].type
+        })));
       }
     };
-    fetchSettings();
+    loadOffers();
   }, []);
 
   const copyCode = (code) => {
@@ -107,11 +99,11 @@ export default function ExclusiveOffers() {
       <div className="container mx-auto px-4">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center max-w-3xl mx-auto mb-12"
-        >
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center max-w-3xl mx-auto mb-12"
+            >
           <div className="inline-flex p-3 bg-primary-100 rounded-2xl mb-4">
             <FiPercent className="w-6 h-6 text-primary-600" />
           </div>
