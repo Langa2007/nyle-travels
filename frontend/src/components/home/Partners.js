@@ -96,7 +96,7 @@ export default function Partners() {
           {activePartners.map((partner) => (
             <SwiperSlide key={partner.id}>
               <motion.div
-                className="flex h-20 items-center justify-center opacity-70 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+                className="flex h-20 items-center justify-center transition-all duration-300"
                 whileHover={{ scale: 1.04, y: -2 }}
               >
                 <div className="flex h-16 w-full items-center justify-center">
