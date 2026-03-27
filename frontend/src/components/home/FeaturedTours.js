@@ -10,7 +10,6 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import Button from '@/components/ui/Button';
 import { fetchSettings } from '@/utils/settings';
 import 'swiper/css/pagination';
-import { fetchSettings } from '@/utils/settings';
 
 const defaultTours = [
   {
