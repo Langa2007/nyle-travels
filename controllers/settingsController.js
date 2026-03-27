@@ -75,14 +75,17 @@ export const uploadMedia = async (req, res, next) => {
 
     const isVideo = req.file.mimetype.startsWith('video');
 
+    console.log('Starting Cloudinary upload for:', req.file.originalname, 'type:', req.file.mimetype);
     const result = await cloudinaryService.uploadFromBuffer(
       req.file.buffer,
-      'nyle-travels/settings',
+      'nyle-travel/settings',
       { resource_type: isVideo ? 'video' : 'image' }
     );
+    console.log('Cloudinary upload success:', result.secure_url);
 
     res.status(200).json({ status: 'success', data: { url: result.secure_url } });
   } catch (error) {
+    console.error('Settings Media Upload ERROR:', error);
     next(error);
   }
 };

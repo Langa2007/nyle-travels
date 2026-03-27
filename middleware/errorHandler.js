@@ -47,6 +47,12 @@ const sendErrorProd = (err, res) => {
 };
 
 export const errorHandler = (err, req, res, next) => {
+  console.error('GLOBAL ERROR LOG:', {
+    message: err.message,
+    stack: err.stack,
+    path: req.originalUrl,
+    method: req.method
+  });
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 

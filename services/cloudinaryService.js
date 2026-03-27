@@ -11,6 +11,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+if (!process.env.CLOUDINARY_CLOUD_NAME) {
+  console.error('CLOUDINARY_CLOUD_NAME is missing from environment variables!');
+}
+
 export const cloudinaryService = {
   // Upload an image from buffer
   async uploadFromBuffer(fileBuffer, folder = 'nyle-travel', options = {}) {
@@ -22,8 +26,12 @@ export const cloudinaryService = {
           ...options
         },
         (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
+          if (error) {
+            console.error('Cloudinary upload_stream ERROR:', error);
+            reject(error);
+          } else {
+            resolve(result);
+          }
         }
       );
 

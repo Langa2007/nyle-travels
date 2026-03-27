@@ -4,12 +4,19 @@ import AppError from '../utils/AppError.js';
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = process.env.ALLOWED_FILE_TYPES?.split(',') || ['image/jpeg', 'image/png', 'image/webp'];
+  const allowedTypes = process.env.ALLOWED_FILE_TYPES?.split(',') || [
+    'image/jpeg', 
+    'image/png', 
+    'image/webp', 
+    'image/svg+xml', 
+    'image/gif'
+  ];
   
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new AppError('Invalid file type. Only JPEG, PNG and WEBP are allowed.', 400), false);
+    console.error(`UPLOAD REJECTED: Invalid file type ${file.mimetype} for ${file.originalname}`);
+    cb(new AppError(`Invalid file type ${file.mimetype}. Only JPEG, PNG, WEBP, SVG and GIF are allowed.`, 400), false);
   }
 };
 
