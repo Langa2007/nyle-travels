@@ -73,6 +73,12 @@ export const adminAPI = {
     api.post(`/admin/settings/${isVideo ? 'video' : 'media'}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     }),
+
+  getSettings: () =>
+    api.get('/settings'),
+
+  restoreDefaults: () =>
+    api.post('/admin/settings/seed-defaults'),
 };
 
 export default adminAPI;

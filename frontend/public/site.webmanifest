@@ -1,0 +1,17 @@
+{
+  "name": "Nyle Travel",
+  "short_name": "Nyle Travel",
+  "description": "Luxury African safaris, curated tours, and premium stays.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "/images/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

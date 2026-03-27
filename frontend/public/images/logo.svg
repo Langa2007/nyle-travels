@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="logoTitle logoDesc">
+  <title id="logoTitle">Nyle Travel logo</title>
+  <desc id="logoDesc">Stylized N letter with a flowing path in teal and gold.</desc>
+  <defs>
+    <linearGradient id="nyleGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="nyleTeal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f766e"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="36" fill="#ffffff"/>
+  <path d="M38 118V42h18l34 43V42h32v76h-18L70 75v43H38Z" fill="url(#nyleTeal)"/>
+  <path d="M44 122c22-23 43-37 61-44 13-5 25-8 35-9-14 9-27 20-39 33-13 14-26 31-39 50l-18-30Z" fill="url(#nyleGold)" opacity=".92"/>
+</svg>

@@ -8,6 +8,7 @@ import { FiPlay, FiPause, FiVolume2, FiVolumeX } from 'react-icons/fi';
 export default function VideoShowcase() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [showThumbnail, setShowThumbnail] = useState(true);
   const [title, setTitle] = useState('Discover Your African Dream');
   const [description, setDescription] = useState('Watch our story and see why discerning travelers choose Nyle for unforgettable African adventures.');
   const [videoUrl, setVideoUrl] = useState('/videos/showcase.mp4');
@@ -28,6 +29,7 @@ export default function VideoShowcase() {
           if (result.data.title) setTitle(result.data.title);
           if (result.data.description) setDescription(result.data.description);
           if (result.data.thumbnail) setThumbnail(result.data.thumbnail);
+          setShowThumbnail(true);
         }
       } catch (error) {
         console.error('Failed to fetch video settings:', error);

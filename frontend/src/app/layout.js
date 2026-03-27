@@ -86,9 +86,9 @@ export const metadata = {
     },
   },
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
+    icon: '/images/logo.svg',
+    shortcut: '/images/logo.svg',
+    apple: '/images/logo.svg',
   },
   manifest: '/site.webmanifest',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://nyletravels.com'),

@@ -42,5 +42,6 @@ router.get('/settings/:section', settingsController.getSectionSettings);
 router.patch('/settings/:section', settingsController.updateSectionSettings);
 router.post('/settings/media', upload.single('media'), settingsController.uploadMedia);
 router.post('/settings/video', uploadVideo.single('media'), settingsController.uploadMedia);
+router.post('/settings/seed-defaults', settingsController.seedDefaults);
 
 export default router;

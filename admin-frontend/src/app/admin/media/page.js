@@ -40,11 +40,8 @@ export default function MediaManagement() {
   useEffect(() => {
     const fetchCurrentSettings = async () => {
       try {
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) return;
-        
-        const res = await fetch(`${apiUrl}/settings`);
-        const result = await res.json();
+        const response = await adminAPI.getSettings();
+        const result = response.data;
         
         if (result.status === 'success' && result.data) {
           setSettings(prev => ({
@@ -60,6 +57,7 @@ export default function MediaManagement() {
         }
       } catch (error) {
         console.error('Failed to load settings:', error);
+        toast.error('Failed to load site content.');
       }
     };
     fetchCurrentSettings();
@@ -225,17 +223,53 @@ export default function MediaManagement() {
     </div>
   );
 
+  const handleRestoreDefaults = async () => {
+    if (!confirm('This will overwrite current site content with the defaults from the main page. Continue?')) return;
+    
+    setLoading(true);
+    const toastId = toast.loading('Syncing with defaults...');
+    try {
+      await adminAPI.restoreDefaults();
+      toast.success('Synced successfully! Refreshing...', { id: toastId });
+      // Refresh data
+      const response = await adminAPI.getSettings();
+      if (response.data.status === 'success') {
+        setSettings(prev => ({ ...prev, ...response.data.data }));
+      }
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (error) {
+      toast.error('Sync failed.', { id: toastId });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="space-y-6 pb-20">
-      <div className="flex items-center justify-between sticky top-0 bg-gray-50/90 backdrop-blur-md py-4 z-10 border-b border-gray-200">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-serif font-black text-gray-900">Site Content Management</h1>
-          <p className="text-sm text-gray-700 font-medium">Manage images, videos, and labels for the homepage</p>
+          <h1 className="text-3xl font-serif font-bold text-gray-900">Site Content Management</h1>
+          <p className="text-gray-600 font-semibold">Manage images, videos, and labels for the homepage</p>
         </div>
-        <Button variant="luxury" onClick={handleSave} disabled={loading}>
-          <FiSave className="mr-2" />
-          {loading ? 'Saving...' : 'Publish Changes'}
-        </Button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleRestoreDefaults}
+            disabled={loading}
+            className="px-6 py-3 bg-white border-2 border-primary-100 text-primary-700 font-bold rounded-xl hover:bg-primary-50 transition-all flex items-center shadow-sm"
+          >
+            <FiUploadCloud className="mr-2" />
+            Sync from Defaults
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="px-8 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 transition-all flex items-center shadow-luxury"
+          >
+            <FiSave className="mr-2" />
+            Publish Changes
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
