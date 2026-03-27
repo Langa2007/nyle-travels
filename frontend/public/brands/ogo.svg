@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 84" role="img" aria-labelledby="ogoTitle ogoDesc">
-  <title id="ogoTitle">OGO wordmark</title>
-  <desc id="ogoDesc">Minimal circular mark with OGO text.</desc>
-  <circle cx="44" cy="42" r="24" fill="#ea580c"/>
-  <path fill="#fff7ed" d="M38 28c-7 2-12 8-12 15 0 9 8 17 18 17 5 0 10-2 13-5l-7-6c-2 2-4 3-6 3-5 0-9-4-9-9 0-4 3-8 7-9l-4-6Z"/>
-  <text x="86" y="36" fill="#111827" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="3">OGO</text>
-  <text x="86" y="58" fill="#4b5563" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" letter-spacing="1">LOCAL EXPERIENCE PARTNER</text>
-</svg>

@@ -21,8 +21,8 @@ const defaultPartners = [
   },
   {
     id: 3,
-    name: 'OGO',
-    logo: '/brands/ogo.svg',
+    name: 'Jambojet',
+    logo: '/brands/jambojet.svg',
   },
   {
     id: 4,
