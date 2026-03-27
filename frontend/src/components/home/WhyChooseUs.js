@@ -1,7 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import { 
   FiShield, 
   FiStar, 
@@ -12,63 +12,40 @@ import {
   FiHeart,
   FiGlobe
 } from 'react-icons/fi';
+import { fetchSettings } from '@/utils/settings';
 
-const features = [
+const iconMap = {
+  FiShield, FiStar, FiUsers, FiClock, FiCompass, FiAward, FiHeart, FiGlobe
+};
+
+const defaultFeatures = [
   {
     id: 1,
-    icon: FiShield,
+    icon: 'FiShield',
     title: 'Safety First',
     description: 'Your safety is our top priority with 24/7 support and emergency protocols.',
     color: 'from-blue-500 to-cyan-500',
   },
   {
     id: 2,
-    icon: FiStar,
+    icon: 'FiStar',
     title: 'Luxury Experiences',
     description: 'Hand-picked premium accommodations and exclusive experiences.',
     color: 'from-yellow-500 to-orange-500',
   },
   {
     id: 3,
-    icon: FiUsers,
+    icon: 'FiUsers',
     title: 'Expert Guides',
     description: 'Knowledgeable local guides with years of experience.',
     color: 'from-green-500 to-emerald-500',
   },
   {
     id: 4,
-    icon: FiClock,
+    icon: 'FiClock',
     title: '24/7 Concierge',
     description: 'Round-the-clock personal assistance throughout your journey.',
     color: 'from-purple-500 to-pink-500',
-  },
-  {
-    id: 5,
-    icon: FiCompass,
-    title: 'Custom Itineraries',
-    description: 'Tailor-made experiences designed just for you.',
-    color: 'from-red-500 to-rose-500',
-  },
-  {
-    id: 6,
-    icon: FiAward,
-    title: 'Award Winning',
-    description: 'Recognized for excellence in luxury travel services.',
-    color: 'from-indigo-500 to-blue-500',
-  },
-  {
-    id: 7,
-    icon: FiHeart,
-    title: 'Sustainable Travel',
-    description: 'Eco-friendly practices supporting local communities.',
-    color: 'from-teal-500 to-green-500',
-  },
-  {
-    id: 8,
-    icon: FiGlobe,
-    title: 'Global Network',
-    description: 'Partnerships with the world\'s finest hospitality brands.',
-    color: 'from-violet-500 to-purple-500',
   },
 ];
 
@@ -78,10 +55,25 @@ const fadeInUp = {
 };
 
 export default function WhyChooseUs() {
+  const [activeFeatures, setActiveFeatures] = useState(defaultFeatures);
+
+  useEffect(() => {
+    const loadFeatures = async () => {
+      const data = await fetchSettings('benefits');
+      if (data && Array.isArray(data) && data.length > 0) {
+        setActiveFeatures(data.map((item, index) => ({
+          ...defaultFeatures[index % defaultFeatures.length],
+          ...item
+        })));
+      }
+    };
+    loadFeatures();
+  }, []);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {features.map((feature, index) => {
-        const Icon = feature.icon;
+      {activeFeatures.map((feature, index) => {
+        const Icon = iconMap[feature.icon] || FiStar;
         return (
           <motion.div
             key={feature.id}
@@ -96,20 +88,20 @@ export default function WhyChooseUs() {
             <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-300`} />
 
             {/* Icon */}
-            <div className={`inline-flex p-4 rounded-xl bg-gradient-to-r ${feature.color} mb-6`}>
+            <div className={`inline-flex p-4 rounded-xl bg-gradient-to-r ${feature.color} mb-6 shadow-lg`}>
               <Icon className="w-6 h-6 text-white" />
             </div>
 
             {/* Content */}
-            <h3 className="text-xl font-semibold mb-3 group-hover:text-primary-600 transition-colors">
+            <h3 className="text-xl font-semibold mb-3 group-hover:text-primary-600 transition-colors uppercase tracking-tight">
               {feature.title}
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 font-medium leading-relaxed">
               {feature.description}
             </p>
 
             {/* Decorative Line */}
-            <div className={`absolute bottom-0 left-8 right-8 h-0.5 bg-gradient-to-r ${feature.color} scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left`} />
+            <div className={`absolute bottom-0 left-8 right-8 h-1 bg-gradient-to-r ${feature.color} scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full`} />
           </motion.div>
         );
       })}

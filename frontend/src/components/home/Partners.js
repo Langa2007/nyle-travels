@@ -1,12 +1,14 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
+import { fetchSettings } from '@/utils/settings';
 
-const partners = [
+const defaultPartners = [
   {
     id: 1,
     name: 'Kenya Airways',
@@ -40,6 +42,18 @@ const partners = [
 ];
 
 export default function Partners() {
+  const [activePartners, setActivePartners] = useState(defaultPartners);
+
+  useEffect(() => {
+    const loadPartners = async () => {
+      const data = await fetchSettings('partners');
+      if (data && Array.isArray(data) && data.length > 0) {
+        setActivePartners(data);
+      }
+    };
+    loadPartners();
+  }, []);
+
   return (
     <section className="py-16 bg-white border-t border-gray-100">
       <div className="container mx-auto px-4">
@@ -62,7 +76,7 @@ export default function Partners() {
             delay: 3000,
             disableOnInteraction: false,
           }}
-          loop={true}
+          loop={activePartners.length > 5}
           breakpoints={{
             640: {
               slidesPerView: 3,
@@ -79,7 +93,7 @@ export default function Partners() {
           }}
           className="partners-slider"
         >
-          {partners.map((partner) => (
+          {activePartners.map((partner) => (
             <SwiperSlide key={partner.id}>
               <motion.div
                 className="flex h-20 items-center justify-center opacity-70 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0"
@@ -93,6 +107,7 @@ export default function Partners() {
                     height={72}
                     sizes="220px"
                     className="h-14 w-auto object-contain"
+                    unoptimized={partner.logo.startsWith('http')}
                   />
                 </div>
               </motion.div>

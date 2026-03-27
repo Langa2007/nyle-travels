@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiStar, FiChevronLeft, FiChevronRight, FiMessageSquare } from 'react-icons/fi';
@@ -9,8 +9,9 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import { fetchSettings } from '@/utils/settings';
 
-const testimonials = [
+const defaultTestimonials = [
   {
     id: 1,
     name: 'Sarah Johnson',
@@ -54,7 +55,20 @@ const testimonials = [
 ];
 
 export default function Testimonials() {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeTestimonials, setActiveTestimonials] = useState(defaultTestimonials);
+
+  useEffect(() => {
+    const loadTestimonials = async () => {
+      const data = await fetchSettings('testimonials');
+      if (data && Array.isArray(data) && data.length > 0) {
+        setActiveTestimonials(data.map((item, index) => ({
+          ...defaultTestimonials[index % defaultTestimonials.length],
+          ...item
+        })));
+      }
+    };
+    loadTestimonials();
+  }, []);
 
   return (
     <div className="relative">
@@ -71,7 +85,6 @@ export default function Testimonials() {
           el: '.testimonial-pagination',
         }}
         autoplay={{ delay: 5000, disableOnInteraction: false }}
-        onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
         breakpoints={{
           768: {
             slidesPerView: 2,
@@ -82,7 +95,7 @@ export default function Testimonials() {
         }}
         className="testimonials-slider"
       >
-        {testimonials.map((testimonial) => (
+        {activeTestimonials.map((testimonial) => (
           <SwiperSlide key={testimonial.id}>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -114,12 +127,13 @@ export default function Testimonials() {
 
               {/* Author */}
               <div className="flex items-center">
-                <div className="relative w-12 h-12 rounded-full overflow-hidden mr-4">
+                <div className="relative w-12 h-12 rounded-full overflow-hidden mr-4 border border-white/20">
                   <Image
                     src={testimonial.avatar}
                     alt={testimonial.name}
                     fill
                     className="object-cover"
+                    unoptimized={testimonial.avatar.startsWith('http')}
                   />
                 </div>
                 <div>
