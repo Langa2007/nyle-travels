@@ -42,14 +42,16 @@ export const getSectionSettings = async (req, res, next) => {
   let key = `${section}_sections`;
   
   if (section === 'safaris') key = 'featured_safaris';
-  if (section === 'video') key = 'showcase_video_section';
-  if (section === 'blog') key = 'blog_posts_sections';
-  if (section === 'offers') key = 'exclusive_offers_sections';
-  if (section === 'stays') key = 'luxury_stays_sections';
-  if (section === 'destinations') key = 'destinations_sections';
-  if (section === 'partners') key = 'partners_section';
-  if (section === 'testimonials') key = 'testimonials_section';
-  if (section === 'benefits') key = 'why_choose_us_section';
+  else if (section === 'video') key = 'showcase_video_section';
+  else if (section === 'blog') key = 'blog_posts_sections';
+  else if (section === 'offers') key = 'exclusive_offers_sections';
+  else if (section === 'stays') key = 'luxury_stays_sections';
+  else if (section === 'destinations') key = 'destinations_sections';
+  else if (section === 'partners') key = 'partners_section';
+  else if (section === 'testimonials') key = 'testimonials_section';
+  else if (section === 'benefits') key = 'why_choose_us_section';
+  else if (section.endsWith('_sections')) key = section;
+  else if (section === 'hero') key = 'hero_sections';
   
   req.params.key = key;
   return getSettings(req, res, next);
