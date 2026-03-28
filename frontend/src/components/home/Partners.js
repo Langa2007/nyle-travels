@@ -9,7 +9,9 @@ const permanentPartners = [
   { id: 'perm-1', name: 'Kenya Airways', logo: '/brands/kenya-airways.svg' },
   { id: 'perm-2', name: 'KWS', logo: '/brands/kws.svg' },
   { id: 'perm-3', name: 'Jambojet', logo: '/brands/jambojet.svg' },
-  { id: 'perm-4', name: 'Sarova', logo: '/brands/sarova.svg' },
+  { id: 'perm-sarova-shield', name: 'Sarova Hotels', logo: 'https://www.sarovahotels.com/assets/images/logo.png' },
+  { id: 'perm-serena', name: 'Serena Hotels', logo: '/brands/serena-hotels.svg' },
+  { id: 'perm-safarilink', name: 'Safarilink', logo: '/brands/safarilink.svg' },
 ];
 
 export default function Partners() {
@@ -52,7 +54,7 @@ export default function Partners() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <div className="flex h-16 w-40 items-center justify-center grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300">
+              <div className="flex h-16 w-40 items-center justify-center transition-all duration-300">
                 <Image
                   src={partner.logo}
                   alt={partner.name}
