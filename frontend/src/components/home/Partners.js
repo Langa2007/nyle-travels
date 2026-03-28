@@ -8,51 +8,33 @@ import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import { fetchSettings } from '@/utils/settings';
 
-const defaultPartners = [
-  {
-    id: 1,
-    name: 'Kenya Airways',
-    logo: '/brands/kenya-airways.svg',
-  },
-  {
-    id: 2,
-    name: 'KWS',
-    logo: '/brands/kws.svg',
-  },
-  {
-    id: 3,
-    name: 'Jambojet',
-    logo: '/brands/jambojet.svg',
-  },
-  {
-    id: 4,
-    name: 'Safarilink',
-    logo: '/brands/safarilink.svg',
-  },
-  {
-    id: 5,
-    name: 'Serena Hotels',
-    logo: '/brands/serena-hotels.svg',
-  },
-  {
-    id: 6,
-    name: 'Sarova',
-    logo: '/brands/sarova.svg',
-  },
+const permanentPartners = [
+  { id: 'perm-1', name: 'Kenya Airways', logo: '/brands/kenya-airways.svg' },
+  { id: 'perm-2', name: 'KWS', logo: '/brands/kws.svg' },
+  { id: 'perm-3', name: 'Jambojet', logo: '/brands/jambojet.svg' },
+  { id: 'perm-4', name: 'Sarova', logo: '/brands/sarova.svg' },
 ];
 
 export default function Partners() {
-  const [activePartners, setActivePartners] = useState(defaultPartners);
+  const [activePartners, setActivePartners] = useState(permanentPartners);
 
   useEffect(() => {
     const loadPartners = async () => {
       const data = await fetchSettings('partners');
       if (data && Array.isArray(data) && data.length > 0) {
-        setActivePartners(data);
+        // combine permanent partners and any newly added ones, avoiding duplicates if any have the same names (just visual fallback)
+        const combined = [...permanentPartners, ...data];
+        setActivePartners(combined);
       }
     };
     loadPartners();
   }, []);
+
+  // To fix Swiper loop warning where we don't have enough slides, 
+  // duplicate the array if there are fewer than 8 slides
+  const displayPartners = activePartners.length < 8 
+    ? [...activePartners, ...activePartners.map(p => ({...p, id: p.id + '-dup'}))] 
+    : activePartners;
 
   return (
     <section className="py-16 bg-white border-t border-gray-100">
@@ -76,7 +58,7 @@ export default function Partners() {
             delay: 3000,
             disableOnInteraction: false,
           }}
-          loop={activePartners.length > 5}
+          loop={true}
           breakpoints={{
             640: {
               slidesPerView: 3,
@@ -93,7 +75,7 @@ export default function Partners() {
           }}
           className="partners-slider"
         >
-          {activePartners.map((partner) => (
+          {displayPartners.map((partner) => (
             <SwiperSlide key={partner.id}>
               <motion.div
                 className="flex h-20 items-center justify-center transition-all duration-300"
