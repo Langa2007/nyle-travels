@@ -129,7 +129,7 @@ export default function MediaManagement() {
 
     try {
       const response = await adminAPI.uploadMedia(formData, isVideo);
-      const url = response.data.url;
+      const url = response.data.data.url;
       
       if (index === null) {
         handleInputChange(section, null, isVideo ? 'url' : 'thumbnail', url);
