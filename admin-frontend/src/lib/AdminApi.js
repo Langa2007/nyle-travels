@@ -79,6 +79,13 @@ export const adminAPI = {
 
   restoreDefaults: () =>
     api.post('/admin/settings/seed-defaults'),
+
+  // Newsletter Subscribers
+  getSubscribers: (params) =>
+    api.get('/newsletter/admin/subscribers', { params }),
+  
+  deleteSubscriber: (id) =>
+    api.delete(`/newsletter/admin/subscribers/${id}`),
 };
 
 export default adminAPI;

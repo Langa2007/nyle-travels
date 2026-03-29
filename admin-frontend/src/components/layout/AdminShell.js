@@ -41,6 +41,7 @@ const menuItems = [
     section: 'Management',
     items: [
       { href: '/admin/users', label: 'Users', icon: FiUsers },
+      { href: '/admin/subscribers', label: 'Subscribers', icon: FiMail },
       { href: '/admin/bookings', label: 'Bookings', icon: FiCalendar },
       { href: '/admin/tours', label: 'Tours', icon: FiPackage },
       { href: '/admin/hotels', label: 'Hotels', icon: FiMap },

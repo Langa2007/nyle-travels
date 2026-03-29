@@ -17,7 +17,8 @@ const EMAIL_TEMPLATES = {
   EMAIL_VERIFICATION: 'email-verification',
   TOUR_REMINDER: 'tour-reminder',
   REVIEW_REQUEST: 'review-request',
-  NEWSLETTER: 'newsletter'
+  NEWSLETTER: 'newsletter',
+  NEWSLETTER_WELCOME: 'newsletter-welcome'
 };
 
 // Log email to database
@@ -225,7 +226,57 @@ const generateEmailHtml = (template, data) => {
         </html>
       `;
 
-    // Add more templates as needed...
+    // Add more templates as ne    case EMAIL_TEMPLATES.NEWSLETTER_WELCOME:
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Welcome to Nyle Travel Community</title>
+        </head>
+        <body style="font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 0;">
+          <div style="background: #1a1a1a; padding: 60px 20px; text-align: center;">
+            <h1 style="color: #c5a059; margin: 0; font-size: 32px; font-family: serif; letter-spacing: 2px;">NYLE TRAVEL</h1>
+            <p style="color: #999; margin-top: 10px; text-transform: uppercase; font-size: 12px; letter-spacing: 4px;">Luxury Safari & Tours</p>
+          </div>
+          
+          <div style="padding: 40px 30px; background: #ffffff;">
+            <h2 style="color: #1a1a1a; font-family: serif; font-size: 24px; text-align: center; margin-bottom: 30px;">Welcome to the Inner Circle</h2>
+            
+            <p style="font-size: 16px; color: #444; margin-bottom: 20px;">
+              Thank you for subscribing to the Nyle Travel newsletter. You are now part of an exclusive community of travelers who appreciate the finer details of African exploration.
+            </p>
+            
+            <div style="background: #fdfaf4; border: 1px solid #f3e6d5; border-radius: 8px; padding: 30px; margin: 30px 0; text-align: center;">
+              <h3 style="color: #c5a059; margin-top: 0; font-family: serif;">Your Exclusive Benefit</h3>
+              <p style="margin-bottom: 20px; font-size: 15px;">As a token of our appreciation, please enjoy an exclusive <strong>10% discount</strong> on your first luxury booking with us.</p>
+              <div style="display: inline-block; border: 2px dashed #c5a059; color: #1a1a1a; padding: 15px 30px; font-size: 20px; font-weight: bold; font-family: monospace;">NYLEWELCOME10</div>
+            </div>
+            
+            <p style="font-size: 16px; color: #444;">Moving forward, you'll be the first to receive:</p>
+            <ul style="color: #666; font-size: 14px; margin-bottom: 30px;">
+              <li style="margin-bottom: 10px;">Early access to limited-edition safari departures.</li>
+              <li style="margin-bottom: 10px;">Insider guides to Africa's most secluded luxury lodges.</li>
+              <li style="margin-bottom: 10px;">Invitations to exclusive member-only events.</li>
+            </ul>
+            
+            <div style="text-align: center; margin-top: 40px;">
+              <a href="${data.websiteUrl}" style="display: inline-block; background: #1a1a1a; color: #c5a059; padding: 18px 35px; text-decoration: none; border-radius: 0; font-weight: bold; text-transform: uppercase; font-size: 13px; letter-spacing: 2px;">Explore Destinations</a>
+            </div>
+          </div>
+          
+          <div style="background: #f9f9f9; padding: 40px 20px; text-align: center; border-top: 1px solid #eee;">
+            <p style="color: #999; font-size: 13px; margin-bottom: 20px;">Follow our journey through the wild</p>
+            <div style="margin-bottom: 30px;">
+              <a href="#" style="margin: 0 10px; color: #1a1a1a; text-decoration: none;">Instagram</a>
+              <a href="#" style="margin: 0 10px; color: #1a1a1a; text-decoration: none;">Facebook</a>
+            </div>
+            <p style="color: #ccc; font-size: 11px;">You received this email because you subscribed on our website. <br> <a href="${data.unsubscribeUrl}" style="color: #999;">Unsubscribe</a></p>
+          </div>
+        </body>
+        </html>
+      `;
 
     default:
       return `<p>${JSON.stringify(data)}</p>`;
@@ -294,9 +345,22 @@ export const sendPasswordResetEmail = async (user, resetToken, ipAddress) => {
   });
 };
 
+export const sendNewsletterWelcomeEmail = async (email) => {
+  return sendEmail({
+    to: email,
+    subject: 'Welcome to the Nyle Travel Inner Circle',
+    template: EMAIL_TEMPLATES.NEWSLETTER_WELCOME,
+    data: {
+      websiteUrl: process.env.FRONTEND_URL,
+      unsubscribeUrl: `${process.env.FRONTEND_URL}/unsubscribe?email=${email}`
+    }
+  });
+};
+
 export default {
   sendWelcomeEmail,
   sendBookingConfirmation,
   sendPasswordResetEmail,
+  sendNewsletterWelcomeEmail,
   sendEmail
 };

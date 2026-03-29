@@ -16,13 +16,31 @@ export default function Newsletter() {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/newsletter/subscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubscribed(true);
+        toast.success(data.message || 'Successfully subscribed to newsletter!');
+        setEmail('');
+      } else {
+        toast.error(data.message || 'Failed to subscribe. Please try again.');
+      }
+    } catch (error) {
+      console.error('Newsletter error:', error);
+      toast.error('Something went wrong. Please try again later.');
+    } finally {
       setLoading(false);
-      setSubscribed(true);
-      toast.success('Successfully subscribed to newsletter!');
-      setEmail('');
-    }, 1500);
+    }
   };
 
   return (
