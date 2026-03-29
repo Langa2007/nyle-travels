@@ -62,15 +62,20 @@ export const register = catchAsync(async (req, res, next) => {
   const verificationToken = crypto.randomBytes(32).toString('hex');
   await User.setEmailVerificationToken(newUser.id, verificationToken);
 
-  // Send welcome email
+  // Send verification email
   try {
-    await sendWelcomeEmail(newUser);
+    const { sendVerificationEmail } = await import('../services/emailService.js');
+    await sendVerificationEmail(newUser, verificationToken);
   } catch (error) {
-    console.error('Failed to send welcome email:', error);
-    // Continue even if email fails
+    console.error('Failed to send verification email:', error);
+    // Continue but maybe inform user in response?
   }
 
-  createSendToken(newUser, 201, req, res);
+  res.status(201).json({
+    status: 'success',
+    message: 'Registration successful! Please check your email to verify your account.',
+    data: { user: newUser }
+  });
 });
 
 export const login = catchAsync(async (req, res, next) => {
@@ -85,6 +90,11 @@ export const login = catchAsync(async (req, res, next) => {
   const user = await User.findByEmail(email);
   if (!user || !(await User.checkPassword(user, password))) {
     return next(new AppError('Incorrect email or password', 401));
+  }
+
+  // Check if email is verified
+  if (!user.email_verified) {
+    return next(new AppError('Please verify your email address before logging in.', 401));
   }
 
   // Update last login

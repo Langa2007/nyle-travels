@@ -10,6 +10,7 @@ import {
   FiUsers, 
   FiCalendar, 
   FiMap, 
+  FiMail,
   FiDollarSign,
   FiSettings,
   FiLogOut,

@@ -1,12 +1,12 @@
+import { buildApiUrl } from '@/lib/api-base';
+
 export const getApiUrl = () => {
-  const url = (process.env.NEXT_PUBLIC_API_URL || 'https://nyle-travels.onrender.com/api').replace(/\/+$/, '');
-  return url;
+  return buildApiUrl();
 };
 
 export const fetchSettings = async (section) => {
   try {
-    const apiUrl = getApiUrl();
-    const res = await fetch(`${apiUrl}/settings/${section}`);
+    const res = await fetch(buildApiUrl(`/settings/${section}`), { cache: 'no-store' });
     const result = await res.json();
     
     if (result.status === 'success' && result.data) {
@@ -21,8 +21,7 @@ export const fetchSettings = async (section) => {
 
 export const fetchAllSettings = async () => {
   try {
-    const apiUrl = getApiUrl();
-    const res = await fetch(`${apiUrl}/settings`);
+    const res = await fetch(buildApiUrl('/settings'), { cache: 'no-store' });
     const result = await res.json();
     
     if (result.status === 'success' && result.data) {

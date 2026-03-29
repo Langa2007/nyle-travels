@@ -54,10 +54,26 @@ export const authOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account.provider === "google") {
+        return true;
+      }
+      
+      if (account.provider === "credentials") {
+        // If it's a manual login, check if the email is verified
+        if (user && !user.emailVerified) {
+          throw new Error("Please verify your email address before logging in.");
+        }
+        return true;
+      }
+      
+      return true;
+    },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
         session.user.role = token.role;
+        session.user.emailVerified = token.emailVerified;
       }
       return session;
     },
@@ -65,6 +81,7 @@ export const authOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.emailVerified = user.emailVerified;
       }
       return token;
     }

@@ -25,12 +25,19 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     
-    const result = await manualLogin(email, password);
-    
-    if (result.success) {
-      router.push(callbackUrl);
+    try {
+      const result = await manualLogin(email, password);
+      
+      if (result.success) {
+        // If successful, the hook handles the redirect
+        // However, if the user is not verified, we might want to stay here
+        // and show a specific message.
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleGoogleLogin = () => {

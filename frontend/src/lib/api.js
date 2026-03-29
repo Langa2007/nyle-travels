@@ -1,10 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-if (!API_URL) {
-  console.warn('NEXT_PUBLIC_API_URL is not set. API calls will use relative URLs.');
-}
+import { API_URL } from './api-base';
 
 const api = axios.create({
   baseURL: API_URL,

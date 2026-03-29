@@ -135,7 +135,7 @@ export const User = {
   // Verify email
   async verifyEmail(token) {
     const result = await query(
-      `UPDATE users SET email_verified = TRUE, email_verification_token = NULL 
+      `UPDATE users SET email_verified = CURRENT_TIMESTAMP, email_verification_token = NULL 
        WHERE email_verification_token = $1 AND deleted_at IS NULL 
        RETURNING id, email`,
       [token]

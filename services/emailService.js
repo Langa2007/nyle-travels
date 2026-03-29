@@ -280,6 +280,44 @@ const generateEmailHtml = (template, data) => {
 
     default:
       return `<p>${JSON.stringify(data)}</p>`;
+
+    case EMAIL_TEMPLATES.EMAIL_VERIFICATION:
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Verify Your Email - Nyle Travel</title>
+        </head>
+        <body style="font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: #1a1a1a; padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: #c5a059; margin: 0; font-size: 28px; font-family: serif; letter-spacing: 2px;">NYLE TRAVEL</h1>
+          </div>
+          
+          <div style="background: #f9f9f9; padding: 40px 20px; border-radius: 0 0 10px 10px; border: 1px solid #eee; border-top: none;">
+            <h2 style="color: #1a1a1a; text-align: center; margin-bottom: 30px;">Verify Your Email Address</h2>
+            
+            <p style="font-size: 16px;">Hello <strong>${data.name}</strong>,</p>
+            
+            <p style="font-size: 16px;">Thank you for registering with Nyle Travel & Tours. To complete your luxury travel profile and access your dashboard, please verify your email address by clicking the button below:</p>
+            
+            <div style="text-align: center; margin: 40px 0;">
+              <a href="${data.verifyUrl}" style="display: inline-block; background: #1a1a1a; color: #c5a059; padding: 18px 40px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Verify Email Address</a>
+            </div>
+            
+            <p style="color: #666; font-size: 14px;">This link will expire in 24 hours. If you did not create an account with us, please ignore this email.</p>
+            
+            <div style="border-top: 2px solid #eee; margin-top: 40px; padding-top: 30px; text-align: center;">
+              <p style="color: #999; font-size: 12px;">Need assistance? Our concierge team is here to help.</p>
+              <p style="margin-top: 10px;">
+                <a href="mailto:concierge@nyletravel.com" style="color: #c5a059; text-decoration: none;">concierge@nyletravel.com</a>
+              </p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
   }
 };
 
@@ -357,10 +395,26 @@ export const sendNewsletterWelcomeEmail = async (email) => {
   });
 };
 
+export const sendVerificationEmail = async (user, token) => {
+  const verifyUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+  
+  return sendEmail({
+    to: user.email,
+    subject: 'Complete Your Registration - Nyle Travel',
+    template: EMAIL_TEMPLATES.EMAIL_VERIFICATION,
+    data: {
+      name: `${user.first_name} ${user.last_name}`,
+      verifyUrl: verifyUrl
+    },
+    userId: user.id
+  });
+};
+
 export default {
   sendWelcomeEmail,
   sendBookingConfirmation,
   sendPasswordResetEmail,
   sendNewsletterWelcomeEmail,
+  sendVerificationEmail,
   sendEmail
 };

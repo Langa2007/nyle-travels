@@ -11,15 +11,16 @@ model User {
   email                String    @unique @db.VarChar(255)
   phone                String?   @db.VarChar(50)
   password_hash        String?   @db.VarChar(255) // Optional for Google Login users
-  first_name           String    @db.VarChar(100)
-  last_name            String    @db.VarChar(100)
+  first_name           String    @map("first_name") @db.VarChar(100)
+  last_name            String    @map("last_name") @db.VarChar(100)
+  name                 String?   @db.VarChar(200)
   date_of_birth        DateTime? @db.Date
   nationality          String?   @db.VarChar(100)
   passport_number      String?   @db.VarChar(50)
   passport_expiry      DateTime? @db.Date
-  profile_image        String?   @db.VarChar(500)
+  image                String?   @map("profile_image") @db.VarChar(500)
   role                String?   @default("user") @db.VarChar(50)
-  email_verified       DateTime? // NextAuth expects this to be DateTime
+  emailVerified        DateTime? @map("email_verified")
   phone_verified       Boolean?  @default(false)
   two_factor_enabled    Boolean?  @default(false)
   two_factor_secret     String?   @db.Text

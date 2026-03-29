@@ -57,16 +57,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authAPI.register(userData);
-      const { token, refreshToken, user } = response.data;
-
-      Cookies.set('token', token, { expires: 7 });
-      Cookies.set('refreshToken', refreshToken, { expires: 30 });
-      
-      setUser(user);
-      toast.success('Registration successful!');
-      
-      router.push('/dashboard');
-      return { success: true };
+      // Backend now sends verification email instead of tokens
+      return { success: true, message: response.data.message };
     } catch (error) {
       toast.error(error.response?.data?.message || 'Registration failed');
       return { success: false, error: error.response?.data?.message };

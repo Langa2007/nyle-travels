@@ -30,15 +30,9 @@ export default function AdminSettings() {
   useEffect(() => {
     const fetchCurrentSettings = async () => {
       try {
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
-        if (!apiUrl) {
-          console.warn('NEXT_PUBLIC_API_URL is not set. Skipping settings fetch.');
-          return;
-        }
-        const res = await fetch(`${apiUrl}/settings`);
-        const result = await res.json();
+        const { data: result } = await adminAPI.getSettings();
         
-        if (result.status === 'success' && result.data) {
+        if (result?.status === 'success' && result.data) {
           if (result.data.hero_images) setHeroPrevs(result.data.hero_images);
           if (result.data.destinations_images) setDestPrevs(result.data.destinations_images);
           if (result.data.tours_images) setToursPrevs(result.data.tours_images);

@@ -1,9 +1,5 @@
 import axios from 'axios';
-
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://nyle-travels.onrender.com/api').replace(/\/+$/, '');
-if (!process.env.NEXT_PUBLIC_API_URL) {
-  console.warn('NEXT_PUBLIC_API_URL is not set. Falling back to default:', API_URL);
-}
+import { API_URL } from './api-base';
 
 const api = axios.create({
   baseURL: API_URL,

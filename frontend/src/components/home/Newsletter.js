@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { FiMail, FiSend, FiCheckCircle } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import toast from 'react-hot-toast';
+import { buildApiUrl } from '@/lib/api-base';
 
 export default function Newsletter() {
   const [email, setEmail] = useState('');
@@ -17,8 +18,7 @@ export default function Newsletter() {
     setLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${apiUrl}/newsletter/subscribe`, {
+      const response = await fetch(buildApiUrl('/newsletter/subscribe'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
