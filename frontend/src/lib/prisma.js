@@ -12,7 +12,14 @@ if (process.env.NEXT_PHASE === 'phase-production-build') {
   prisma = null;
 } else {
   if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = new PrismaClient();
+    const { Pool } = require('pg');
+    const { PrismaPg } = require('@prisma/adapter-pg');
+    
+    const connectionString = process.env.DATABASE_URL_NEON || process.env.DATABASE_URL;
+    const pool = new Pool({ connectionString });
+    const adapter = new PrismaPg(pool);
+    
+    globalForPrisma.prisma = new PrismaClient({ adapter });
   }
   prisma = globalForPrisma.prisma;
 }

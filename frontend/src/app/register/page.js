@@ -21,6 +21,7 @@ export default function RegisterPage() {
     confirmPassword: '',
   });
   const [isRegistered, setIsRegistered] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { register: manualRegister } = useAuth();
 
   const handleChange = (e) => {
