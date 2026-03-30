@@ -4,17 +4,21 @@ import cloudinaryService from '../services/cloudinaryService.js';
 export const getSettings = async (req, res, next) => {
   try {
     const { key } = req.params;
+    console.log(`[SETTINGS] Fetching settings. Key: ${key || 'ALL'}`);
     let result;
     if (key) {
       result = await query('SELECT value FROM app_settings WHERE key = $1', [key]);
+      console.log(`[SETTINGS] Result for ${key}:`, result.rows.length, 'rows');
       return res.status(200).json({ status: 'success', data: result.rows[0]?.value || null });
     } else {
       result = await query('SELECT * FROM app_settings');
+      console.log(`[SETTINGS] Retrieved ${result.rows.length} total settings records from DB`);
       const settings = {};
       result.rows.forEach(row => { settings[row.key] = row.value; });
       return res.status(200).json({ status: 'success', data: settings });
     }
   } catch (error) {
+    console.error(`[SETTINGS] Error fetching settings:`, error);
     next(error);
   }
 };
