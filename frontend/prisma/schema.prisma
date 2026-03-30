@@ -9,7 +9,7 @@ datasource db {
 model User {
   id                   String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   email                String    @unique @db.VarChar(255)
-  phone                String?   @db.VarChar(50)
+  phone                String?   @unique @db.VarChar(50)
   password_hash        String?   @db.VarChar(255) // Optional for Google Login users
   first_name           String    @map("first_name") @db.VarChar(100)
   last_name            String    @map("last_name") @db.VarChar(100)

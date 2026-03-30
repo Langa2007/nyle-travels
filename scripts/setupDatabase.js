@@ -25,35 +25,17 @@ const escapeIdentifier = (value) => `"${String(value).replace(/"/g, '""')}"`;
 const setupDatabase = async () => {
   let pool;
   try {
-    if (!dbName) {
-      throw new Error('DB_NAME is missing in .env');
-    }
+    console.log(' Using connection string for database setup...');
 
-    console.log(' Setting up database...');
-
-    // Ensure database exists (connect to admin DB first)
-    const adminPool = new Pool({
-      ...baseConfig,
-      database: adminDb
-    });
-
-    const existsResult = await adminPool.query(
-      'SELECT 1 FROM pg_database WHERE datname = $1',
-      [dbName]
-    );
-
-    if (existsResult.rowCount === 0) {
-      console.log(` Creating database ${dbName}...`);
-      await adminPool.query(`CREATE DATABASE ${escapeIdentifier(dbName)}`);
-      console.log(' Database created successfully');
-    }
-
-    await adminPool.end();
-
+    console.log(' Using connection string for database setup...');
     pool = new Pool({
-      ...baseConfig,
-      database: dbName
+      connectionString: process.env.DATABASE_URL_NEON || process.env.DATABASE_URL_LOCAL || process.env.DATABASE_URL,
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
     });
+    console.log(' Connected to pool');
 
     // Read schema file
     const schemaPath = path.join(__dirname, 'schema.sql');
