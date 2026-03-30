@@ -77,3 +77,52 @@ model VerificationToken {
   @@unique([identifier, token])
   @@map("verification_tokens")
 }
+
+model AppSetting {
+  key        String   @id @db.VarChar(255)
+  value      Json     @db.JsonB
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  @@map("app_settings")
+}
+
+model Subscriber {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email      String   @unique @db.VarChar(255)
+  status     String?  @default("active") @db.VarChar(50)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  @@map("subscribers")
+}
+
+model Destination {
+  id                  String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                String   @db.VarChar(255)
+  slug                String   @unique @db.VarChar(255)
+  country             String   @db.VarChar(100)
+  region              String?  @db.VarChar(100)
+  description         String?  @db.Text
+  short_description   String?  @db.VarChar(500)
+  latitude            Decimal? @db.Decimal(10, 8)
+  longitude           Decimal? @db.Decimal(11, 8)
+  best_time_to_visit  String?  @db.Text
+  how_to_get_there    String?  @db.Text
+  visa_requirements   String?  @db.Text
+  health_safety       String?  @db.Text
+  currency            String?  @db.VarChar(50)
+  languages           String[]
+  timezone            String?  @db.VarChar(100)
+  featured_image      String?  @db.VarChar(500)
+  gallery_images      String[]
+  meta_title          String?  @db.VarChar(255)
+  meta_description    String?  @db.Text
+  meta_keywords       String[]
+  is_featured         Boolean? @default(false)
+  is_active           Boolean? @default(true)
+  views_count         Int?     @default(0)
+  created_at          DateTime @default(now()) @db.Timestamp(6)
+  updated_at          DateTime @default(now()) @db.Timestamp(6)
+
+  @@map("destinations")
+}
