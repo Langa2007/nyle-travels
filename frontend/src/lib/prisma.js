@@ -14,7 +14,7 @@ if (process.env.NEXT_PHASE === 'phase-production-build') {
   prisma = null;
 } else {
   if (!globalForPrisma.prisma) {
-    const connectionString = process.env.DATABASE_URL;
+    const connectionString = process.env.DATABASE_URL || process.env.DATABASE_URL_NEON;
     const pool = new pg.Pool({ 
       connectionString,
       ssl: { rejectUnauthorized: false },
