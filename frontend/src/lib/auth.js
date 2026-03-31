@@ -56,6 +56,57 @@ export const authOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account.provider === "google") {
+        if (!prisma) return true;
+        
+        try {
+          // Check if a user with this email already exists
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+          });
+
+          if (existingUser) {
+            // Check if this Google account is already linked
+            const existingAccount = await prisma.account.findFirst({
+              where: {
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              },
+            });
+
+            if (!existingAccount) {
+              // Link Google account to existing user
+              await prisma.account.create({
+                data: {
+                  userId: existingUser.id,
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  access_token: account.access_token,
+                  refresh_token: account.refresh_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                  session_state: account.session_state,
+                },
+              });
+            }
+
+            // Update user profile with Google info if missing
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: {
+                emailVerified: existingUser.emailVerified || new Date(),
+                image: existingUser.image || user.image,
+                name: existingUser.name || user.name,
+              },
+            });
+          }
+        } catch (error) {
+          console.error("[AUTH] Google account linking error:", error);
+          // Still allow sign-in even if linking fails
+        }
+
         return true;
       }
       
