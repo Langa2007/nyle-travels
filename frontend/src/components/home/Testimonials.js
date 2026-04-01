@@ -55,16 +55,26 @@ const defaultTestimonials = [
 ];
 
 export default function Testimonials() {
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTestimonials, setActiveTestimonials] = useState(defaultTestimonials);
 
   useEffect(() => {
     const loadTestimonials = async () => {
-      const data = await fetchSettings('testimonials');
-      if (data && Array.isArray(data) && data.length > 0) {
-        setActiveTestimonials(data.map((item, index) => ({
-          ...defaultTestimonials[index % defaultTestimonials.length],
-          ...item
-        })));
+      try {
+        const data = await fetchSettings('testimonials');
+        if (data && Array.isArray(data) && data.length > 0) {
+          const nextTestimonials = data.map((item, index) => ({
+            ...defaultTestimonials[index % defaultTestimonials.length],
+            ...item,
+            avatar: item.avatar || ''
+          }));
+
+          if (nextTestimonials.some((item) => item.avatar)) {
+            setActiveTestimonials(nextTestimonials);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
     loadTestimonials();
@@ -128,13 +138,17 @@ export default function Testimonials() {
               {/* Author */}
               <div className="flex items-center">
                 <div className="relative w-12 h-12 rounded-full overflow-hidden mr-4 border border-white/20">
-                  <Image
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
-                    fill
-                    className="object-cover"
-                    unoptimized={testimonial.avatar.startsWith('http')}
-                  />
+                  {!isLoading && testimonial.avatar ? (
+                    <Image
+                      src={testimonial.avatar}
+                      alt={testimonial.name}
+                      fill
+                      className="object-cover"
+                      unoptimized={testimonial.avatar.startsWith('http')}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-white/10" />
+                  )}
                 </div>
                 <div>
                   <h4 className="font-semibold text-white">{testimonial.name}</h4>

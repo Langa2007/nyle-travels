@@ -11,6 +11,7 @@ import { fetchSettings } from '@/utils/settings';
 
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchParams, setSearchParams] = useState({
     destination: '',
     date: null,
@@ -57,15 +58,23 @@ export default function Hero() {
 
   useEffect(() => {
     const loadHeroSlides = async () => {
-      const data = await fetchSettings('hero_sections');
-      if (data && Array.isArray(data) && data.length > 0) {
-        setHeroSlides(data.map((slide, index) => ({
-          id: slide.id || index + 1,
-          image: slide.image || `https://picsum.photos/seed/hero${index}/800/600`,
-          title: slide.title || 'Luxury Safari Experience',
-          subtitle: slide.subtitle || 'Witness the Great Migration',
-          description: slide.description || 'Experience the untamed beauty of Africa in unparalleled luxury',
-        })));
+      try {
+        const data = await fetchSettings('hero_sections');
+        if (data && Array.isArray(data) && data.length > 0) {
+          const nextSlides = data.map((slide, index) => ({
+            id: slide.id || index + 1,
+            image: slide.image || '',
+            title: slide.title || heroSlides[index % heroSlides.length].title,
+            subtitle: slide.subtitle || heroSlides[index % heroSlides.length].subtitle,
+            description: slide.description || heroSlides[index % heroSlides.length].description,
+          }));
+
+          if (nextSlides.some((slide) => slide.image)) {
+            setHeroSlides(nextSlides);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
     loadHeroSlides();
@@ -91,13 +100,17 @@ export default function Hero() {
           transition={{ duration: 1.5 }}
           className="absolute inset-0"
         >
-          <Image
-            src={heroSlides[currentSlide].image}
-            alt={heroSlides[currentSlide].title}
-            fill
-            className="object-cover"
-            priority
-          />
+          {!isLoading && heroSlides[currentSlide]?.image ? (
+            <Image
+              src={heroSlides[currentSlide].image}
+              alt={heroSlides[currentSlide].title}
+              fill
+              className="object-cover"
+              priority
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/50" />
         </motion.div>
       </AnimatePresence>

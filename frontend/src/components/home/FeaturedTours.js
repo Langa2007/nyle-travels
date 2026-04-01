@@ -111,18 +111,27 @@ const defaultTours = [
 
 export default function FeaturedTours() {
   const [wishlist, setWishlist] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [tours, setTours] = useState(defaultTours);
 
   useEffect(() => {
     const loadTours = async () => {
-      const data = await fetchSettings('safaris');
-      if (data && Array.isArray(data) && data.length > 0) {
-        setTours(data.map((item, index) => ({
-          ...defaultTours[index % defaultTours.length],
-          ...item,
-          id: item.id || defaultTours[index % defaultTours.length].id,
-          image: item.image || defaultTours[index % defaultTours.length].image
-        })));
+      try {
+        const data = await fetchSettings('safaris');
+        if (data && Array.isArray(data) && data.length > 0) {
+          const nextTours = data.map((item, index) => ({
+            ...defaultTours[index % defaultTours.length],
+            ...item,
+            id: item.id || defaultTours[index % defaultTours.length].id,
+            image: item.image || ''
+          }));
+
+          if (nextTours.some((item) => item.image)) {
+            setTours(nextTours);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
     loadTours();
@@ -168,12 +177,16 @@ export default function FeaturedTours() {
             >
               {/* Image */}
               <div className="relative h-64 overflow-hidden">
-                <Image
-                  src={tour.image}
-                  alt={tour.name}
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-700"
-                />
+                {!isLoading && tour.image ? (
+                  <Image
+                    src={tour.image}
+                    alt={tour.name}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300" />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 
                 {/* Badge */}

@@ -69,20 +69,29 @@ const CountdownRenderer = ({ days, hours, minutes, seconds, completed }) => {
 
 export default function ExclusiveOffers() {
   const [copiedCode, setCopiedCode] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeOffers, setActiveOffers] = useState(defaultOffers);
 
   useEffect(() => {
     const loadOffers = async () => {
-      const data = await fetchSettings('offers');
-      if (data && Array.isArray(data) && data.length > 0) {
-        setActiveOffers(data.map((item, index) => ({
-          ...defaultOffers[index % defaultOffers.length],
-          ...item,
-          id: item.id || defaultOffers[index % defaultOffers.length].id,
-          image: item.image || defaultOffers[index % defaultOffers.length].image,
-          validUntil: item.validUntil ? new Date(item.validUntil) : defaultOffers[index % defaultOffers.length].validUntil,
-          type: item.type || defaultOffers[index % defaultOffers.length].type
-        })));
+      try {
+        const data = await fetchSettings('offers');
+        if (data && Array.isArray(data) && data.length > 0) {
+          const nextOffers = data.map((item, index) => ({
+            ...defaultOffers[index % defaultOffers.length],
+            ...item,
+            id: item.id || defaultOffers[index % defaultOffers.length].id,
+            image: item.image || '',
+            validUntil: item.validUntil ? new Date(item.validUntil) : defaultOffers[index % defaultOffers.length].validUntil,
+            type: item.type || defaultOffers[index % defaultOffers.length].type
+          }));
+
+          if (nextOffers.some((item) => item.image)) {
+            setActiveOffers(nextOffers);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
     loadOffers();
@@ -129,12 +138,16 @@ export default function ExclusiveOffers() {
               <div className="bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
                 {/* Image */}
                 <div className="relative h-48 overflow-hidden">
-                  <Image
-                    src={offer.image}
-                    alt={offer.title}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
+                  {!isLoading && offer.image ? (
+                    <Image
+                      src={offer.image}
+                      alt={offer.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300" />
+                  )}
                   
                   {/* Discount Badge */}
                   <div className="absolute top-4 right-4">

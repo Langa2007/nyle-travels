@@ -56,18 +56,27 @@ const defaultBlogPosts = [
 ];
 
 export default function TravelBlog() {
+  const [isLoading, setIsLoading] = useState(true);
   const [posts, setPosts] = useState(defaultBlogPosts);
 
   useEffect(() => {
     const loadPosts = async () => {
-      const data = await fetchSettings('blog');
-      if (data && Array.isArray(data) && data.length > 0) {
-        setPosts(data.map((item, index) => ({
-          ...defaultBlogPosts[index % defaultBlogPosts.length],
-          ...item,
-          id: item.id || defaultBlogPosts[index % defaultBlogPosts.length].id,
-          image: item.image || defaultBlogPosts[index % defaultBlogPosts.length].image
-        })));
+      try {
+        const data = await fetchSettings('blog');
+        if (data && Array.isArray(data) && data.length > 0) {
+          const nextPosts = data.map((item, index) => ({
+            ...defaultBlogPosts[index % defaultBlogPosts.length],
+            ...item,
+            id: item.id || defaultBlogPosts[index % defaultBlogPosts.length].id,
+            image: item.image || ''
+          }));
+
+          if (nextPosts.some((item) => item.image)) {
+            setPosts(nextPosts);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
     loadPosts();
@@ -89,12 +98,16 @@ export default function TravelBlog() {
               <div className="grid grid-cols-1 md:grid-cols-5">
                 {/* Image */}
                 <div className="md:col-span-2 relative h-48 md:h-full overflow-hidden">
-                  <Image
-                    src={post.image}
-                    alt={post.title}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
+                  {!isLoading && post.image ? (
+                    <Image
+                      src={post.image}
+                      alt={post.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300" />
+                  )}
                   
                   {/* Category Tag */}
                   <div className="absolute top-4 left-4">

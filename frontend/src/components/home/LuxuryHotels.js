@@ -66,18 +66,27 @@ const defaultHotels = [
 
 export default function LuxuryHotels() {
   const [wishlist, setWishlist] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [hotels, setHotels] = useState(defaultHotels);
 
   useEffect(() => {
     const loadHotels = async () => {
-      const data = await fetchSettings('luxury_stays');
-      if (data && Array.isArray(data) && data.length > 0) {
-        setHotels(data.map((item, index) => ({
-          ...defaultHotels[index % defaultHotels.length],
-          ...item,
-          id: item.id || defaultHotels[index % defaultHotels.length].id,
-          image: item.image || defaultHotels[index % defaultHotels.length].image
-        })));
+      try {
+        const data = await fetchSettings('luxury_stays');
+        if (data && Array.isArray(data) && data.length > 0) {
+          const nextHotels = data.map((item, index) => ({
+            ...defaultHotels[index % defaultHotels.length],
+            ...item,
+            id: item.id || defaultHotels[index % defaultHotels.length].id,
+            image: item.image || ''
+          }));
+
+          if (nextHotels.some((item) => item.image)) {
+            setHotels(nextHotels);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
     loadHotels();
@@ -105,12 +114,16 @@ export default function LuxuryHotels() {
           <div className="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
             {/* Image Container */}
             <div className="relative h-56 overflow-hidden">
-              <Image
-                src={hotel.image}
-                alt={hotel.name}
-                fill
-                className="object-cover group-hover:scale-110 transition-transform duration-700"
-              />
+              {!isLoading && hotel.image ? (
+                <Image
+                  src={hotel.image}
+                  alt={hotel.name}
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300" />
+              )}
               
               {/* Badge */}
               <div className="absolute top-4 left-4">

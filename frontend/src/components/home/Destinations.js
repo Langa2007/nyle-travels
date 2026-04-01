@@ -84,18 +84,27 @@ const fadeInUp = {
 
 export default function Destinations() {
   const [hoveredId, setHoveredId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [destinations, setDestinations] = useState(defaultDestinations);
 
   useEffect(() => {
     const loadDestinations = async () => {
-      const data = await fetchSettings('destinations_sections');
-      if (data && Array.isArray(data) && data.length > 0) {
-        setDestinations(data.map((item, index) => ({
-          ...defaultDestinations[index % defaultDestinations.length],
-          ...item,
-          id: item.id || defaultDestinations[index % defaultDestinations.length].id,
-          image: item.image || defaultDestinations[index % defaultDestinations.length].image
-        })));
+      try {
+        const data = await fetchSettings('destinations_sections');
+        if (data && Array.isArray(data) && data.length > 0) {
+          const nextDestinations = data.map((item, index) => ({
+            ...defaultDestinations[index % defaultDestinations.length],
+            ...item,
+            id: item.id || defaultDestinations[index % defaultDestinations.length].id,
+            image: item.image || ''
+          }));
+
+          if (nextDestinations.some((item) => item.image)) {
+            setDestinations(nextDestinations);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
     loadDestinations();
@@ -117,12 +126,16 @@ export default function Destinations() {
           <Link href={`/destinations/${destination.slug}`}>
             <div className="group relative h-80 rounded-3xl overflow-hidden cursor-pointer">
               {/* Image */}
-              <Image
-                src={destination.image}
-                alt={destination.name}
-                fill
-                className="object-cover group-hover:scale-110 transition-transform duration-700"
-              />
+              {!isLoading && destination.image ? (
+                <Image
+                  src={destination.image}
+                  alt={destination.name}
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300" />
+              )}
               
               {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />

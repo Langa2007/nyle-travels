@@ -9,6 +9,7 @@ import { fetchSettings } from '@/utils/settings';
 export default function VideoShowcase() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [showThumbnail, setShowThumbnail] = useState(true);
   const [title, setTitle] = useState('Discover Your African Dream');
   const [description, setDescription] = useState('Watch our story and see why discerning travelers choose Nyle for unforgettable African adventures.');
@@ -18,13 +19,19 @@ export default function VideoShowcase() {
 
   useEffect(() => {
     const loadVideoSettings = async () => {
-      const data = await fetchSettings('video');
-      if (data) {
-        if (data.url) setVideoUrl(data.url);
-        if (data.title) setTitle(data.title);
-        if (data.description) setDescription(data.description);
-        if (data.thumbnail) setThumbnail(data.thumbnail);
-        setShowThumbnail(true);
+      try {
+        const data = await fetchSettings('video');
+        if (data) {
+          if (data.url) setVideoUrl(data.url);
+          if (data.title) setTitle(data.title);
+          if (data.description) setDescription(data.description);
+          if (data.url || data.thumbnail) {
+            setThumbnail(data.thumbnail || '');
+          }
+          setShowThumbnail(true);
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
     loadVideoSettings();
@@ -54,12 +61,16 @@ export default function VideoShowcase() {
       {/* Video Background */}
       <div className="absolute inset-0 bg-black">
         {showThumbnail ? (
-          <Image
-            src={thumbnail}
-            alt="Video Thumbnail"
-            fill
-            className="object-cover opacity-80"
-          />
+          !isLoading && thumbnail ? (
+            <Image
+              src={thumbnail}
+              alt="Video Thumbnail"
+              fill
+              className="object-cover opacity-80"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black" />
+          )
         ) : (
           <video
             ref={videoRef}
