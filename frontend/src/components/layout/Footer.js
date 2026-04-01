@@ -34,12 +34,12 @@ const footerLinks = {
     { label: 'Privacy Policy', href: '/privacy' },
   ],
   destinations: [
-    { label: 'Maasai Mara', href: '/destinations/maasai-mara' },
-    { label: 'Diani Beach', href: '/destinations/diani-beach' },
-    { label: 'Amboseli', href: '/destinations/amboseli' },
-    { label: 'Tsavo', href: '/destinations/tsavo' },
-    { label: 'Lake Nakuru', href: '/destinations/lake-nakuru' },
-    { label: 'Samburu', href: '/destinations/samburu' },
+    { label: 'Maasai Mara', href: '/destinations#maasai-mara' },
+    { label: 'Diani Beach', href: '/destinations#diani-beach' },
+    { label: 'Amboseli', href: '/destinations#amboseli' },
+    { label: 'Tsavo', href: '/destinations#tsavo-east' },
+    { label: 'Lake Nakuru', href: '/destinations#lake-nakuru' },
+    { label: 'Samburu', href: '/destinations#samburu' },
   ],
   tours: [
     { label: 'Safari Adventures', href: '/tours?type=safari' },

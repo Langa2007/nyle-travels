@@ -123,7 +123,7 @@ export default function Destinations() {
           onMouseEnter={() => setHoveredId(destination.id)}
           onMouseLeave={() => setHoveredId(null)}
         >
-          <Link href={`/destinations/${destination.slug}`}>
+          <Link href={`/destinations#${destination.slug}`}>
             <div className="group relative h-80 rounded-3xl overflow-hidden cursor-pointer">
               {/* Image */}
               {!isLoading && destination.image ? (

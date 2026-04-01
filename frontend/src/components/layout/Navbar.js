@@ -58,11 +58,11 @@ const navLinks = [
       {
         title: 'By Destination',
         links: [
-          { href: '/destinations/maasai-mara', label: 'Maasai Mara' },
-          { href: '/destinations/diani-beach', label: 'Diani Beach' },
-          { href: '/destinations/amboseli', label: 'Amboseli' },
-          { href: '/destinations/tsavo', label: 'Tsavo' },
-          { href: '/destinations/lake-nakuru', label: 'Lake Nakuru' },
+          { href: '/destinations#maasai-mara', label: 'Maasai Mara' },
+          { href: '/destinations#diani-beach', label: 'Diani Beach' },
+          { href: '/destinations#amboseli', label: 'Amboseli' },
+          { href: '/destinations#tsavo-east', label: 'Tsavo' },
+          { href: '/destinations#lake-nakuru', label: 'Lake Nakuru' },
         ]
       }
     ]
