@@ -1,28 +1,35 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useCart } from '@/hooks/useCart';
-import { 
-  FiMenu, 
-  FiX, 
-  FiUser, 
-  FiHeart, 
+import {
+  FiMenu,
+  FiX,
+  FiHeart,
   FiShoppingBag,
   FiSearch,
-  FiChevronDown
+  FiChevronDown,
+  FiMapPin,
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
+import hotelsSeed from '@/data/hotels';
+import useHotelCatalog from '@/hooks/useHotelCatalog';
+import {
+  buildHotelQuery,
+  getFeaturedHotels,
+  getHotelImage,
+} from '@/lib/hotelCatalog';
 
 const navLinks = [
   { href: '/', label: 'Home' },
-  { 
-    href: '/tours', 
+  {
+    href: '/tours',
     label: 'Tours',
     megaMenu: [
       {
@@ -34,7 +41,7 @@ const navLinks = [
           { href: '/tours?type=cultural', label: 'Cultural Experiences' },
           { href: '/tours?type=photography', label: 'Photography Safaris' },
           { href: '/tours?type=family', label: 'Family Friendly' },
-        ]
+        ],
       },
       {
         title: 'By Duration',
@@ -44,7 +51,7 @@ const navLinks = [
           { href: '/tours?duration=10', label: '10 Days' },
           { href: '/tours?duration=14', label: '2 Weeks' },
           { href: '/tours?duration=21', label: '3 Weeks+' },
-        ]
+        ],
       },
       {
         title: 'Featured',
@@ -53,7 +60,7 @@ const navLinks = [
           { href: '/tours/luxury', label: 'Ultra-Luxury' },
           { href: '/tours/best-sellers', label: 'Best Sellers' },
           { href: '/tours/special-offers', label: 'Special Offers' },
-        ]
+        ],
       },
       {
         title: 'By Destination',
@@ -63,12 +70,12 @@ const navLinks = [
           { href: '/destinations#amboseli', label: 'Amboseli' },
           { href: '/destinations#tsavo-east', label: 'Tsavo' },
           { href: '/destinations#lake-nakuru', label: 'Lake Nakuru' },
-        ]
-      }
-    ]
+        ],
+      },
+    ],
   },
-  { 
-    href: '/hotels', 
+  {
+    href: '/hotels',
     label: 'Hotels',
     megaMenu: [
       {
@@ -79,15 +86,15 @@ const navLinks = [
           { href: '/hotels?type=beach', label: 'Beach Resorts' },
           { href: '/hotels?type=safari', label: 'Safari Lodges' },
           { href: '/hotels?type=wellness', label: 'Wellness Retreats' },
-        ]
+        ],
       },
       {
         title: 'By Rating',
         links: [
           { href: '/hotels?rating=5', label: '5 Star' },
-          { href: '/hotels?rating=4', label: '4 Star' },
-          { href: '/hotels?rating=3', label: '3 Star' },
-        ]
+          { href: '/hotels?rating=4', label: '4 Star & Up' },
+          { href: '/hotels?rating=3', label: '3 Star & Up' },
+        ],
       },
       {
         title: 'Amenities',
@@ -95,26 +102,49 @@ const navLinks = [
           { href: '/hotels?amenity=spa', label: 'Spa & Wellness' },
           { href: '/hotels?amenity=pool', label: 'Infinity Pools' },
           { href: '/hotels?amenity=fine-dining', label: 'Fine Dining' },
-          { href: '/hotels?amenity=private-pool', label: 'Private Pools' },
-          { href: '/hotels?amenity=beachfront', label: 'Beachfront' },
-        ]
-      }
-    ]
+          { href: '/hotels?amenity=game-drives', label: 'Game Drives' },
+          { href: '/hotels?amenity=beach-access', label: 'Beach Access' },
+        ],
+      },
+      {
+        title: 'Popular Destinations',
+        links: [
+          { href: '/hotels?destination=Maasai%20Mara', label: 'Maasai Mara' },
+          { href: '/hotels?destination=Diani%20Beach', label: 'Diani Beach' },
+          { href: '/hotels?destination=Nairobi', label: 'Nairobi' },
+          { href: '/hotels?destination=Watamu', label: 'Watamu' },
+          { href: '/hotels?destination=Naivasha', label: 'Naivasha' },
+        ],
+      },
+    ],
   },
   { href: '/destinations', label: 'Destinations' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ];
 
+const hotelTypeOptions = ['luxury', 'boutique', 'beach', 'safari', 'wellness', 'city'];
+const hotelAmenityOptions = ['spa', 'pool', 'fine-dining', 'beach-access', 'game-drives'];
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [hotelFinder, setHotelFinder] = useState({
+    search: '',
+    destination: '',
+    type: '',
+    amenity: '',
+  });
   const pathname = usePathname();
+  const router = useRouter();
   const { user, logout } = useAuth();
   const { wishlistCount } = useWishlist();
   const { cartCount } = useCart();
+  const { hotels } = useHotelCatalog(hotelsSeed);
+  const featuredHotels = getFeaturedHotels(hotels, 3);
+  const hotelDestinations = [...new Set(hotels.map((hotel) => hotel.destination).filter(Boolean))].slice(0, 6);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -129,18 +159,39 @@ export default function Navbar() {
     setActiveMegaMenu(null);
   }, [pathname]);
 
+  function updateHotelFinder(field, value) {
+    setHotelFinder((current) => ({
+      ...current,
+      [field]: current[field] === value ? '' : value,
+    }));
+  }
+
+  function goToHotelSearch(overrides = {}) {
+    const nextFilters = {
+      ...hotelFinder,
+      ...overrides,
+    };
+    const query = buildHotelQuery(nextFilters);
+    setActiveMegaMenu(null);
+    router.push(query ? `/hotels?${query}` : '/hotels');
+  }
+
+  function handleHotelFinderSubmit(event) {
+    event.preventDefault();
+    goToHotelSearch();
+  }
+
   return (
     <>
-      <nav 
+      <nav
         className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-          isScrolled 
-            ? 'bg-white/95 backdrop-blur-md shadow-lg py-2' 
+          isScrolled
+            ? 'bg-white/95 backdrop-blur-md shadow-lg py-2'
             : 'bg-transparent py-4'
         }`}
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
-            {/* Logo */}
             <Link href="/" className="relative z-10">
               <div className="flex items-center space-x-2">
                 <div className="relative w-12 h-12">
@@ -160,7 +211,6 @@ export default function Navbar() {
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-8">
               {navLinks.map((link) => (
                 <div
@@ -179,7 +229,6 @@ export default function Navbar() {
                     {link.megaMenu && <FiChevronDown className="ml-1" />}
                   </Link>
 
-                  {/* Mega Menu */}
                   <AnimatePresence>
                     {link.megaMenu && activeMegaMenu === link.label && (
                       <motion.div
@@ -187,27 +236,141 @@ export default function Navbar() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 mt-2 w-[600px] bg-white rounded-2xl shadow-2xl p-6 grid grid-cols-4 gap-6"
+                        className={`absolute top-full left-0 mt-2 rounded-2xl bg-white p-6 shadow-2xl ${
+                          link.label === 'Hotels' ? 'w-[980px]' : 'w-[600px]'
+                        }`}
                       >
-                        {link.megaMenu.map((column, idx) => (
-                          <div key={idx}>
-                            <h3 className="font-semibold text-gray-900 mb-3 text-sm">
-                              {column.title}
-                            </h3>
-                            <ul className="space-y-2">
-                              {column.links.map((subLink) => (
-                                <li key={subLink.href}>
-                                  <Link
-                                    href={subLink.href}
-                                    className="text-sm text-gray-600 hover:text-primary-500 transition-colors"
+                        {link.label === 'Hotels' ? (
+                          <div className="grid grid-cols-[repeat(4,minmax(0,1fr))_1.35fr] gap-6">
+                            {link.megaMenu.map((column) => (
+                              <div key={column.title}>
+                                <h3 className="mb-3 text-sm font-semibold text-gray-900">{column.title}</h3>
+                                <ul className="space-y-2">
+                                  {column.links.map((subLink) => (
+                                    <li key={subLink.href}>
+                                      <Link
+                                        href={subLink.href}
+                                        className="text-sm text-gray-600 transition-colors hover:text-primary-500"
+                                      >
+                                        {subLink.label}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+
+                            <div className="rounded-3xl bg-[#132026] p-5 text-white">
+                              <p className="text-xs uppercase tracking-[0.25em] text-white/60">Hotel Finder</p>
+                              <h3 className="mt-3 text-xl font-serif">Search from the hover menu</h3>
+                              <p className="mt-2 text-sm leading-6 text-white/70">
+                                Open the full hotels page with your destination, category, and amenity filters already applied.
+                              </p>
+
+                              <form onSubmit={handleHotelFinderSubmit} className="mt-5 space-y-4">
+                                <div>
+                                  <input
+                                    type="text"
+                                    value={hotelFinder.search}
+                                    onChange={(event) => updateHotelFinder('search', event.target.value)}
+                                    placeholder="Search hotel or destination"
+                                    className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/45 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                  />
+                                </div>
+
+                                <select
+                                  value={hotelFinder.destination}
+                                  onChange={(event) => updateHotelFinder('destination', event.target.value)}
+                                  className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                >
+                                  <option value="">Any destination</option>
+                                  {hotelDestinations.map((destination) => (
+                                    <option key={destination} value={destination} className="text-gray-900">
+                                      {destination}
+                                    </option>
+                                  ))}
+                                </select>
+
+                                <select
+                                  value={hotelFinder.type}
+                                  onChange={(event) => updateHotelFinder('type', event.target.value)}
+                                  className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white capitalize focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                >
+                                  <option value="">Any style</option>
+                                  {hotelTypeOptions.map((type) => (
+                                    <option key={type} value={type} className="text-gray-900">
+                                      {type}
+                                    </option>
+                                  ))}
+                                </select>
+
+                                <div className="flex flex-wrap gap-2">
+                                  {hotelAmenityOptions.map((amenity) => (
+                                    <button
+                                      key={amenity}
+                                      type="button"
+                                      onClick={() => updateHotelFinder('amenity', amenity)}
+                                      className={`rounded-full px-3 py-2 text-xs transition-colors ${
+                                        hotelFinder.amenity === amenity
+                                          ? 'bg-primary-600 text-white'
+                                          : 'bg-white/10 text-white/75 hover:bg-white/15'
+                                      }`}
+                                    >
+                                      {amenity.replace(/-/g, ' ')}
+                                    </button>
+                                  ))}
+                                </div>
+
+                                <Button type="submit" variant="primary" fullWidth>
+                                  Search Hotels
+                                </Button>
+                              </form>
+
+                              <div className="mt-5 space-y-3 border-t border-white/10 pt-5">
+                                {featuredHotels.map((hotel) => (
+                                  <button
+                                    key={hotel.slug}
+                                    type="button"
+                                    onClick={() => goToHotelSearch({ destination: hotel.destination, search: hotel.name })}
+                                    className="flex w-full items-center gap-3 rounded-2xl bg-white/8 p-3 text-left transition-colors hover:bg-white/12"
                                   >
-                                    {subLink.label}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
+                                    <div className="relative h-16 w-20 overflow-hidden rounded-2xl bg-white/10">
+                                      <Image src={getHotelImage(hotel)} alt={hotel.name} fill className="object-cover" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="truncate text-sm font-semibold text-white">{hotel.name}</p>
+                                      <p className="mt-1 flex items-center text-xs text-white/65">
+                                        <FiMapPin className="mr-1" />
+                                        {hotel.destination}
+                                      </p>
+                                    </div>
+                                    <span className="text-xs text-white/70">${hotel.price}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
                           </div>
-                        ))}
+                        ) : (
+                          <div className="grid grid-cols-4 gap-6">
+                            {link.megaMenu.map((column) => (
+                              <div key={column.title}>
+                                <h3 className="mb-3 text-sm font-semibold text-gray-900">{column.title}</h3>
+                                <ul className="space-y-2">
+                                  {column.links.map((subLink) => (
+                                    <li key={subLink.href}>
+                                      <Link
+                                        href={subLink.href}
+                                        className="text-sm text-gray-600 transition-colors hover:text-primary-500"
+                                      >
+                                        {subLink.label}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -215,7 +378,6 @@ export default function Navbar() {
               ))}
             </div>
 
-            {/* Right Icons */}
             <div className="hidden lg:flex items-center space-x-4">
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
@@ -262,24 +424,15 @@ export default function Navbar() {
                     </div>
                     <FiChevronDown className={`${isScrolled ? 'text-gray-700' : 'text-white'}`} />
                   </button>
-                  
+
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                    <Link
-                      href="/dashboard"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
+                    <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       Dashboard
                     </Link>
-                    <Link
-                      href="/dashboard/bookings"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
+                    <Link href="/dashboard/bookings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       My Bookings
                     </Link>
-                    <Link
-                      href="/dashboard/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
+                    <Link href="/dashboard/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       Profile
                     </Link>
                     <hr className="my-2" />
@@ -304,7 +457,6 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={`lg:hidden p-2 rounded-lg transition-colors ${
@@ -317,7 +469,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Search Overlay */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div
@@ -332,7 +483,7 @@ export default function Navbar() {
               animate={{ y: 0 }}
               exit={{ y: -100 }}
               className="bg-white p-8"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}
             >
               <div className="container mx-auto">
                 <div className="relative">
@@ -365,7 +516,6 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -428,9 +578,7 @@ export default function Navbar() {
                         <div className="grid grid-cols-2 gap-4 ml-4">
                           {link.megaMenu.map((column) => (
                             <div key={column.title}>
-                              <h4 className="text-xs font-semibold text-gray-500 mb-2">
-                                {column.title}
-                              </h4>
+                              <h4 className="text-xs font-semibold text-gray-500 mb-2">{column.title}</h4>
                               <ul className="space-y-2">
                                 {column.links.map((subLink) => (
                                   <li key={subLink.href}>

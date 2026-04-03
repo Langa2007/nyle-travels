@@ -1,108 +1,39 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { 
-  FiStar, 
-  FiMapPin, 
+import {
+  FiStar,
+  FiMapPin,
   FiHeart,
-  FiChevronRight 
+  FiChevronRight,
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
-import { fetchSettings } from '@/utils/settings';
-
-const defaultHotels = [
-  {
-    id: 1,
-    name: 'Mara Serena Safari Lodge',
-    slug: 'mara-serena',
-    destination: 'Maasai Mara',
-    image: 'https://picsum.photos/seed/hotel1/800/600',
-    rating: 5,
-    price: 850,
-    amenities: ['Pool', 'Spa', 'Restaurant', 'WiFi'],
-    description: 'Luxury lodge perched on a hillside with panoramic views of the Mara.',
-    badge: 'Ultra-Luxury',
-  },
-  {
-    id: 2,
-    name: 'Almanara Luxury Resort',
-    slug: 'almanara',
-    destination: 'Diani Beach',
-    image: 'https://picsum.photos/seed/hotel2/800/600',
-    rating: 5,
-    price: 650,
-    amenities: ['Private Beach', 'Spa', 'Fine Dining', 'Infinity Pool'],
-    description: 'Italian-designed luxury resort on the white sands of Diani.',
-    badge: 'Beachfront',
-  },
-  {
-    id: 3,
-    name: 'Ol Donyo Wuas Lodge',
-    slug: 'ol-donyo-wuas',
-    destination: 'Amboseli',
-    image: 'https://picsum.photos/seed/hotel3/800/600',
-    rating: 5,
-    price: 1200,
-    amenities: ['Private Pools', 'Stargazing', 'Safari', 'Gourmet Meals'],
-    description: 'Exclusive lodge with stunning views of Kilimanjaro.',
-    badge: 'Exclusive',
-  },
-  {
-    id: 4,
-    name: 'Giraffe Manor',
-    slug: 'giraffe-manor',
-    destination: 'Nairobi',
-    image: 'https://picsum.photos/seed/hotel4/800/600',
-    rating: 5,
-    price: 950,
-    amenities: ['Giraffe Feeding', 'Garden', 'Fine Dining', 'Heritage'],
-    description: 'Iconic manor where giraffes visit during breakfast.',
-    badge: 'Iconic',
-  },
-];
+import hotelsSeed from '@/data/hotels';
+import useHotelCatalog from '@/hooks/useHotelCatalog';
+import {
+  getFeaturedHotels,
+  getHotelImage,
+} from '@/lib/hotelCatalog';
 
 export default function LuxuryHotels() {
   const [wishlist, setWishlist] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hotels, setHotels] = useState(defaultHotels);
-
-  useEffect(() => {
-    const loadHotels = async () => {
-      try {
-        const data = await fetchSettings('luxury_stays');
-        if (data && Array.isArray(data) && data.length > 0) {
-          const nextHotels = data.map((item, index) => ({
-            ...defaultHotels[index % defaultHotels.length],
-            ...item,
-            id: item.id || defaultHotels[index % defaultHotels.length].id,
-            image: item.image || ''
-          }));
-
-          if (nextHotels.some((item) => item.image)) {
-            setHotels(nextHotels);
-          }
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadHotels();
-  }, []);
+  const { hotels } = useHotelCatalog(hotelsSeed);
+  const featuredHotels = getFeaturedHotels(hotels, 4);
 
   const toggleWishlist = (hotelId) => {
-    setWishlist(prev =>
-      prev.includes(hotelId)
-        ? prev.filter(id => id !== hotelId)
-        : [...prev, hotelId]
+    setWishlist((current) =>
+      current.includes(hotelId)
+        ? current.filter((id) => id !== hotelId)
+        : [...current, hotelId]
     );
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {hotels.map((hotel, index) => (
+      {featuredHotels.map((hotel, index) => (
         <motion.div
           key={hotel.id}
           initial={{ opacity: 0, y: 20 }}
@@ -112,27 +43,20 @@ export default function LuxuryHotels() {
           className="group"
         >
           <div className="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-            {/* Image Container */}
             <div className="relative h-56 overflow-hidden">
-              {!isLoading && hotel.image ? (
-                <Image
-                  src={hotel.image}
-                  alt={hotel.name}
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300" />
-              )}
-              
-              {/* Badge */}
+              <Image
+                src={getHotelImage(hotel)}
+                alt={hotel.name}
+                fill
+                className="object-cover group-hover:scale-110 transition-transform duration-700"
+              />
+
               <div className="absolute top-4 left-4">
                 <span className="px-3 py-1 bg-gradient-to-r from-primary-600 to-secondary-600 text-white text-xs font-semibold rounded-full">
                   {hotel.badge}
                 </span>
               </div>
 
-              {/* Wishlist Button */}
               <button
                 onClick={() => toggleWishlist(hotel.id)}
                 className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors"
@@ -146,21 +70,17 @@ export default function LuxuryHotels() {
                 />
               </button>
 
-              {/* Rating */}
               <div className="absolute bottom-4 left-4 flex items-center bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full">
                 <FiStar className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-                <span className="text-white text-sm font-semibold">{hotel.rating}.0</span>
+                <span className="text-white text-sm font-semibold">{hotel.starRating}.0</span>
               </div>
             </div>
 
-            {/* Content */}
             <div className="p-6">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="text-lg font-semibold mb-1 group-hover:text-primary-600 transition-colors">
-                    <Link href={`/hotels/${hotel.slug}`}>
-                      {hotel.name}
-                    </Link>
+                    <Link href={`/hotels/${hotel.slug}`}>{hotel.name}</Link>
                   </h3>
                   <div className="flex items-center text-sm text-gray-500">
                     <FiMapPin className="w-4 h-4 mr-1" />
@@ -169,15 +89,12 @@ export default function LuxuryHotels() {
                 </div>
               </div>
 
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                {hotel.description}
-              </p>
+              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{hotel.shortDescription}</p>
 
-              {/* Amenities */}
               <div className="flex flex-wrap gap-2 mb-4">
-                {hotel.amenities.map((amenity, i) => (
+                {hotel.amenities.map((amenity) => (
                   <span
-                    key={i}
+                    key={`${hotel.slug}-${amenity}`}
                     className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600"
                   >
                     {amenity}
@@ -185,13 +102,10 @@ export default function LuxuryHotels() {
                 ))}
               </div>
 
-              {/* Price and CTA */}
               <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                 <div>
                   <span className="text-sm text-gray-500">From</span>
-                  <span className="text-2xl font-bold text-primary-600 ml-1">
-                    ${hotel.price}
-                  </span>
+                  <span className="text-2xl font-bold text-primary-600 ml-1">${hotel.price}</span>
                   <span className="text-sm text-gray-500">/night</span>
                 </div>
                 <Link href={`/hotels/${hotel.slug}`}>
@@ -205,7 +119,6 @@ export default function LuxuryHotels() {
         </motion.div>
       ))}
 
-      {/* View All Button */}
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
