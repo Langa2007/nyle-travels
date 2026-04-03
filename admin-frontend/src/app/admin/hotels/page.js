@@ -493,6 +493,7 @@ export default function HotelsPage() {
         onClose={closeModal}
         title={selectedHotel ? 'Edit Hotel' : 'Add Hotel'}
         size="xl"
+        closeOnClickOutside={false}
       >
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

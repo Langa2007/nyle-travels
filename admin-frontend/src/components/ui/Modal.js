@@ -58,7 +58,7 @@ export default function Modal({
 
         {/* Modal Panel */}
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <div className="flex min-h-full items-start justify-center p-4 text-center sm:p-6">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -68,10 +68,12 @@ export default function Modal({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className={`w-full ${sizes[size]} transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-2xl transition-all`}>
+              <Dialog.Panel
+                className={`w-full ${sizes[size]} my-4 max-h-[calc(100vh-2rem)] transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-2xl transition-all flex flex-col`}
+              >
                 {/* Header */}
                 {(title || showCloseButton) && (
-                  <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
                     {title && (
                       <Dialog.Title as="h3" className="text-lg font-semibold text-gray-900">
                         {title}
@@ -89,13 +91,13 @@ export default function Modal({
                 )}
 
                 {/* Body */}
-                <div className="px-6 py-4">
+                <div className="px-6 py-4 overflow-y-auto flex-1">
                   {children}
                 </div>
 
                 {/* Footer */}
                 {footer && (
-                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 shrink-0">
                     {footer}
                   </div>
                 )}
