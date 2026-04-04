@@ -28,11 +28,23 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
+    const status = error.response?.status;
+    const message = String(error.response?.data?.message || error.message || '').toLowerCase();
+    const isAuthExpiry =
+      status === 401 ||
+      message.includes('token has expired') ||
+      message.includes('jwt expired') ||
+      message.includes('invalid token');
+
+    if (isAuthExpiry && typeof window !== 'undefined') {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
+
     return Promise.reject(error);
   }
 );

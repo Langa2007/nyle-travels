@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiMapPin, FiCalendar, FiUsers } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import DatePicker from '@/components/common/DatePicker';
+import { defaultHeroSlides, normalizeHeroSlides } from '@/data/heroSlides';
 import { fetchSettings } from '@/utils/settings';
 
 export default function Hero() {
@@ -18,61 +19,13 @@ export default function Hero() {
     guests: 2,
   });
 
-  const [heroSlides, setHeroSlides] = useState([
-    {
-      id: 1,
-      image: 'https://picsum.photos/seed/bj6tly/800/600',
-      title: 'Luxury Safari Experience',
-      subtitle: 'Witness the Great Migration',
-      description: 'Experience the untamed beauty of Africa in unparalleled luxury',
-    },
-    {
-      id: 2,
-      image: 'https://picsum.photos/seed/7dt4ou/800/600',
-      title: 'Pristine Beach Retreats',
-      subtitle: 'Indian Ocean Paradise',
-      description: 'Relax on white sandy beaches with world-class amenities',
-    },
-    {
-      id: 3,
-      image: 'https://picsum.photos/seed/f92ta9/800/600',
-      title: 'Mountain Majesty',
-      subtitle: 'Climb Kilimanjaro',
-      description: 'Conquer Africa\'s highest peak in style',
-    },
-    {
-      id: 4,
-      image: 'https://picsum.photos/seed/7gup6o/800/600',
-      title: 'Cultural Immersion',
-      subtitle: 'Meet Local Tribes',
-      description: 'Discover the rich heritage and traditions of East Africa',
-    },
-    {
-      id: 5,
-      image: 'https://picsum.photos/seed/60xk0t/800/600',
-      title: 'Majestic Waterfalls',
-      subtitle: 'Victoria Falls & Beyond',
-      description: 'Witness the breathtaking power of nature firsthand',
-    }
-  ]);
+  const [heroSlides, setHeroSlides] = useState(defaultHeroSlides);
 
   useEffect(() => {
     const loadHeroSlides = async () => {
       try {
         const data = await fetchSettings('hero_sections');
-        if (data && Array.isArray(data) && data.length > 0) {
-          const nextSlides = data.map((slide, index) => ({
-            id: slide.id || index + 1,
-            image: slide.image || '',
-            title: slide.title || heroSlides[index % heroSlides.length].title,
-            subtitle: slide.subtitle || heroSlides[index % heroSlides.length].subtitle,
-            description: slide.description || heroSlides[index % heroSlides.length].description,
-          }));
-
-          if (nextSlides.some((slide) => slide.image)) {
-            setHeroSlides(nextSlides);
-          }
-        }
+        setHeroSlides(normalizeHeroSlides(data));
       } finally {
         setIsLoading(false);
       }

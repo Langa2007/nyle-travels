@@ -59,8 +59,18 @@ export const errorHandler = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else {
-    let error = { ...err };
-    error.message = err.message;
+    let error = {
+      ...err,
+      name: err.name,
+      message: err.message,
+      code: err.code,
+      path: err.path,
+      value: err.value,
+      errors: err.errors,
+      errmsg: err.errmsg,
+      statusCode: err.statusCode,
+      status: err.status
+    };
 
     if (error.name === 'CastError') error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDuplicateFieldsDB(error);

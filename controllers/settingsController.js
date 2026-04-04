@@ -1,6 +1,44 @@
 import { query } from '../config/db.js';
 import cloudinaryService from '../services/cloudinaryService.js';
 
+const defaultHeroSections = [
+  {
+    id: 1,
+    image: 'https://picsum.photos/seed/bj6tly/800/600',
+    title: 'Luxury Safari Experience',
+    subtitle: 'Witness the Great Migration',
+    description: 'Experience the untamed beauty of Africa in unparalleled luxury'
+  },
+  {
+    id: 2,
+    image: 'https://picsum.photos/seed/7dt4ou/800/600',
+    title: 'Pristine Beach Retreats',
+    subtitle: 'Indian Ocean Paradise',
+    description: 'Relax on white sandy beaches with world-class amenities'
+  },
+  {
+    id: 3,
+    image: 'https://picsum.photos/seed/f92ta9/800/600',
+    title: 'Mountain Majesty',
+    subtitle: 'Climb Kilimanjaro',
+    description: 'Conquer Africa\'s highest peak in style'
+  },
+  {
+    id: 4,
+    image: 'https://picsum.photos/seed/7gup6o/800/600',
+    title: 'Cultural Immersion',
+    subtitle: 'Meet Local Tribes',
+    description: 'Discover the rich heritage and traditions of East Africa'
+  },
+  {
+    id: 5,
+    image: 'https://picsum.photos/seed/60xk0t/800/600',
+    title: 'Majestic Waterfalls',
+    subtitle: 'Victoria Falls & Beyond',
+    description: 'Witness the breathtaking power of nature firsthand'
+  }
+];
+
 export const getSettings = async (req, res, next) => {
   try {
     const { key } = req.params;
@@ -98,13 +136,7 @@ export const uploadMedia = async (req, res, next) => {
 export const seedDefaults = async (req, res, next) => {
   try {
     const defaultSettings = [
-      { key: 'hero_sections', value: [
-        { id: 1, image: 'https://picsum.photos/seed/bj6tly/800/600', title: 'Luxury Safari Experience', subtitle: 'Witness the Great Migration', description: 'Experience the untamed beauty of Africa in unparalleled luxury' },
-        { id: 2, image: 'https://picsum.photos/seed/7dt4ou/800/600', title: 'Pristine Beach Retreats', subtitle: 'Indian Ocean Paradise', description: 'Relax on white sandy beaches with world-class amenities' },
-        { id: 3, image: 'https://picsum.photos/seed/f92ta9/800/600', title: 'Mountain Majesty', subtitle: 'Climb Kilimanjaro', description: 'Conquer Africa\'s highest peak in style' },
-        { id: 4, image: 'https://picsum.photos/seed/7gup6o/800/600', title: 'Cultural Immersion', subtitle: 'Meet Local Tribes', description: 'Discover the rich heritage and traditions of East Africa' },
-        { id: 5, image: 'https://picsum.photos/seed/60xk0t/800/600', title: 'Majestic Waterfalls', subtitle: 'Victoria Falls & Beyond', description: 'Witness the breathtaking power of nature firsthand' }
-      ]},
+      { key: 'hero_sections', value: defaultHeroSections },
       { key: 'featured_safaris', value: [
         { id: 1, name: 'The Great Migration Safari', slug: 'great-migration-safari', destination: 'Maasai Mara', image: 'https://picsum.photos/seed/tour1/800/600', duration: '7 Days', maxGroupSize: 8, price: 4500, rating: 4.9, reviewCount: 124, badge: 'Best Seller', highlights: ['Witness the wildebeest migration', 'Luxury tented camps', 'Hot air balloon safari', 'Maasai cultural visit'] },
         { id: 2, name: 'Coastal Luxury Retreat', slug: 'coastal-luxury-retreat', destination: 'Diani Beach', image: 'https://picsum.photos/seed/tour2/800/600', duration: '5 Days', maxGroupSize: 2, price: 3200, rating: 4.8, reviewCount: 89, badge: 'Honeymoon Special', highlights: ['Private beach villa', 'Spa treatments', 'Sunset dhow cruise', 'Gourmet dining'] },

@@ -228,7 +228,7 @@ export default function HotelsPage() {
       toast.success(field === 'defaultImage' ? 'Seed image uploaded.' : 'Override image uploaded.');
     } catch (error) {
       console.error('Failed to upload image:', error);
-      toast.error('Failed to upload image.');
+      toast.error(error.response?.data?.message || 'Failed to upload image.');
     } finally {
       setUploadingField('');
     }

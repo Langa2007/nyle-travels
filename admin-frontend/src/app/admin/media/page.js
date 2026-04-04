@@ -23,6 +23,7 @@ import {
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import { adminAPI } from '@/lib/AdminApi';
+import { defaultHeroSlides, normalizeHeroSlides } from '@/data/heroSlides';
 import toast from 'react-hot-toast';
 
 export default function MediaManagement() {
@@ -30,7 +31,7 @@ export default function MediaManagement() {
   const [activeTab, setActiveTab ] = useState('hero');
   
   const [settings, setSettings] = useState({
-    hero_sections: [],
+    hero_sections: defaultHeroSlides,
     featured_safaris: [],
     destinations_sections: [],
     luxury_stays_sections: [],
@@ -53,7 +54,7 @@ export default function MediaManagement() {
           setSettings(prev => ({
             ...prev,
             ...result.data,
-            hero_sections: result.data.hero_sections || [],
+            hero_sections: normalizeHeroSlides(result.data.hero_sections),
             featured_safaris: result.data.featured_safaris || [],
             destinations_sections: result.data.destinations_sections || [],
             luxury_stays_sections: result.data.luxury_stays_sections || [],
@@ -139,7 +140,7 @@ export default function MediaManagement() {
       }
       toast.success('Uploaded successfully!', { id: toastId });
     } catch (error) {
-      toast.error('Upload failed.', { id: toastId });
+      toast.error(error.response?.data?.message || 'Upload failed.', { id: toastId });
     } finally {
       setLoading(false);
     }
