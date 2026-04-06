@@ -98,7 +98,7 @@ export default function RegisterPage() {
               <p className="text-gray-500">Join Nyle Travel for exclusive luxury experiences</p>
             </div>
 
-            <form onSubmit={handleManualRegister} className="space-y-6">
+            <form onSubmit={handleManualRegister} className="space-y-6" autoComplete="on">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="relative">
                   <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -107,6 +107,7 @@ export default function RegisterPage() {
                     name="first_name"
                     placeholder="First Name"
                     required
+                    autoComplete="given-name"
                     value={formData.first_name}
                     onChange={handleChange}
                     className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 transition-all outline-none text-gray-900"
@@ -119,6 +120,7 @@ export default function RegisterPage() {
                     name="last_name"
                     placeholder="Last Name"
                     required
+                    autoComplete="family-name"
                     value={formData.last_name}
                     onChange={handleChange}
                     className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 transition-all outline-none text-gray-900"
@@ -133,6 +135,7 @@ export default function RegisterPage() {
                   name="email"
                   placeholder="Email Address"
                   required
+                  autoComplete="email"
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 transition-all outline-none text-gray-900"
@@ -145,6 +148,7 @@ export default function RegisterPage() {
                   type="text"
                   name="phone"
                   placeholder="Phone Number"
+                  autoComplete="tel"
                   value={formData.phone}
                   onChange={handleChange}
                   className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 transition-all outline-none text-gray-900"
@@ -159,6 +163,7 @@ export default function RegisterPage() {
                     name="password"
                     placeholder="Password"
                     required
+                    autoComplete="new-password"
                     value={formData.password}
                     onChange={handleChange}
                     className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 transition-all outline-none text-gray-900"
@@ -171,6 +176,7 @@ export default function RegisterPage() {
                     name="confirmPassword"
                     placeholder="Confirm Password"
                     required
+                    autoComplete="new-password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 transition-all outline-none text-gray-900"
