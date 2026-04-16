@@ -48,7 +48,7 @@ export default function ContactForm() {
             required
             type="text"
             className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
-            placeholder="John Doe"
+            placeholder="your name"
           />
         </div>
         <div className="space-y-2">
@@ -57,7 +57,7 @@ export default function ContactForm() {
             required
             type="email"
             className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
-            placeholder="john@example.com"
+            placeholder="your email"
           />
         </div>
       </div>
@@ -68,7 +68,7 @@ export default function ContactForm() {
           <input
             type="tel"
             className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
-            placeholder="+254 700 000 000"
+            placeholder="phone number"
           />
         </div>
         <div className="space-y-2">

@@ -15,8 +15,8 @@ const contactInfo = [
   {
     icon: FiPhone,
     title: 'Talk to Us',
-    details: ['+254 700 000 000', '+254 711 000 000'],
-    link: 'tel:+254700000000',
+    details: ['+254 704 521 408', '+254 113491403'],
+    link: 'tel:+254704521408',
   },
   {
     icon: FiMail,
