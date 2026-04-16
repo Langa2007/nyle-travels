@@ -8,7 +8,7 @@ import {
 import { fetchAllSettings } from '@/utils/settings';
 
 export function useHotelCatalog(seedHotels = []) {
-  const [hotels, setHotels] = useState(() => normalizeHotels(seedHotels));
+  const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,8 +19,12 @@ export function useHotelCatalog(seedHotels = []) {
         const settings = await fetchAllSettings();
         const savedCatalog = settings?.[HOTELS_SETTINGS_KEY];
 
-        if (mounted && Array.isArray(savedCatalog) && savedCatalog.length > 0) {
-          setHotels(normalizeHotels(savedCatalog));
+        if (mounted) {
+          if (Array.isArray(savedCatalog) && savedCatalog.length > 0) {
+            setHotels(normalizeHotels(savedCatalog));
+          } else {
+            setHotels(normalizeHotels(seedHotels));
+          }
         }
       } finally {
         if (mounted) {
@@ -34,6 +38,7 @@ export function useHotelCatalog(seedHotels = []) {
     return () => {
       mounted = false;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { hotels, loading };
