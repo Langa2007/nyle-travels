@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -29,7 +29,7 @@ const defaultFilters = {
   amenity: 'all',
 };
 
-export default function HotelsPage() {
+function HotelsPageContent() {
   const searchParams = useSearchParams();
   const { hotels, loading } = useHotelCatalog(hotelsSeed);
   const [filters, setFilters] = useState(defaultFilters);
@@ -290,5 +290,13 @@ export default function HotelsPage() {
         )}
       </section>
     </div>
+  );
+}
+
+export default function HotelsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HotelsPageContent />
+    </Suspense>
   );
 }

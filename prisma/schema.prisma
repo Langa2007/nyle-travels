@@ -1,0 +1,332 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Users table
+model User {
+  id                      String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email                   String    @unique @db.VarChar(255)
+  phone                   String?   @unique @db.VarChar(50)
+  password_hash           String?   @db.VarChar(255)
+  first_name              String    @db.VarChar(100)
+  last_name               String    @db.VarChar(100)
+  date_of_birth           DateTime? @db.Date
+  nationality             String?   @db.VarChar(100)
+  passport_number         String?   @db.VarChar(50)
+  passport_expiry         DateTime? @db.Date
+  profile_image           String?   @db.VarChar(500)
+  role                    String?   @default("user") @db.VarChar(50)
+  email_verified          Boolean?  @default(false)
+  phone_verified          Boolean?  @default(false)
+  two_factor_enabled      Boolean?  @default(false)
+  two_factor_secret       String?   @db.Text
+  refresh_token           String?   @db.Text
+  password_reset_token    String?   @db.Text
+  password_reset_expires  DateTime?
+  email_verification_token String?  @db.Text
+  last_login              DateTime?
+  preferences             Json?     @default("{}")
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @default(now()) @updatedAt
+  deleted_at              DateTime?
+  
+  bookings                Booking[]
+  reviews                 Review[]
+  payments                Payment[]
+
+  @@map("users")
+}
+
+// Destinations table
+model Destination {
+  id                  String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                String   @db.VarChar(255)
+  slug                String   @unique @db.VarChar(255)
+  country             String   @db.VarChar(100)
+  region              String?  @db.VarChar(100)
+  description         String?  @db.Text
+  short_description   String?  @db.VarChar(500)
+  latitude            Decimal? @db.Decimal(10, 8)
+  longitude           Decimal? @db.Decimal(11, 8)
+  best_time_to_visit  String?  @db.Text
+  how_to_get_there    String?  @db.Text
+  visa_requirements   String?  @db.Text
+  health_safety       String?  @db.Text
+  currency            String?  @db.VarChar(50)
+  languages           String[]
+  timezone            String?  @db.VarChar(100)
+  featured_image      String?  @db.VarChar(500)
+  gallery_images      String[]
+  meta_title          String?  @db.VarChar(255)
+  meta_description    String?  @db.Text
+  meta_keywords       String[]
+  is_featured         Boolean  @default(false)
+  is_active           Boolean  @default(true)
+  views_count         Int      @default(0)
+  created_at          DateTime @default(now())
+  updated_at          DateTime @default(now()) @updatedAt
+  
+  tour_packages       TourPackage[]
+  hotels              Hotel[]
+
+  @@map("destinations")
+}
+
+// Tour packages table
+model TourPackage {
+  id                      String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  destination_id          String?   @db.Uuid
+  name                    String    @db.VarChar(255)
+  slug                    String    @unique @db.VarChar(255)
+  package_code            String    @unique @db.VarChar(50)
+  duration_days           Int
+  duration_nights         Int
+  difficulty_level        String?   @db.VarChar(50)
+  group_size_min          Int       @default(1)
+  group_size_max          Int       @default(20)
+  private_tour_available  Boolean   @default(false)
+  private_tour_price      Decimal?  @db.Decimal(10, 2)
+  description             String?   @db.Text
+  short_description       String?   @db.VarChar(500)
+  highlights              String[]
+  included_items          String[]
+  excluded_items          String[]
+  what_to_bring           String[]
+  physical_rating         Int?
+  cultural_rating         Int?
+  wildlife_rating         Int?
+  adventure_rating        Int?
+  luxury_rating           Int?
+  base_price              Decimal   @db.Decimal(10, 2)
+  price_currency          String    @default("KES") @db.VarChar(3)
+  discount_percentage     Decimal   @default(0) @db.Decimal(5, 2)
+  featured_image          String?   @db.VarChar(500)
+  gallery_images          String[]
+  video_url               String?   @db.VarChar(500)
+  cancellation_policy     String?   @db.Text
+  terms_conditions        String?   @db.Text
+  min_age                 Int       @default(0)
+  max_age                 Int?
+  health_requirements     String?   @db.Text
+  meta_title              String?   @db.VarChar(255)
+  meta_description        String?   @db.Text
+  meta_keywords           String[]
+  is_featured             Boolean   @default(false)
+  is_active               Boolean   @default(true)
+  views_count             Int       @default(0)
+  booking_count           Int       @default(0)
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @default(now()) @updatedAt
+  
+  destination             Destination? @relation(fields: [destination_id], references: [id])
+  itineraries             TourItinerary[]
+  availability            TourAvailability[]
+  bookings                Booking[]
+  reviews                 Review[] @relation("TourReviews")
+
+  @@map("tour_packages")
+}
+
+// Tour itineraries table
+model TourItinerary {
+  id                          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tour_package_id             String    @db.Uuid
+  day_number                  Int
+  title                       String    @db.VarChar(255)
+  description                 String?   @db.Text
+  accommodation_type          String?   @db.VarChar(100)
+  accommodation_name          String?   @db.VarChar(255)
+  accommodation_description   String?   @db.Text
+  meals_included              String[]
+  activities                  String[]
+  distance_traveled           Decimal?  @db.Decimal(10, 2)
+  travel_time                 Int?
+  elevation_gain              Int?
+  highlights                  String[]
+  images                      String[]
+  created_at                  DateTime  @default(now())
+  updated_at                  DateTime  @default(now()) @updatedAt
+  
+  tour_package                TourPackage @relation(fields: [tour_package_id], references: [id], onDelete: Cascade)
+
+  @@unique([tour_package_id, day_number])
+  @@map("tour_itineraries")
+}
+
+// Hotels table
+model Hotel {
+  id                  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  destination_id      String?   @db.Uuid
+  name                String    @db.VarChar(255)
+  slug                String    @unique @db.VarChar(255)
+  hotel_type          String?   @db.VarChar(100)
+  star_rating         Int?
+  description         String?   @db.Text
+  short_description   String?   @db.VarChar(500)
+  address             String?   @db.Text
+  latitude            Decimal?  @db.Decimal(10, 8)
+  longitude           Decimal?  @db.Decimal(11, 8)
+  check_in_time       DateTime? @db.Time()
+  check_out_time      DateTime? @db.Time()
+  amenities           String[]
+  room_types          Json?
+  featured_image      String?   @db.VarChar(500)
+  gallery_images      String[]
+  contact_phone       String?   @db.VarChar(50)
+  contact_email       String?   @db.VarChar(255)
+  website             String?   @db.VarChar(255)
+  price_per_night     Decimal?  @db.Decimal(10, 2)
+  price_currency      String    @default("KES") @db.VarChar(3)
+  is_active           Boolean   @default(true)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @default(now()) @updatedAt
+  
+  destination         Destination? @relation(fields: [destination_id], references: [id])
+  reviews             Review[]
+
+  @@map("hotels")
+}
+
+// Tour availability
+model TourAvailability {
+  id                  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tour_package_id     String    @db.Uuid
+  start_date          DateTime  @db.Date
+  end_date            DateTime  @db.Date
+  available_slots     Int       @default(0)
+  total_slots         Int
+  special_price       Decimal?  @db.Decimal(10, 2)
+  is_available        Boolean   @default(true)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @default(now()) @updatedAt
+  
+  tour_package        TourPackage @relation(fields: [tour_package_id], references: [id], onDelete: Cascade)
+
+  @@unique([tour_package_id, start_date])
+  @@map("tour_availability")
+}
+
+// Bookings table
+model Booking {
+  id                          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  booking_number              String    @unique @db.VarChar(50)
+  user_id                     String?   @db.Uuid
+  tour_package_id             String?   @db.Uuid
+  booking_date                DateTime  @default(now())
+  start_date                  DateTime  @db.Date
+  end_date                    DateTime  @db.Date
+  number_of_adults            Int
+  number_of_children          Int       @default(0)
+  children_ages               Int[]
+  special_requests            String?   @db.Text
+  dietary_requirements        String?   @db.Text
+  medical_conditions          String?   @db.Text
+  emergency_contact_name      String?   @db.VarChar(255)
+  emergency_contact_phone     String?   @db.VarChar(50)
+  emergency_contact_relation  String?   @db.VarChar(100)
+  subtotal_amount             Decimal   @db.Decimal(10, 2)
+  tax_amount                  Decimal   @default(0) @db.Decimal(10, 2)
+  discount_amount             Decimal   @default(0) @db.Decimal(10, 2)
+  total_amount                Decimal   @db.Decimal(10, 2)
+  currency                    String    @default("KES") @db.VarChar(3)
+  status                      String    @default("pending") @db.VarChar(50)
+  payment_status              String    @default("unpaid") @db.VarChar(50)
+  created_at                  DateTime  @default(now())
+  updated_at                  DateTime  @default(now()) @updatedAt
+  
+  user                        User? @relation(fields: [user_id], references: [id])
+  tour_package                TourPackage? @relation(fields: [tour_package_id], references: [id])
+  payments                    Payment[]
+  participants                BookingParticipant[]
+
+  @@map("bookings")
+}
+
+// Booking participants
+model BookingParticipant {
+  id                  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  booking_id          String?   @db.Uuid
+  full_name           String    @db.VarChar(255)
+  passport_number     String?   @db.VarChar(50)
+  nationality         String?   @db.VarChar(100)
+  date_of_birth       DateTime? @db.Date
+  special_requirements String?  @db.Text
+  created_at          DateTime  @default(now())
+  
+  booking              Booking? @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+
+  @@map("booking_participants")
+}
+
+// Payments table
+model Payment {
+  id                  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  booking_id          String?   @db.Uuid
+  user_id             String?   @db.Uuid
+  amount              Decimal   @db.Decimal(10, 2)
+  currency            String    @default("KES") @db.VarChar(3)
+  payment_method      String    @db.VarChar(50)
+  status              String    @default("pending") @db.VarChar(50)
+  transaction_id      String?   @unique @db.VarChar(255)
+  reference_number    String?   @db.VarChar(100)
+  payment_date        DateTime?
+  receipt_url         String?   @db.VarChar(500)
+  notes               String?   @db.Text
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @default(now()) @updatedAt
+  
+  booking              Booking? @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+  user                User? @relation(fields: [user_id], references: [id])
+
+  @@map("payments")
+}
+
+// Reviews table
+model Review {
+  id                  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id             String?   @db.Uuid
+  tour_package_id     String?   @db.Uuid
+  hotel_id            String?   @db.Uuid
+  rating              Int
+  title               String?   @db.VarChar(255)
+  comment             String?   @db.Text
+  verified_purchase   Boolean   @default(false)
+  helpful_count       Int       @default(0)
+  status              String    @default("pending") @db.VarChar(50)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @default(now()) @updatedAt
+  
+  user                User? @relation(fields: [user_id], references: [id])
+  tour_package        TourPackage? @relation(name: "TourReviews", fields: [tour_package_id], references: [id])
+  hotel               Hotel? @relation(fields: [hotel_id], references: [id])
+
+  @@map("reviews")
+}
+
+// Newsletter Subscribers
+model Subscriber {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email      String   @unique @db.VarChar(255)
+  status     String   @default("active") @db.VarChar(50)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@map("subscribers")
+}
+
+// App Settings
+model AppSetting {
+  key        String   @id @db.VarChar(255)
+  value      Json     @db.JsonB
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@map("app_settings")
+}

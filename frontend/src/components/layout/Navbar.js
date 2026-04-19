@@ -131,17 +131,25 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
+  const { wishlistCount } = useWishlist();
+  const { cartCount } = useCart();
+  
   const [hotelFinder, setHotelFinder] = useState({
     search: '',
     destination: '',
     type: '',
     amenity: '',
   });
-  const pathname = usePathname();
-  const router = useRouter();
-  const { user, logout } = useAuth();
-  const { wishlistCount } = useWishlist();
-  const { cartCount } = useCart();
+
+  const [tourFinder, setTourFinder] = useState({
+    search: '',
+    type: '',
+    duration: '',
+    destination: '',
+  });
   const { hotels } = useHotelCatalog(hotelsSeed);
   const featuredHotels = getFeaturedHotels(hotels, 3);
   const hotelDestinations = [...new Set(hotels.map((hotel) => hotel.destination).filter(Boolean))].slice(0, 6);
@@ -166,6 +174,13 @@ export default function Navbar() {
     }));
   }
 
+  function updateTourFinder(field, value) {
+    setTourFinder((current) => ({
+      ...current,
+      [field]: current[field] === value ? '' : value,
+    }));
+  }
+
   function goToHotelSearch(overrides = {}) {
     const nextFilters = {
       ...hotelFinder,
@@ -176,9 +191,28 @@ export default function Navbar() {
     router.push(query ? `/hotels?${query}` : '/hotels');
   }
 
+  function goToTourSearch(overrides = {}) {
+    const nextFilters = {
+      ...tourFinder,
+      ...overrides,
+    };
+    const params = new URLSearchParams();
+    Object.entries(nextFilters).forEach(([key, value]) => {
+      if (value) params.append(key, value);
+    });
+    const queryString = params.toString();
+    setActiveMegaMenu(null);
+    router.push(queryString ? `/tours?${queryString}` : '/tours');
+  }
+
   function handleHotelFinderSubmit(event) {
     event.preventDefault();
     goToHotelSearch();
+  }
+
+  function handleTourFinderSubmit(event) {
+    event.preventDefault();
+    goToTourSearch();
   }
 
   return (
@@ -240,8 +274,9 @@ export default function Navbar() {
                           link.label === 'Hotels' ? 'w-[980px]' : 'w-[600px]'
                         }`}
                       >
-                        {link.label === 'Hotels' ? (
-                          <div className="grid grid-cols-[repeat(4,minmax(0,1fr))_1.35fr] gap-6">
+                          <div className={`grid gap-6 ${
+                            link.label === 'Hotels' || link.label === 'Tours' ? 'grid-cols-[repeat(4,minmax(0,1fr))_1.35fr]' : 'grid-cols-4'
+                          }`}>
                             {link.megaMenu.map((column) => (
                               <div key={column.title}>
                                 <h3 className="mb-3 text-sm font-semibold text-gray-900">{column.title}</h3>
@@ -260,117 +295,125 @@ export default function Navbar() {
                               </div>
                             ))}
 
-                            <div className="rounded-3xl bg-[#132026] p-5 text-white">
-                              <p className="text-xs uppercase tracking-[0.25em] text-white/60">Hotel Finder</p>
-                              <h3 className="mt-3 text-xl font-serif">Search from the hover menu</h3>
-                              <p className="mt-2 text-sm leading-6 text-white/70">
-                                Open the full hotels page with your destination, category, and amenity filters already applied.
-                              </p>
+                            {(link.label === 'Hotels' || link.label === 'Tours') && (
+                              <div className="rounded-3xl bg-[#132026] p-5 text-white">
+                                <p className="text-xs uppercase tracking-[0.25em] text-white/60">
+                                  {link.label === 'Hotels' ? 'Hotel Finder' : 'Tour Finder'}
+                                </p>
+                                <h3 className="mt-3 text-xl font-serif">Search from the hover menu</h3>
+                                <p className="mt-2 text-sm leading-6 text-white/70">
+                                  {link.label === 'Hotels' 
+                                    ? 'Open the full hotels page with your destination, category, and amenity filters already applied.'
+                                    : 'Explore our 50+ authentic tours with custom filters for duration, type, and more.'}
+                                </p>
 
-                              <form onSubmit={handleHotelFinderSubmit} className="mt-5 space-y-4">
-                                <div>
-                                  <input
-                                    type="text"
-                                    value={hotelFinder.search}
-                                    onChange={(event) => updateHotelFinder('search', event.target.value)}
-                                    placeholder="Search hotel or destination"
-                                    className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/45 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                  />
-                                </div>
-
-                                <select
-                                  value={hotelFinder.destination}
-                                  onChange={(event) => updateHotelFinder('destination', event.target.value)}
-                                  className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                <form 
+                                  onSubmit={link.label === 'Hotels' ? handleHotelFinderSubmit : handleTourFinderSubmit} 
+                                  className="mt-5 space-y-4"
                                 >
-                                  <option value="">Any destination</option>
-                                  {hotelDestinations.map((destination) => (
-                                    <option key={destination} value={destination} className="text-gray-900">
-                                      {destination}
-                                    </option>
-                                  ))}
-                                </select>
+                                  <div>
+                                    <input
+                                      type="text"
+                                      value={link.label === 'Hotels' ? hotelFinder.search : tourFinder.search}
+                                      onChange={(event) => 
+                                        link.label === 'Hotels' 
+                                          ? updateHotelFinder('search', event.target.value) 
+                                          : updateTourFinder('search', event.target.value)
+                                      }
+                                      placeholder={link.label === 'Hotels' ? "Search hotel or destination" : "Search tours or activities"}
+                                      className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/45 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    />
+                                  </div>
 
-                                <select
-                                  value={hotelFinder.type}
-                                  onChange={(event) => updateHotelFinder('type', event.target.value)}
-                                  className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white capitalize focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                >
-                                  <option value="">Any style</option>
-                                  {hotelTypeOptions.map((type) => (
-                                    <option key={type} value={type} className="text-gray-900">
-                                      {type}
-                                    </option>
-                                  ))}
-                                </select>
-
-                                <div className="flex flex-wrap gap-2">
-                                  {hotelAmenityOptions.map((amenity) => (
-                                    <button
-                                      key={amenity}
-                                      type="button"
-                                      onClick={() => updateHotelFinder('amenity', amenity)}
-                                      className={`rounded-full px-3 py-2 text-xs transition-colors ${
-                                        hotelFinder.amenity === amenity
-                                          ? 'bg-primary-600 text-white'
-                                          : 'bg-white/10 text-white/75 hover:bg-white/15'
-                                      }`}
-                                    >
-                                      {amenity.replace(/-/g, ' ')}
-                                    </button>
-                                  ))}
-                                </div>
-
-                                <Button type="submit" variant="primary" fullWidth>
-                                  Search Hotels
-                                </Button>
-                              </form>
-
-                              <div className="mt-5 space-y-3 border-t border-white/10 pt-5">
-                                {featuredHotels.map((hotel) => (
-                                  <button
-                                    key={hotel.slug}
-                                    type="button"
-                                    onClick={() => goToHotelSearch({ destination: hotel.destination, search: hotel.name })}
-                                    className="flex w-full items-center gap-3 rounded-2xl bg-white/8 p-3 text-left transition-colors hover:bg-white/12"
-                                  >
-                                    <div className="relative h-16 w-20 overflow-hidden rounded-2xl bg-white/10">
-                                      <Image src={getHotelImage(hotel)} alt={hotel.name} fill className="object-cover" />
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                      <p className="truncate text-sm font-semibold text-white">{hotel.name}</p>
-                                      <p className="mt-1 flex items-center text-xs text-white/65">
-                                        <FiMapPin className="mr-1" />
-                                        {hotel.destination}
-                                      </p>
-                                    </div>
-                                    <span className="text-xs text-white/70">${hotel.price}</span>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="grid grid-cols-4 gap-6">
-                            {link.megaMenu.map((column) => (
-                              <div key={column.title}>
-                                <h3 className="mb-3 text-sm font-semibold text-gray-900">{column.title}</h3>
-                                <ul className="space-y-2">
-                                  {column.links.map((subLink) => (
-                                    <li key={subLink.href}>
-                                      <Link
-                                        href={subLink.href}
-                                        className="text-sm text-gray-600 transition-colors hover:text-primary-500"
+                                  {link.label === 'Hotels' ? (
+                                    <>
+                                      <select
+                                        value={hotelFinder.destination}
+                                        onChange={(event) => updateHotelFinder('destination', event.target.value)}
+                                        className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                                       >
-                                        {subLink.label}
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </ul>
+                                        <option value="">Any destination</option>
+                                        {hotelDestinations.map((destination) => (
+                                          <option key={destination} value={destination} className="text-gray-900">
+                                            {destination}
+                                          </option>
+                                        ))}
+                                      </select>
+
+                                      <select
+                                        value={hotelFinder.type}
+                                        onChange={(event) => updateHotelFinder('type', event.target.value)}
+                                        className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white capitalize focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                      >
+                                        <option value="">Any style</option>
+                                        {hotelTypeOptions.map((type) => (
+                                          <option key={type} value={type} className="text-gray-900">
+                                            {type}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <select
+                                        value={tourFinder.type}
+                                        onChange={(event) => updateTourFinder('type', event.target.value)}
+                                        className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white capitalize focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                      >
+                                        <option value="">Any interest</option>
+                                        {['wildlife', 'beach', 'adventure', 'cultural', 'photography', 'family'].map((type) => (
+                                          <option key={type} value={type} className="text-gray-900">
+                                            {type}
+                                          </option>
+                                        ))}
+                                      </select>
+
+                                      <select
+                                        value={tourFinder.duration}
+                                        onChange={(event) => updateTourFinder('duration', event.target.value)}
+                                        className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                      >
+                                        <option value="">Any duration</option>
+                                        <option value="1-3" className="text-gray-900">1-3 Days</option>
+                                        <option value="4-7" className="text-gray-900">4-7 Days</option>
+                                        <option value="8-14" className="text-gray-900">8-14 Days</option>
+                                        <option value="15+" className="text-gray-900">15+ Days</option>
+                                      </select>
+                                    </>
+                                  )}
+
+                                  <Button type="submit" variant="primary" fullWidth>
+                                    {link.label === 'Hotels' ? 'Search Hotels' : 'Explore Tours'}
+                                  </Button>
+                                </form>
+
+                                {link.label === 'Hotels' && (
+                                  <div className="mt-5 space-y-3 border-t border-white/10 pt-5">
+                                    {featuredHotels.map((hotel) => (
+                                      <button
+                                        key={hotel.slug}
+                                        type="button"
+                                        onClick={() => goToHotelSearch({ destination: hotel.destination, search: hotel.name })}
+                                        className="flex w-full items-center gap-3 rounded-2xl bg-white/8 p-3 text-left transition-colors hover:bg-white/12"
+                                      >
+                                        <div className="relative h-16 w-20 overflow-hidden rounded-2xl bg-white/10">
+                                          <Image src={getHotelImage(hotel)} alt={hotel.name} fill className="object-cover" />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                          <p className="truncate text-sm font-semibold text-white">{hotel.name}</p>
+                                          <p className="mt-1 flex items-center text-xs text-white/65">
+                                            <FiMapPin className="mr-1" />
+                                            {hotel.destination}
+                                          </p>
+                                        </div>
+                                        <span className="text-xs text-white/70">${hotel.price}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                            ))}
+                            )}
                           </div>
-                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>

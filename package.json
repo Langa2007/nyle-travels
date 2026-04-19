@@ -7,7 +7,15 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "db:setup": "node scripts/setupDatabase.js"
+    "db:setup": "node scripts/setupDatabase.js",
+    "db:migrate": "node scripts/db-migrate.js",
+    "db:status": "node scripts/db-migrate.js status",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "node scripts/seed-tours.js",
+    "prisma:reset": "prisma migrate reset"
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.3.16",
@@ -37,6 +45,7 @@
     "winston-daily-rotate-file": "^4.7.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "nodemon": "^2.0.22",
+    "prisma": "^5.0.0"
   }
 }

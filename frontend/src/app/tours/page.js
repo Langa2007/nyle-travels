@@ -1,379 +1,336 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { 
-  FiClock, 
-  FiUsers, 
-  FiMapPin, 
-  FiStar, 
-  FiCalendar,
-  FiDollarSign,
-  FiShield,
-  FiWifi,
-  FiCoffee,
-  FiCamera,
-  FiHeart,
-  FiShare2,
-  FiChevronRight,
-  FiCheckCircle
+import { useSearchParams } from 'next/navigation';
+import {
+  FiMapPin,
+  FiSearch,
+  FiSliders,
+  FiStar,
+  FiSun,
+  FiClock,
+  FiUsers,
+  FiChevronRight
 } from 'react-icons/fi';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Thumbs } from 'swiper/modules';
-import { useParams } from 'next/navigation';
-import { toursAPI } from '@/lib/api';
+import { motion, AnimatePresence } from 'framer-motion';
+import StaticPageHeader from '@/components/ui/StaticPageHeader';
 import Button from '@/components/ui/Button';
-import Rating from '@/components/ui/Rating';
-import BookingWidget from '@/components/tours/BookingWidget';
-import TourMap from '@/components/tours/TourMap';
-import ReviewList from '@/components/reviews/ReviewList';
-import ReviewForm from '@/components/reviews/ReviewForm';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
+import useTourCatalog from '@/hooks/useTourCatalog';
+import {
+  filterTours,
+  getFeaturedTours,
+  getTourImage,
+} from '@/lib/tourCatalog';
 
-export default function TourDetails() {
-  const { slug } = useParams();
-  const [tour, setTour] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [thumbsSwiper, setThumbsSwiper] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [inWishlist, setInWishlist] = useState(false);
+const defaultFilters = {
+  search: '',
+  type: 'all',
+  duration: 'all',
+  destination: 'all',
+  difficulty: 'all',
+};
+
+function ToursPageContent() {
+  const searchParams = useSearchParams();
+  const { tours, loading } = useTourCatalog();
+  const [filters, setFilters] = useState(defaultFilters);
 
   useEffect(() => {
-    fetchTour();
-  }, [slug]);
+    setFilters({
+      search: searchParams.get('search') || '',
+      type: searchParams.get('type') || 'all',
+      duration: searchParams.get('duration') || 'all',
+      destination: searchParams.get('destination') || 'all',
+      difficulty: searchParams.get('difficulty') || 'all',
+    });
+  }, [searchParams]);
 
-  const fetchTour = async () => {
-    try {
-      const response = await toursAPI.getOne(slug);
-      setTour(response.data.data.tour);
-    } catch (error) {
-      console.error('Failed to fetch tour:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const destinations = ['all', ...new Set(tours.map((tour) => tour.destination?.name).filter(Boolean))];
+  const types = ['all', 'wildlife', 'beach', 'adventure', 'cultural', 'photography', 'family'];
+  const durations = ['all', '1-3', '4-7', '8-14', '15+'];
+  const difficulties = ['all', 'easy', 'moderate', 'challenging', 'difficult'];
+  const featuredTours = getFeaturedTours(tours, 3);
+  const filteredTours = filterTours(tours, filters);
+  const headerImage = getTourImage(featuredTours[0] || tours[0]);
+  const featuredCount = tours.filter((tour) => tour.is_featured).length;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+  function updateFilter(field, value) {
+    setFilters((current) => ({
+      ...current,
+      [field]: value,
+    }));
   }
 
-  if (!tour) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Tour Not Found</h2>
-          <Link href="/tours">
-            <Button>Browse Tours</Button>
-          </Link>
-        </div>
-      </div>
-    );
+  function resetFilters() {
+    setFilters(defaultFilters);
   }
 
   return (
-    <div className="pt-20">
-      {/* Gallery Section */}
-      <section className="relative h-[70vh]">
-        <Swiper
-          modules={[Navigation, Pagination, Thumbs]}
-          navigation
-          pagination={{ clickable: true }}
-          thumbs={{ swiper: thumbsSwiper }}
-          className="h-full"
-        >
-          {tour.gallery_images?.map((image, index) => (
-            <SwiperSlide key={index}>
-              <div className="relative h-full">
-                <Image
-                  src={image}
-                  alt={`${tour.name} - ${index + 1}`}
-                  fill
-                  className="object-cover"
-                  priority={index === 0}
-                />
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+    <div className="min-h-screen bg-[#faf8f2]">
+      <StaticPageHeader
+        title="Tours In Kenya"
+        subtitle="Explore 50+ authentic Kenyan experiences from wildlife safaris and beach getaways to cultural adventures and mountain treks."
+        bgImage={headerImage}
+      />
 
-        {/* Thumbnail Navigation */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-          <Swiper
-            onSwiper={setThumbsSwiper}
-            spaceBetween={10}
-            slidesPerView={4}
-            freeMode={true}
-            watchSlidesProgress={true}
-            className="thumbs-slider"
-          >
-            {tour.gallery_images?.map((image, index) => (
-              <SwiperSlide key={index}>
-                <div className="relative w-24 h-16 cursor-pointer rounded-lg overflow-hidden border-2 border-white/50 hover:border-primary-500 transition-colors">
-                  <Image
-                    src={image}
-                    alt={`Thumbnail ${index + 1}`}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+      <section className="container mx-auto px-4 py-12 space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+            <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Catalog</p>
+            <p className="mt-2 text-3xl font-serif text-gray-900">{tours.length}</p>
+            <p className="mt-2 text-sm text-gray-500">Kenyan tours and experiences available</p>
+          </div>
+          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+            <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Featured</p>
+            <p className="mt-2 text-3xl font-serif text-primary-600">{featuredCount}</p>
+            <p className="mt-2 text-sm text-gray-500">premium experiences highlighted in the navbar</p>
+          </div>
+          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+            <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Status</p>
+            <p className="mt-2 text-3xl font-serif text-gray-900">{loading ? 'Loading' : 'Ready'}</p>
+            <p className="mt-2 text-sm text-gray-500">admin tour updates appear here automatically</p>
+          </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="absolute top-4 right-4 z-20 flex space-x-2">
-          <button
-            onClick={() => setInWishlist(!inWishlist)}
-            className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors"
-          >
-            <FiHeart
-              className={`w-5 h-5 ${
-                inWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'
-              }`}
-            />
-          </button>
-          <button className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors">
-            <FiShare2 className="w-5 h-5 text-gray-600" />
-          </button>
-        </div>
-      </section>
-
-      {/* Main Content */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column - Details */}
-            <div className="lg:col-span-2">
-              {/* Breadcrumbs */}
-              <div className="flex items-center text-sm text-gray-500 mb-4">
-                <Link href="/" className="hover:text-primary-600">Home</Link>
-                <FiChevronRight className="mx-2" />
-                <Link href="/tours" className="hover:text-primary-600">Tours</Link>
-                <FiChevronRight className="mx-2" />
-                <span className="text-gray-900">{tour.name}</span>
+        <div className="grid grid-cols-1 xl:grid-cols-[1.4fr_0.9fr] gap-6">
+          <div className="bg-white rounded-[2rem] border border-gray-100 p-5 shadow-sm">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-11 h-11 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center">
+                <FiSliders className="w-5 h-5" />
               </div>
-
-              {/* Title & Rating */}
-              <div className="mb-6">
-                <h1 className="text-4xl font-serif font-bold mb-4">{tour.name}</h1>
-                <div className="flex items-center space-x-4">
-                  <Rating value={tour.average_rating} />
-                  <span className="text-gray-600">
-                    ({tour.review_count} reviews)
-                  </span>
-                  <span className="text-gray-300">|</span>
-                  <span className="text-primary-600 font-semibold">
-                    {tour.difficulty_level}
-                  </span>
-                </div>
-              </div>
-
-              {/* Quick Info */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <FiClock className="w-5 h-5 text-primary-600 mb-2" />
-                  <div className="text-sm text-gray-500">Duration</div>
-                  <div className="font-semibold">{tour.duration_days} Days</div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <FiUsers className="w-5 h-5 text-primary-600 mb-2" />
-                  <div className="text-sm text-gray-500">Group Size</div>
-                  <div className="font-semibold">Max {tour.group_size_max}</div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <FiMapPin className="w-5 h-5 text-primary-600 mb-2" />
-                  <div className="text-sm text-gray-500">Location</div>
-                  <div className="font-semibold">{tour.destination_name}</div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <FiCalendar className="w-5 h-5 text-primary-600 mb-2" />
-                  <div className="text-sm text-gray-500">Best Time</div>
-                  <div className="font-semibold">{tour.best_time_to_visit}</div>
-                </div>
-              </div>
-
-              {/* Tabs */}
-              <div className="border-b border-gray-200 mb-6">
-                <div className="flex space-x-8">
-                  {['overview', 'itinerary', 'includes', 'reviews', 'location'].map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`py-4 text-sm font-medium capitalize border-b-2 transition-colors ${
-                        activeTab === tab
-                          ? 'border-primary-600 text-primary-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700'
-                      }`}
-                    >
-                      {tab}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tab Content */}
-              <div className="mb-8">
-                {activeTab === 'overview' && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="prose max-w-none"
-                  >
-                    <p className="text-lg text-gray-600 mb-6">
-                      {tour.short_description}
-                    </p>
-                    <div className="whitespace-pre-line">
-                      {tour.description}
-                    </div>
-
-                    {/* Highlights */}
-                    <h3 className="text-xl font-semibold mt-8 mb-4">Tour Highlights</h3>
-                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {tour.highlights?.map((highlight, index) => (
-                        <li key={index} className="flex items-start">
-                          <FiCheckCircle className="w-5 h-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-                          <span>{highlight}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </motion.div>
-                )}
-
-                {activeTab === 'itinerary' && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="space-y-6"
-                  >
-                    {tour.itineraries?.map((day, index) => (
-                      <div
-                        key={index}
-                        className="bg-gray-50 rounded-xl p-6 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex items-center mb-4">
-                          <span className="w-10 h-10 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold">
-                            {day.day_number}
-                          </span>
-                          <h3 className="text-xl font-semibold ml-4">{day.title}</h3>
-                        </div>
-                        <p className="text-gray-600 mb-4">{day.description}</p>
-                        
-                        {day.activities && day.activities.length > 0 && (
-                          <div className="mt-4">
-                            <h4 className="font-semibold mb-2">Activities:</h4>
-                            <div className="flex flex-wrap gap-2">
-                              {day.activities.map((activity, i) => (
-                                <span
-                                  key={i}
-                                  className="px-3 py-1 bg-white rounded-full text-sm"
-                                >
-                                  {activity}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {day.accommodation_name && (
-                          <div className="mt-4 p-4 bg-white rounded-lg">
-                            <div className="flex items-center">
-                              <FiCoffee className="w-5 h-5 text-primary-600 mr-2" />
-                              <span className="font-medium">Accommodation:</span>
-                              <span className="ml-2">{day.accommodation_name}</span>
-                            </div>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {day.accommodation_description}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </motion.div>
-                )}
-
-                {activeTab === 'includes' && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-8"
-                  >
-                    <div>
-                      <h3 className="text-xl font-semibold mb-4 text-green-600">Included</h3>
-                      <ul className="space-y-3">
-                        {tour.included_items?.map((item, index) => (
-                          <li key={index} className="flex items-center">
-                            <FiCheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-semibold mb-4 text-red-600">Not Included</h3>
-                      <ul className="space-y-3">
-                        {tour.excluded_items?.map((item, index) => (
-                          <li key={index} className="flex items-center">
-                            <span className="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center mr-3 flex-shrink-0">×</span>
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </motion.div>
-                )}
-
-                {activeTab === 'reviews' && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    <ReviewList tourId={tour.id} />
-                    {user && <ReviewForm tourId={tour.id} />}
-                  </motion.div>
-                )}
-
-                {activeTab === 'location' && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    <TourMap 
-                      center={{ lat: tour.latitude, lng: tour.longitude }}
-                      markers={[
-                        {
-                          lat: tour.latitude,
-                          lng: tour.longitude,
-                          title: tour.name
-                        }
-                      ]}
-                    />
-                    <div className="mt-4">
-                      <h3 className="font-semibold mb-2">How to Get There</h3>
-                      <p className="text-gray-600">{tour.how_to_get_there}</p>
-                    </div>
-                  </motion.div>
-                )}
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Find Your Adventure</h2>
+                <p className="text-sm text-gray-500">Start from the navbar hover finder or refine everything here.</p>
               </div>
             </div>
 
-            {/* Right Column - Booking Widget */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-24">
-                <BookingWidget tour={tour} />
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+              <div className="xl:col-span-2 relative">
+                <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={filters.search}
+                  onChange={(event) => updateFilter('search', event.target.value)}
+                  placeholder="Search tours, destinations, or activities..."
+                  className="w-full rounded-2xl border border-gray-200 bg-white py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
               </div>
+
+              <select
+                value={filters.type}
+                onChange={(event) => updateFilter('type', event.target.value)}
+                className="rounded-2xl border border-gray-200 bg-white px-4 py-4 capitalize focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                {types.map((type) => (
+                  <option key={type} value={type}>
+                    {type === 'all' ? 'All Types' : type}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={filters.duration}
+                onChange={(event) => updateFilter('duration', event.target.value)}
+                className="rounded-2xl border border-gray-200 bg-white px-4 py-4 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                {durations.map((duration) => (
+                  <option key={duration} value={duration}>
+                    {duration === 'all' ? 'Any Duration' : `${duration} Days`}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={filters.destination}
+                onChange={(event) => updateFilter('destination', event.target.value)}
+                className="rounded-2xl border border-gray-200 bg-white px-4 py-4 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                {destinations.map((destination) => (
+                  <option key={destination} value={destination}>
+                    {destination === 'all' ? 'All Destinations' : destination}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-wrap gap-2">
+                {difficulties.map((difficulty) => (
+                  <button
+                    key={difficulty}
+                    type="button"
+                    onClick={() => updateFilter('difficulty', difficulty)}
+                    className={`rounded-full px-4 py-2 text-sm capitalize transition-colors ${
+                      filters.difficulty === difficulty
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {difficulty === 'all' ? 'All Levels' : difficulty}
+                  </button>
+                ))}
+              </div>
+
+              <Button variant="ghost" onClick={resetFilters} className="justify-center">
+                Reset Filters
+              </Button>
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] border border-gray-100 bg-[#132026] p-6 text-white shadow-sm">
+            <p className="text-sm uppercase tracking-[0.2em] text-white/60">Spotlight</p>
+            <h2 className="mt-3 text-2xl font-serif">Popular Kenya Tours</h2>
+            <p className="mt-2 text-sm leading-6 text-white/75">
+              These highlight cards share the same catalog the admin editor controls, so updates flow straight through.
+            </p>
+            <div className="mt-5 space-y-4">
+              {featuredTours.map((tour) => (
+                <Link
+                  key={tour.slug}
+                  href={`/tours/${tour.slug}`}
+                  className="flex items-center gap-4 rounded-3xl bg-white/10 p-3 transition-colors hover:bg-white/15"
+                >
+                  <div className="relative h-20 w-24 overflow-hidden rounded-2xl bg-white/10">
+                    <Image src={getTourImage(tour)} alt={tour.name} fill className="object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs uppercase tracking-[0.2em] text-white/60">{tour.package_code}</p>
+                    <h3 className="mt-1 truncate text-base font-semibold text-white">{tour.name}</h3>
+                    <p className="mt-1 text-sm text-white/70">{tour.destination?.name}</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs text-white">
+                      <FiClock className="mr-1" />
+                      {tour.duration_days}d
+                    </div>
+                    <p className="mt-2 text-sm text-white/70">from ${tour.base_price}</p>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
+        >
+          <div>
+            <h2 className="text-3xl font-serif text-gray-900">Tour Catalog</h2>
+            <p className="mt-2 text-gray-500 max-w-2xl">
+              Showing {filteredTours.length} of {tours.length} authentic Kenyan experiences curated for the discerning traveler.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 rounded-full border border-primary-100 bg-primary-50 px-4 py-2 text-sm text-primary-700 shadow-sm">
+            <FiSun className="text-primary-600 animate-pulse" />
+            <span className="font-medium">50+ Authentic Experiences Found</span>
+          </div>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <AnimatePresence mode="popLayout">
+            {filteredTours.map((tour, index) => (
+              <motion.article
+                key={tour.slug}
+                layout
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                className="group overflow-hidden rounded-[2.5rem] border border-gray-100 bg-white shadow-md transition-all hover:shadow-2xl hover:-translate-y-1"
+              >
+                <div className="relative h-72 bg-gray-100 overflow-hidden">
+                  <Image 
+                    src={getTourImage(tour)} 
+                    alt={tour.name} 
+                    fill 
+                    className="object-cover transition-transform duration-700 group-hover:scale-110" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  
+                  <div className="absolute top-6 left-6 flex flex-wrap gap-2">
+                    <span className="rounded-full bg-white/90 backdrop-blur-md px-4 py-1.5 text-xs font-bold text-gray-900 uppercase tracking-wider shadow-sm">
+                      {tour.difficulty_level}
+                    </span>
+                    {tour.is_featured && (
+                      <span className="rounded-full bg-primary-600 px-4 py-1.5 text-xs font-bold text-white uppercase tracking-wider shadow-lg shadow-primary-500/30">
+                        Featured
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="absolute bottom-6 left-6 right-6 text-white">
+                    <div className="space-y-2">
+                        <div className="flex items-center text-sm font-medium text-white/90">
+                          <FiMapPin className="mr-2 text-primary-400" />
+                          {tour.destination?.name}
+                        </div>
+                        <h3 className="text-2xl font-serif font-bold leading-tight line-clamp-2">
+                          {tour.name}
+                        </h3>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-8 space-y-6">
+                  <p className="text-sm leading-relaxed text-gray-600 line-clamp-3 italic">
+                    "{tour.short_description}"
+                  </p>
+
+                  <div className="flex flex-wrap gap-3">
+                    <div className="flex items-center rounded-2xl bg-gray-50 px-4 py-2 text-xs font-medium text-gray-700 border border-gray-100">
+                      <FiClock className="mr-2 text-primary-500" />
+                      {tour.duration_days} Days
+                    </div>
+                    {tour.group_size_max && (
+                      <div className="flex items-center rounded-2xl bg-gray-50 px-4 py-2 text-xs font-medium text-gray-700 border border-gray-100">
+                        <FiUsers className="mr-2 text-primary-500" />
+                        Up to {tour.group_size_max} Pax
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-gray-100 pt-6">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-gray-400">Total Per Person</p>
+                      <div className="flex items-baseline gap-1 mt-1">
+                        <span className="text-xs font-bold text-primary-600">$</span>
+                        <p className="text-3xl font-serif font-black text-primary-600">{tour.base_price}</p>
+                      </div>
+                    </div>
+                    <Link href={`/tours/${tour.slug}`}>
+                      <Button variant="outline" className="group/btn rounded-full px-6 border-2 hover:bg-primary-600 hover:text-white hover:border-primary-600 transition-all duration-300">
+                        <span className="flex items-center">
+                          Explore
+                          <FiChevronRight className="ml-2 transition-transform group-hover/btn:translate-x-1" />
+                        </span>
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </motion.article>
+            ))}
+          </AnimatePresence>
+        </div>
+
+        {filteredTours.length === 0 && (
+          <div className="rounded-[2rem] border border-dashed border-gray-300 bg-white p-12 text-center text-gray-500">
+            No tours match the current filters yet. Reset the filters or try another type, duration, or destination.
+          </div>
+        )}
       </section>
     </div>
+  );
+}
+
+export default function ToursPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ToursPageContent />
+    </Suspense>
   );
 }
