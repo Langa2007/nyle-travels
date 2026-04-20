@@ -11,7 +11,9 @@ import {
   addItinerary, 
   bulkUpdateItinerary, 
   updateAvailability, 
-  getTourStats 
+  updateAvailability, 
+  getTourStats,
+  getTourByIdAdmin
 } from '../controllers/admin/tourAdminController.js';
 import { protect, restrictTo } from '../middleware/authMiddleware.js';
 
@@ -31,6 +33,7 @@ router.use(protect);
 router.use(restrictTo('admin'));
 
 router.get('/admin/stats', getTourStats);
+router.get('/admin/:id', getTourByIdAdmin);
 router.post('/', createTour);
 router.put('/:id', updateTour);
 router.delete('/:id', deleteTour);

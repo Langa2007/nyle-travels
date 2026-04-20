@@ -61,9 +61,7 @@ export default function TourEditorPage() {
       setDestinations(destsRes.data.data.destinations);
 
       if (!isNew) {
-        const res = await toursAPI.getOne(id); // Admin can get by ID or slug if backend supports it
-        // Note: Our public API uses slug, but admin usually uses ID. 
-        // If slug was passed, we handle it.
+        const res = await toursAPI.getById(id); 
         const tourData = res.data.data.tour;
         setFormData(tourData);
         setItineraries(res.data.data.itinerary || []);

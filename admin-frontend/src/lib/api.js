@@ -49,4 +49,28 @@ api.interceptors.response.use(
   }
 );
 
+
+// Tours API
+export const toursAPI = {
+  // Public (for preview)
+  getAll: (params) => api.get('/tours', { params }),
+  getOne: (slug) => api.get(`/tours/${slug}`),
+  
+  // Admin-specific
+  getById: (id) => api.get(`/tours/admin/${id}`),
+  getStats: () => api.get('/tours/admin/stats'),
+  create: (data) => api.post('/tours', data),
+  update: (id, data) => api.put(`/tours/${id}`, data),
+  delete: (id) => api.delete(`/tours/${id}`),
+  addItinerary: (id, data) => api.post(`/tours/${id}/itinerary`, data),
+  bulkUpdateItinerary: (id, data) => api.put(`/tours/${id}/itinerary/bulk`, data),
+  updateAvailability: (id, data) => api.put(`/tours/${id}/availability`, data),
+};
+
+// Destinations API
+export const destinationsAPI = {
+  getAll: (params) => api.get('/destinations', { params }),
+  getOne: (id) => api.get(`/destinations/${id}`),
+};
+
 export default api;

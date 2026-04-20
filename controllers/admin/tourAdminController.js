@@ -153,3 +153,35 @@ export const getTourStats = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getTourByIdAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const tour = await TourPackage.findById(id);
+
+    if (!tour) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Tour package not found'
+      });
+    }
+
+    const itinerary = await TourPackage.getItineraries(tour.id);
+    const availability = await TourPackage.getAvailability(
+      tour.id, 
+      new Date().toISOString().split('T')[0], 
+      new Date(new Date().setMonth(new Date().getMonth() + 12)).toISOString().split('T')[0]
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        tour,
+        itinerary,
+        availability
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
