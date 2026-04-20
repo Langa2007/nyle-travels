@@ -7,8 +7,8 @@ import useTourCatalog from '@/hooks/useTourCatalog';
 import { destinationsAPI } from '@/lib/api';
 import TourCard from '@/components/tours/TourCard';
 import TourFilters from '@/components/tours/TourFilters';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import TourCard from '@/components/tours/TourCard';
+import TourFilters from '@/components/tours/TourFilters';
 
 export default function TourCatalogPage() {
   const {
@@ -47,8 +47,7 @@ export default function TourCatalogPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#fafbfc]">
-      <Navbar />
+    <main className="bg-[#fafbfc]">
       
       {/* Hero Section */}
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-gray-900">
@@ -235,7 +234,6 @@ export default function TourCatalogPage() {
         </div>
       </section>
 
-      <Footer />
     </main>
   );
 }

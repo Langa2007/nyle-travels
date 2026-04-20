@@ -10,25 +10,17 @@ import {
   deleteTour, 
   addItinerary, 
   bulkUpdateItinerary, 
-  updateAvailability, 
-  updateAvailability, 
+  updateAvailability,  
   getTourStats,
   getTourByIdAdmin
 } from '../controllers/admin/tourAdminController.js';
 import { protect, restrictTo } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
-
-/**
- * Public Routes
- */
 router.get('/', getAllTours);
 router.get('/featured', getFeaturedTours);
 router.get('/:slug', getTourBySlug);
 
-/**
- * Admin Routes (Protected)
- */
 router.use(protect);
 router.use(restrictTo('admin'));
 
