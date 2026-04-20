@@ -14,7 +14,7 @@ import {
   getTourStats,
   getTourByIdAdmin
 } from '../controllers/admin/tourAdminController.js';
-import { protect, restrictTo } from '../middleware/authMiddleware.js';
+import { protect, restrictTo } from '../middleware/auth.js';
 
 const router = express.Router();
 router.get('/', getAllTours);

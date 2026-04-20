@@ -22,16 +22,6 @@ router.patch('/users/:userId/status', adminController.toggleUserStatus);
 router.get('/bookings', adminController.getAllBookings);
 router.patch('/bookings/:bookingId/status', adminController.updateBookingStatus);
 
-router.post('/tours', 
-  upload.fields([
-    { name: 'featured_image', maxCount: 1 },
-    { name: 'gallery_images', maxCount: 10 }
-  ]),
-  adminController.createTour
-);
-router.post('/tours/bulk-update', restrictToSuperAdmin, adminController.bulkUpdateTours);
-router.post('/tours/:tourId/duplicate', adminController.duplicateTour);
-
 router.get('/payments', adminController.getAllPayments);
 router.post('/payments/:paymentId/refund', adminController.processRefund);
 
