@@ -2,7 +2,6 @@ import { query, transaction } from '../config/db.js';
 import AppError from '../utils/AppError.js';
 import catchAsync from '../utils/CatchAsync.js';
 import { User } from '../models/user.js';
-import { TourPackage } from '../models/TourPackage.js';
 import { Booking } from '../models/Booking.js';
 import { Payment } from '../models/Payment.js';
 import { sendEmail } from '../services/emailService.js';
@@ -12,12 +11,9 @@ import PDFDocument from 'pdfkit';
 // ==================== DASHBOARD STATS ====================
 
 export const getDashboardStats = catchAsync(async (req, res, next) => {
-  const [totalUsers, totalTours, totalBookings, totalRevenue, recentActivity] = await Promise.all([
+  const [totalUsers, totalBookings, totalRevenue, recentActivity] = await Promise.all([
     // Total users
     query('SELECT COUNT(*) FROM users WHERE deleted_at IS NULL'),
-    
-    // Total tours
-    query('SELECT COUNT(*) FROM tour_packages WHERE is_active = TRUE'),
     
     // Total bookings
     query('SELECT COUNT(*) FROM bookings'),
@@ -56,7 +52,6 @@ export const getDashboardStats = catchAsync(async (req, res, next) => {
     data: {
       overview: {
         totalUsers: parseInt(totalUsers.rows[0].count),
-        totalTours: parseInt(totalTours.rows[0].count),
         totalBookings: parseInt(totalBookings.rows[0].count),
         totalRevenue: parseFloat(totalRevenue.rows[0].coalesce),
       },
@@ -140,9 +135,8 @@ export const getUserDetails = catchAsync(async (req, res, next) => {
   const [bookings, payments, reviews, activity] = await Promise.all([
     // Bookings with tour details
     query(`
-      SELECT b.*, tp.name as tour_name, tp.slug as tour_slug
+      SELECT b.*
       FROM bookings b
-      LEFT JOIN tour_packages tp ON b.tour_package_id = tp.id
       WHERE b.user_id = $1
       ORDER BY b.created_at DESC
     `, [userId]),
@@ -158,9 +152,8 @@ export const getUserDetails = catchAsync(async (req, res, next) => {
 
     // Reviews
     query(`
-      SELECT r.*, tp.name as tour_name
+      SELECT r.*
       FROM reviews r
-      LEFT JOIN tour_packages tp ON r.tour_package_id = tp.id
       WHERE r.user_id = $1
       ORDER BY r.created_at DESC
     `, [userId]),
@@ -319,14 +312,9 @@ export const getAllBookings = catchAsync(async (req, res, next) => {
       u.email as user_email,
       u.first_name,
       u.last_name,
-      u.phone as user_phone,
-      tp.name as tour_name,
-      tp.slug as tour_slug,
-      d.name as destination_name
+      u.phone as user_phone
     FROM bookings b
     LEFT JOIN users u ON b.user_id = u.id
-    LEFT JOIN tour_packages tp ON b.tour_package_id = tp.id
-    LEFT JOIN destinations d ON tp.destination_id = d.id
     WHERE ${whereString}
     ORDER BY ${sort.replace('-', '')} ${sort.startsWith('-') ? 'DESC' : 'ASC'}
     LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
@@ -387,84 +375,6 @@ export const updateBookingStatus = catchAsync(async (req, res, next) => {
   });
 });
 
-// ==================== TOUR MANAGEMENT ====================
-
-export const createTour = catchAsync(async (req, res, next) => {
-  const tourData = req.body;
-
-  // Handle image uploads
-  if (req.files?.featured_image) {
-    const result = await cloudinaryService.uploadFromBuffer(
-      req.files.featured_image[0].buffer,
-      'nyle-travel/tours'
-    );
-    tourData.featured_image = result.secure_url;
-  }
-
-  if (req.files?.gallery_images) {
-    const uploadPromises = req.files.gallery_images.map(file =>
-      cloudinaryService.uploadFromBuffer(file.buffer, 'nyle-travel/tours/gallery')
-    );
-    const results = await Promise.all(uploadPromises);
-    tourData.gallery_images = results.map(r => r.secure_url);
-  }
-
-  const tour = await TourPackage.create(tourData);
-
-  res.status(201).json({
-    status: 'success',
-    data: { tour }
-  });
-});
-
-export const bulkUpdateTours = catchAsync(async (req, res, next) => {
-  const { tourIds, updates } = req.body;
-
-  await transaction(async (client) => {
-    for (const tourId of tourIds) {
-      await client.query(
-        `UPDATE tour_packages SET ${Object.keys(updates).map((k, i) => `${k} = $${i + 1}`).join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${Object.keys(updates).length + 1}`,
-        [...Object.values(updates), tourId]
-      );
-    }
-  });
-
-  res.status(200).json({
-    status: 'success',
-    message: `${tourIds.length} tours updated successfully`
-  });
-});
-
-export const duplicateTour = catchAsync(async (req, res, next) => {
-  const { tourId } = req.params;
-
-  const original = await TourPackage.findById(tourId);
-  if (!original) {
-    return next(new AppError('Tour not found', 404));
-  }
-
-  // Create duplicate with modifications
-  const duplicate = await TourPackage.create({
-    ...original,
-    name: `${original.name} (Copy)`,
-    slug: `${original.slug}-copy-${Date.now()}`,
-    package_code: `${original.package_code}-COPY`,
-    is_featured: false,
-    views_count: 0,
-    booking_count: 0
-  });
-
-  // Duplicate itineraries
-  const itineraries = await TourPackage.getItineraries(tourId);
-  for (const itinerary of itineraries) {
-    await TourPackage.addItinerary(duplicate.id, itinerary);
-  }
-
-  res.status(201).json({
-    status: 'success',
-    data: { tour: duplicate }
-  });
-});
 
 // ==================== PAYMENT MANAGEMENT ====================
 
@@ -567,9 +477,6 @@ export const generateReport = catchAsync(async (req, res, next) => {
       break;
     case 'users':
       data = await generateUsersReport(dateFrom, dateTo);
-      break;
-    case 'tours':
-      data = await generateToursReport(dateFrom, dateTo);
       break;
     default:
       return next(new AppError('Invalid report type', 400));

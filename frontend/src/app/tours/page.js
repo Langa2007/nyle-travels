@@ -1,336 +1,241 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import {
-  FiMapPin,
-  FiSearch,
-  FiSliders,
-  FiStar,
-  FiSun,
-  FiClock,
-  FiUsers,
-  FiChevronRight
-} from 'react-icons/fi';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import StaticPageHeader from '@/components/ui/StaticPageHeader';
-import Button from '@/components/ui/Button';
+import { FiSearch, FiFrown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import useTourCatalog from '@/hooks/useTourCatalog';
-import {
-  filterTours,
-  getFeaturedTours,
-  getTourImage,
-} from '@/lib/tourCatalog';
+import { destinationsAPI } from '@/lib/api';
+import TourCard from '@/components/tours/TourCard';
+import TourFilters from '@/components/tours/TourFilters';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 
-const defaultFilters = {
-  search: '',
-  type: 'all',
-  duration: 'all',
-  destination: 'all',
-  difficulty: 'all',
-};
+export default function TourCatalogPage() {
+  const {
+    tours,
+    loading,
+    error,
+    total,
+    totalPages,
+    currentPage,
+    filters,
+    updateFilters,
+    nextPage,
+    prevPage
+  } = useTourCatalog();
 
-function ToursPageContent() {
-  const searchParams = useSearchParams();
-  const { tours, loading } = useTourCatalog();
-  const [filters, setFilters] = useState(defaultFilters);
+  const [destinations, setDestinations] = useState([]);
 
   useEffect(() => {
-    setFilters({
-      search: searchParams.get('search') || '',
-      type: searchParams.get('type') || 'all',
-      duration: searchParams.get('duration') || 'all',
-      destination: searchParams.get('destination') || 'all',
-      difficulty: searchParams.get('difficulty') || 'all',
-    });
-  }, [searchParams]);
+    const fetchDestinations = async () => {
+      try {
+        const response = await destinationsAPI.getAll();
+        setDestinations(response.data.data.destinations);
+      } catch (err) {
+        console.error('Failed to fetch destinations', err);
+      }
+    };
+    fetchDestinations();
+  }, []);
 
-  const destinations = ['all', ...new Set(tours.map((tour) => tour.destination?.name).filter(Boolean))];
-  const types = ['all', 'wildlife', 'beach', 'adventure', 'cultural', 'photography', 'family'];
-  const durations = ['all', '1-3', '4-7', '8-14', '15+'];
-  const difficulties = ['all', 'easy', 'moderate', 'challenging', 'difficult'];
-  const featuredTours = getFeaturedTours(tours, 3);
-  const filteredTours = filterTours(tours, filters);
-  const headerImage = getTourImage(featuredTours[0] || tours[0]);
-  const featuredCount = tours.filter((tour) => tour.is_featured).length;
-
-  function updateFilter(field, value) {
-    setFilters((current) => ({
-      ...current,
-      [field]: value,
-    }));
-  }
-
-  function resetFilters() {
-    setFilters(defaultFilters);
-  }
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#faf8f2]">
-      <StaticPageHeader
-        title="Tours In Kenya"
-        subtitle="Explore 50+ authentic Kenyan experiences from wildlife safaris and beach getaways to cultural adventures and mountain treks."
-        bgImage={headerImage}
-      />
-
-      <section className="container mx-auto px-4 py-12 space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
-            <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Catalog</p>
-            <p className="mt-2 text-3xl font-serif text-gray-900">{tours.length}</p>
-            <p className="mt-2 text-sm text-gray-500">Kenyan tours and experiences available</p>
-          </div>
-          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
-            <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Featured</p>
-            <p className="mt-2 text-3xl font-serif text-primary-600">{featuredCount}</p>
-            <p className="mt-2 text-sm text-gray-500">premium experiences highlighted in the navbar</p>
-          </div>
-          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
-            <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Status</p>
-            <p className="mt-2 text-3xl font-serif text-gray-900">{loading ? 'Loading' : 'Ready'}</p>
-            <p className="mt-2 text-sm text-gray-500">admin tour updates appear here automatically</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-[1.4fr_0.9fr] gap-6">
-          <div className="bg-white rounded-[2rem] border border-gray-100 p-5 shadow-sm">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-11 h-11 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center">
-                <FiSliders className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">Find Your Adventure</h2>
-                <p className="text-sm text-gray-500">Start from the navbar hover finder or refine everything here.</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
-              <div className="xl:col-span-2 relative">
-                <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  value={filters.search}
-                  onChange={(event) => updateFilter('search', event.target.value)}
-                  placeholder="Search tours, destinations, or activities..."
-                  className="w-full rounded-2xl border border-gray-200 bg-white py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-
-              <select
-                value={filters.type}
-                onChange={(event) => updateFilter('type', event.target.value)}
-                className="rounded-2xl border border-gray-200 bg-white px-4 py-4 capitalize focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                {types.map((type) => (
-                  <option key={type} value={type}>
-                    {type === 'all' ? 'All Types' : type}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={filters.duration}
-                onChange={(event) => updateFilter('duration', event.target.value)}
-                className="rounded-2xl border border-gray-200 bg-white px-4 py-4 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                {durations.map((duration) => (
-                  <option key={duration} value={duration}>
-                    {duration === 'all' ? 'Any Duration' : `${duration} Days`}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={filters.destination}
-                onChange={(event) => updateFilter('destination', event.target.value)}
-                className="rounded-2xl border border-gray-200 bg-white px-4 py-4 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                {destinations.map((destination) => (
-                  <option key={destination} value={destination}>
-                    {destination === 'all' ? 'All Destinations' : destination}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex flex-wrap gap-2">
-                {difficulties.map((difficulty) => (
-                  <button
-                    key={difficulty}
-                    type="button"
-                    onClick={() => updateFilter('difficulty', difficulty)}
-                    className={`rounded-full px-4 py-2 text-sm capitalize transition-colors ${
-                      filters.difficulty === difficulty
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {difficulty === 'all' ? 'All Levels' : difficulty}
-                  </button>
-                ))}
-              </div>
-
-              <Button variant="ghost" onClick={resetFilters} className="justify-center">
-                Reset Filters
-              </Button>
-            </div>
-          </div>
-
-          <div className="rounded-[2rem] border border-gray-100 bg-[#132026] p-6 text-white shadow-sm">
-            <p className="text-sm uppercase tracking-[0.2em] text-white/60">Spotlight</p>
-            <h2 className="mt-3 text-2xl font-serif">Popular Kenya Tours</h2>
-            <p className="mt-2 text-sm leading-6 text-white/75">
-              These highlight cards share the same catalog the admin editor controls, so updates flow straight through.
-            </p>
-            <div className="mt-5 space-y-4">
-              {featuredTours.map((tour) => (
-                <Link
-                  key={tour.slug}
-                  href={`/tours/${tour.slug}`}
-                  className="flex items-center gap-4 rounded-3xl bg-white/10 p-3 transition-colors hover:bg-white/15"
-                >
-                  <div className="relative h-20 w-24 overflow-hidden rounded-2xl bg-white/10">
-                    <Image src={getTourImage(tour)} alt={tour.name} fill className="object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs uppercase tracking-[0.2em] text-white/60">{tour.package_code}</p>
-                    <h3 className="mt-1 truncate text-base font-semibold text-white">{tour.name}</h3>
-                    <p className="mt-1 text-sm text-white/70">{tour.destination?.name}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs text-white">
-                      <FiClock className="mr-1" />
-                      {tour.duration_days}d
-                    </div>
-                    <p className="mt-2 text-sm text-white/70">from ${tour.base_price}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
+    <main className="min-h-screen bg-[#fafbfc]">
+      <Navbar />
+      
+      {/* Hero Section */}
+      <section className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-gray-900">
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline 
+          className="absolute inset-0 w-full h-full object-cover opacity-50 scale-105"
         >
-          <div>
-            <h2 className="text-3xl font-serif text-gray-900">Tour Catalog</h2>
-            <p className="mt-2 text-gray-500 max-w-2xl">
-              Showing {filteredTours.length} of {tours.length} authentic Kenyan experiences curated for the discerning traveler.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 rounded-full border border-primary-100 bg-primary-50 px-4 py-2 text-sm text-primary-700 shadow-sm">
-            <FiSun className="text-primary-600 animate-pulse" />
-            <span className="font-medium">50+ Authentic Experiences Found</span>
-          </div>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <AnimatePresence mode="popLayout">
-            {filteredTours.map((tour, index) => (
-              <motion.article
-                key={tour.slug}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="group overflow-hidden rounded-[2.5rem] border border-gray-100 bg-white shadow-md transition-all hover:shadow-2xl hover:-translate-y-1"
-              >
-                <div className="relative h-72 bg-gray-100 overflow-hidden">
-                  <Image 
-                    src={getTourImage(tour)} 
-                    alt={tour.name} 
-                    fill 
-                    className="object-cover transition-transform duration-700 group-hover:scale-110" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  
-                  <div className="absolute top-6 left-6 flex flex-wrap gap-2">
-                    <span className="rounded-full bg-white/90 backdrop-blur-md px-4 py-1.5 text-xs font-bold text-gray-900 uppercase tracking-wider shadow-sm">
-                      {tour.difficulty_level}
-                    </span>
-                    {tour.is_featured && (
-                      <span className="rounded-full bg-primary-600 px-4 py-1.5 text-xs font-bold text-white uppercase tracking-wider shadow-lg shadow-primary-500/30">
-                        Featured
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="absolute bottom-6 left-6 right-6 text-white">
-                    <div className="space-y-2">
-                        <div className="flex items-center text-sm font-medium text-white/90">
-                          <FiMapPin className="mr-2 text-primary-400" />
-                          {tour.destination?.name}
-                        </div>
-                        <h3 className="text-2xl font-serif font-bold leading-tight line-clamp-2">
-                          {tour.name}
-                        </h3>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-8 space-y-6">
-                  <p className="text-sm leading-relaxed text-gray-600 line-clamp-3 italic">
-                    "{tour.short_description}"
-                  </p>
-
-                  <div className="flex flex-wrap gap-3">
-                    <div className="flex items-center rounded-2xl bg-gray-50 px-4 py-2 text-xs font-medium text-gray-700 border border-gray-100">
-                      <FiClock className="mr-2 text-primary-500" />
-                      {tour.duration_days} Days
-                    </div>
-                    {tour.group_size_max && (
-                      <div className="flex items-center rounded-2xl bg-gray-50 px-4 py-2 text-xs font-medium text-gray-700 border border-gray-100">
-                        <FiUsers className="mr-2 text-primary-500" />
-                        Up to {tour.group_size_max} Pax
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between border-t border-gray-100 pt-6">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-gray-400">Total Per Person</p>
-                      <div className="flex items-baseline gap-1 mt-1">
-                        <span className="text-xs font-bold text-primary-600">$</span>
-                        <p className="text-3xl font-serif font-black text-primary-600">{tour.base_price}</p>
-                      </div>
-                    </div>
-                    <Link href={`/tours/${tour.slug}`}>
-                      <Button variant="outline" className="group/btn rounded-full px-6 border-2 hover:bg-primary-600 hover:text-white hover:border-primary-600 transition-all duration-300">
-                        <span className="flex items-center">
-                          Explore
-                          <FiChevronRight className="ml-2 transition-transform group-hover/btn:translate-x-1" />
-                        </span>
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </motion.article>
-            ))}
-          </AnimatePresence>
+          <source src="https://player.vimeo.com/external/370331493.hd.mp4?s=3333333333333333333333333333333333333333&profile_id=175" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-gray-900/40 to-[#fafbfc]" />
+        
+        <div className="container mx-auto px-6 relative z-10 text-center">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-[10px] uppercase tracking-[0.4em] font-bold text-primary-400 mb-6"
+          >
+            Nyle Luxury Collection
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-5xl md:text-7xl font-serif font-bold text-white mb-8 tracking-tight"
+          >
+            Unforgettable <br />
+            <span className="italic font-normal text-primary-400">Experiences</span>
+          </motion.h1>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="max-w-2xl mx-auto relative px-4"
+          >
+            <div className="relative group">
+              <FiSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
+              <input
+                type="text"
+                placeholder="Search your next adventure..."
+                className="w-full bg-white/90 backdrop-blur-xl border-none rounded-[2rem] px-16 py-6 text-lg focus:outline-none focus:ring-4 focus:ring-primary-500/20 shadow-2xl transition-all"
+                value={filters.search || ''}
+                onChange={(e) => updateFilters({ search: e.target.value })}
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 px-6 py-3 bg-primary-500 rounded-full text-white font-bold text-sm shadow-lg shadow-primary-500/30">
+                Search
+              </div>
+            </div>
+          </motion.div>
         </div>
-
-        {filteredTours.length === 0 && (
-          <div className="rounded-[2rem] border border-dashed border-gray-300 bg-white p-12 text-center text-gray-500">
-            No tours match the current filters yet. Reset the filters or try another type, duration, or destination.
-          </div>
-        )}
       </section>
-    </div>
-  );
-}
 
-export default function ToursPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ToursPageContent />
-    </Suspense>
+      {/* Main Content */}
+      <section className="container mx-auto px-6 py-20">
+        <div className="flex flex-col lg:flex-row gap-12">
+          
+          {/* Filters Sidebar */}
+          <aside className="w-full lg:w-[380px] shrink-0">
+            <div className="sticky top-32">
+              <TourFilters 
+                filters={filters} 
+                updateFilters={updateFilters} 
+                destinations={destinations} 
+              />
+              
+              <div className="mt-8 rounded-[2.5rem] bg-gray-950 p-8 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/20 rounded-full blur-2xl -mr-16 -mt-16" />
+                <h4 className="text-xl font-serif font-bold mb-4 relative z-10 italic">Need expert advice?</h4>
+                <p className="text-gray-400 text-sm mb-6 relative z-10">Our luxury travel consultants are ready to curate your perfect itinerary.</p>
+                <button className="w-full py-4 rounded-2xl bg-white text-gray-900 font-bold text-sm tracking-widest uppercase hover:bg-primary-500 hover:text-white transition-all">
+                  Contact Specialist
+                </button>
+              </div>
+            </div>
+          </aside>
+
+          {/* Results Grid */}
+          <div className="flex-1">
+            <div className="flex justify-between items-center mb-10">
+              <div className="flex items-baseline space-x-2">
+                <span className="text-3xl font-serif font-bold text-gray-900">{total}</span>
+                <span className="text-gray-400 font-medium tracking-widest uppercase text-[10px]">Tours Found</span>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <span className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Sort By:</span>
+                <select 
+                  className="bg-transparent border-none text-sm font-bold text-gray-900 focus:ring-0 cursor-pointer"
+                  value={filters.sort}
+                  onChange={(e) => updateFilters({ sort: e.target.value })}
+                >
+                  <option value="created_at">Latest</option>
+                  <option value="base_price">Price (Low to High)</option>
+                  <option value="duration_days">Duration</option>
+                </select>
+              </div>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {loading ? (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-8"
+                >
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="bg-gray-100 rounded-[2.5rem] h-96 animate-pulse" />
+                  ))}
+                </motion.div>
+              ) : tours.length > 0 ? (
+                <motion.div
+                  key="results"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="show"
+                  className="grid grid-cols-1 md:grid-cols-2 gap-8"
+                >
+                  {tours.map((tour) => (
+                    <TourCard key={tour.id} tour={tour} />
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div 
+                  key="empty"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center justify-center py-40 text-center"
+                >
+                  <div className="w-24 h-24 rounded-full bg-gray-50 flex items-center justify-center mb-8">
+                    <FiFrown className="text-gray-300" size={48} />
+                  </div>
+                  <h3 className="text-2xl font-serif font-bold text-gray-900 mb-2">No matching tours</h3>
+                  <p className="text-gray-500 max-w-sm">Try adjusting your filters or search terms to find what you're looking for.</p>
+                  <button 
+                    onClick={() => updateFilters({ search: '', destination: '', difficulty: '' })}
+                    className="mt-8 text-primary-500 font-bold text-xs uppercase tracking-[0.2em] hover:opacity-70 transition-opacity"
+                  >
+                    Clear all filters
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-20 flex items-center justify-center space-x-6">
+                <button
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
+                  className="w-14 h-14 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-900 shadow-sm transition-all hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <FiChevronLeft size={20} />
+                </button>
+                
+                <div className="flex items-center space-x-2">
+                  {[...Array(totalPages)].map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => updateFilters({ page: i + 1 })}
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold transition-all ${
+                        currentPage === i + 1 
+                          ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' 
+                          : 'bg-white text-gray-400 hover:text-gray-900'
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={nextPage}
+                  disabled={currentPage === totalPages}
+                  className="w-14 h-14 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-900 shadow-sm transition-all hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <FiChevronRight size={20} />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </main>
   );
 }

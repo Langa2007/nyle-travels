@@ -73,16 +73,6 @@ export const authAPI = {
   updatePassword: (data) => api.patch('/auth/update-password', data),
 };
 
-// Tours API
-export const toursAPI = {
-  getAll: (params) => api.get('/tours', { params }),
-  getOne: (slug) => api.get(`/tours/${slug}`),
-  getFeatured: () => api.get('/tours/featured'),
-  search: (query) => api.get('/tours/search', { params: { query } }),
-  checkAvailability: (tourId, date, guests) => 
-    api.get(`/tours/${tourId}/availability`, { params: { date, guests } }),
-};
-
 // Hotels API
 export const hotelsAPI = {
   getAll: (params) => api.get('/hotels', { params }),
@@ -94,6 +84,23 @@ export const hotelsAPI = {
     api.get('/hotels/nearby', { params: { latitude: lat, longitude: lng, radius } }),
   checkAvailability: (hotelId, checkIn, checkOut, roomType) =>
     api.get(`/hotels/${hotelId}/availability`, { params: { check_in: checkIn, check_out: checkOut, room_type: roomType } }),
+};
+
+// Tours API
+export const toursAPI = {
+  // Public
+  getAll: (params) => api.get('/tours', { params }),
+  getOne: (slug) => api.get(`/tours/${slug}`),
+  getFeatured: () => api.get('/tours/featured'),
+  
+  // Admin
+  getStats: () => api.get('/tours/admin/stats'),
+  create: (data) => api.post('/tours', data),
+  update: (id, data) => api.put(`/tours/${id}`, data),
+  delete: (id) => api.delete(`/tours/${id}`),
+  addItinerary: (id, data) => api.post(`/tours/${id}/itinerary`, data),
+  bulkUpdateItinerary: (id, data) => api.put(`/tours/${id}/itinerary/bulk`, data),
+  updateAvailability: (id, data) => api.put(`/tours/${id}/availability`, data),
 };
 
 // Destinations API
@@ -133,7 +140,6 @@ export const paymentsAPI = {
 // Reviews API
 export const reviewsAPI = {
   create: (data) => api.post('/reviews', data),
-  getTourReviews: (tourId, params) => api.get(`/reviews/tour/${tourId}`, { params }),
   getHotelReviews: (hotelId, params) => api.get(`/reviews/hotel/${hotelId}`, { params }),
   getOne: (id) => api.get(`/reviews/${id}`),
   update: (id, data) => api.patch(`/reviews/${id}`, data),

@@ -12,8 +12,8 @@ dotenv.config();
 
 // Import routes
 import authRoutes from './routes/authRoutes.js';
-import tourRoutes from './routes/tourRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
+import tourRoutes from './routes/tourRoutes.js';
 import hotelRoutes from './routes/hotelRoutes.js';
 import destinationRoutes from './routes/destinationRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
@@ -101,8 +101,8 @@ app.get('/health', (req, res) => {
 
 // API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/tours', tourRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/tours', tourRoutes);
 app.use('/api/hotels', hotelRoutes);
 app.use('/api/destinations', destinationRoutes);
 app.use('/api/payments', paymentRoutes);

@@ -29,52 +29,6 @@ import {
 const navLinks = [
   { href: '/', label: 'Home' },
   {
-    href: '/tours',
-    label: 'Tours',
-    megaMenu: [
-      {
-        title: 'By Interest',
-        links: [
-          { href: '/tours?type=wildlife', label: 'Wildlife Safaris' },
-          { href: '/tours?type=beach', label: 'Beach Holidays' },
-          { href: '/tours?type=adventure', label: 'Adventure Tours' },
-          { href: '/tours?type=cultural', label: 'Cultural Experiences' },
-          { href: '/tours?type=photography', label: 'Photography Safaris' },
-          { href: '/tours?type=family', label: 'Family Friendly' },
-        ],
-      },
-      {
-        title: 'By Duration',
-        links: [
-          { href: '/tours?duration=3', label: '3-5 Days' },
-          { href: '/tours?duration=7', label: '1 Week' },
-          { href: '/tours?duration=10', label: '10 Days' },
-          { href: '/tours?duration=14', label: '2 Weeks' },
-          { href: '/tours?duration=21', label: '3 Weeks+' },
-        ],
-      },
-      {
-        title: 'Featured',
-        links: [
-          { href: '/tours/featured', label: 'Premium Collection' },
-          { href: '/tours/luxury', label: 'Ultra-Luxury' },
-          { href: '/tours/best-sellers', label: 'Best Sellers' },
-          { href: '/tours/special-offers', label: 'Special Offers' },
-        ],
-      },
-      {
-        title: 'By Destination',
-        links: [
-          { href: '/destinations#maasai-mara', label: 'Maasai Mara' },
-          { href: '/destinations#diani-beach', label: 'Diani Beach' },
-          { href: '/destinations#amboseli', label: 'Amboseli' },
-          { href: '/destinations#tsavo-east', label: 'Tsavo' },
-          { href: '/destinations#lake-nakuru', label: 'Lake Nakuru' },
-        ],
-      },
-    ],
-  },
-  {
     href: '/hotels',
     label: 'Hotels',
     megaMenu: [
@@ -118,6 +72,45 @@ const navLinks = [
       },
     ],
   },
+  {
+    href: '/tours',
+    label: 'Tours',
+    megaMenu: [
+      {
+        title: 'By Style',
+        links: [
+          { href: '/tours?difficulty=easy', label: 'Family Expeditions' },
+          { href: '/tours?difficulty=moderate', label: 'Cultural Discoveries' },
+          { href: '/tours?difficulty=challenging', label: 'Wilderness Treks' },
+          { href: '/tours?difficulty=difficult', label: 'Extreme Adventures' },
+        ],
+      },
+      {
+        title: 'By Duration',
+        links: [
+          { href: '/tours?minDuration=1&maxDuration=5', label: 'Quick Escapes' },
+          { href: '/tours?minDuration=6&maxDuration=10', label: 'Standard Voyages' },
+          { href: '/tours?minDuration=11', label: 'Grand Expeditions' },
+        ],
+      },
+      {
+        title: 'Specialty',
+        links: [
+          { href: '/tours?isFeatured=true', label: 'Signature Series' },
+          { href: '/tours?sort=views_count', label: 'Trending Journeys' },
+          { href: '/tours?sort=base_price&order=ASC', label: 'Value Collections' },
+        ],
+      },
+      {
+        title: 'Top Regions',
+        links: [
+          { href: '/tours?destination=maasai-mara', label: 'The Mara' },
+          { href: '/tours?destination=diani-beach', label: 'Coastal Luxury' },
+          { href: '/tours?destination=amboseli', label: 'Kilimanjaro Views' },
+        ],
+      },
+    ],
+  },
   { href: '/destinations', label: 'Destinations' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
@@ -144,12 +137,6 @@ export default function Navbar() {
     amenity: '',
   });
 
-  const [tourFinder, setTourFinder] = useState({
-    search: '',
-    type: '',
-    duration: '',
-    destination: '',
-  });
   const { hotels } = useHotelCatalog(hotelsSeed);
   const featuredHotels = getFeaturedHotels(hotels, 3);
   const hotelDestinations = [...new Set(hotels.map((hotel) => hotel.destination).filter(Boolean))].slice(0, 6);
@@ -174,13 +161,6 @@ export default function Navbar() {
     }));
   }
 
-  function updateTourFinder(field, value) {
-    setTourFinder((current) => ({
-      ...current,
-      [field]: current[field] === value ? '' : value,
-    }));
-  }
-
   function goToHotelSearch(overrides = {}) {
     const nextFilters = {
       ...hotelFinder,
@@ -191,229 +171,221 @@ export default function Navbar() {
     router.push(query ? `/hotels?${query}` : '/hotels');
   }
 
-  function goToTourSearch(overrides = {}) {
-    const nextFilters = {
-      ...tourFinder,
-      ...overrides,
-    };
-    const params = new URLSearchParams();
-    Object.entries(nextFilters).forEach(([key, value]) => {
-      if (value) params.append(key, value);
-    });
-    const queryString = params.toString();
-    setActiveMegaMenu(null);
-    router.push(queryString ? `/tours?${queryString}` : '/tours');
-  }
-
   function handleHotelFinderSubmit(event) {
     event.preventDefault();
     goToHotelSearch();
   }
 
-  function handleTourFinderSubmit(event) {
-    event.preventDefault();
-    goToTourSearch();
-  }
-
   return (
     <>
       <nav
-        className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-          isScrolled
-            ? 'bg-white/95 backdrop-blur-md shadow-lg py-2'
-            : 'bg-transparent py-4'
+        className={`fixed top-0 left-0 right-0 z-50 px-4 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+          isScrolled ? 'pt-4' : 'pt-0'
         }`}
       >
-        <div className="container mx-auto px-4">
+        <div 
+          className={`mx-auto transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+            isScrolled 
+              ? 'max-w-5xl bg-white/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] rounded-[2rem] px-8 py-3' 
+              : 'max-w-full bg-transparent px-8 py-6'
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <Link href="/" className="relative z-10">
-              <div className="flex items-center space-x-2">
-                <div className="relative w-12 h-12">
-                  <Image
-                    src="/images/logo.svg"
-                    alt="Nyle Travel"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
+            <Link href="/" className="relative z-10 group overflow-hidden">
+              <div className="flex items-center space-x-3">
+                <motion.div 
+                  className="relative w-10 h-10 overflow-hidden rounded-xl bg-gradient-to-br from-primary-500 to-secondary-600 p-[2px]"
+                  whileHover={{ rotate: 10, scale: 1.05 }}
+                >
+                  <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
+                    <Image
+                      src="/images/logo.svg"
+                      alt="Nyle Travel"
+                      fill
+                      className="object-contain p-1.5"
+                      priority
+                    />
+                  </div>
+                </motion.div>
+                <div className="flex flex-col">
+                  <span className={`font-serif text-xl font-bold leading-none tracking-tight transition-colors duration-500 ${
+                    isScrolled ? 'text-gray-900' : 'text-white'
+                  }`}>
+                    Nyle<span className="text-primary-500">Travel</span>
+                  </span>
+                  <span className={`text-[10px] uppercase tracking-[0.3em] font-medium transition-colors duration-500 ${
+                    isScrolled ? 'text-gray-500 font-bold' : 'text-white/60'
+                  }`}>
+                    & Tours
+                  </span>
                 </div>
-                <span className={`font-serif text-2xl font-bold transition-colors ${
-                  isScrolled ? 'text-gray-900' : 'text-white'
-                }`}>
-                  Nyle<span className="text-primary-500">Travel</span>
-                </span>
               </div>
             </Link>
 
-            <div className="hidden lg:flex items-center space-x-8">
+            <div className="hidden lg:flex items-center space-x-2 relative">
               {navLinks.map((link) => (
                 <div
                   key={link.href}
-                  className="relative group"
-                  onMouseEnter={() => link.megaMenu && setActiveMegaMenu(link.label)}
+                  className="relative px-4 py-2"
+                  onMouseEnter={() => {
+                    setActiveMegaMenu(link.label);
+                  }}
                   onMouseLeave={() => setActiveMegaMenu(null)}
                 >
                   <Link
                     href={link.href}
-                    className={`flex items-center space-x-1 text-sm font-medium transition-colors hover:text-primary-500 ${
-                      isScrolled ? 'text-gray-700' : 'text-white'
-                    } ${pathname === link.href ? 'text-primary-500' : ''}`}
+                    className={`relative z-10 flex items-center space-x-1 text-sm font-semibold transition-colors duration-500 ${
+                      activeMegaMenu === link.label || pathname === link.href
+                        ? 'text-primary-500'
+                        : isScrolled ? 'text-gray-600' : 'text-white/90'
+                    }`}
                   >
                     <span>{link.label}</span>
-                    {link.megaMenu && <FiChevronDown className="ml-1" />}
+                    {link.megaMenu && (
+                      <motion.span
+                        animate={{ rotate: activeMegaMenu === link.label ? 180 : 0 }}
+                      >
+                        <FiChevronDown className="ml-0.5 w-3 h-3" />
+                      </motion.span>
+                    )}
                   </Link>
+
+                  {pathname === link.href && (
+                    <motion.div
+                      layoutId="nav-pill"
+                      className="absolute inset-0 bg-primary-50/80 rounded-full -z-0"
+                      transition={{ type: 'spring', bounce: 0.25, duration: 0.5 }}
+                    />
+                  )}
 
                   <AnimatePresence>
                     {link.megaMenu && activeMegaMenu === link.label && (
                       <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        transition={{ duration: 0.2 }}
-                        className={`absolute top-full left-0 mt-2 rounded-2xl bg-white p-6 shadow-2xl ${
-                          link.label === 'Hotels' ? 'w-[980px]' : 'w-[600px]'
+                        exit={{ opacity: 0, y: 15 }}
+                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                        className={`absolute top-full -left-20 mt-4 rounded-[2rem] bg-white/90 backdrop-blur-2xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white/20 overflow-hidden ${
+                          link.label === 'Hotels' ? 'w-[1000px]' : 'w-[640px]'
                         }`}
                       >
-                          <div className={`grid gap-6 ${
-                            link.label === 'Hotels' || link.label === 'Tours' ? 'grid-cols-[repeat(4,minmax(0,1fr))_1.35fr]' : 'grid-cols-4'
-                          }`}>
-                            {link.megaMenu.map((column) => (
-                              <div key={column.title}>
-                                <h3 className="mb-3 text-sm font-semibold text-gray-900">{column.title}</h3>
-                                <ul className="space-y-2">
-                                  {column.links.map((subLink) => (
-                                    <li key={subLink.href}>
-                                      <Link
-                                        href={subLink.href}
-                                        className="text-sm text-gray-600 transition-colors hover:text-primary-500"
-                                      >
+                        {/* Decorative background element for mega menu */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 rounded-full blur-3xl -mr-32 -mt-32" />
+                        
+                        <motion.div 
+                          className={`relative z-10 grid gap-10 ${
+                            link.label === 'Hotels' ? 'grid-cols-[repeat(4,minmax(0,1fr))_1.5fr]' : 'grid-cols-4'
+                          }`}
+                          variants={{
+                            hidden: { opacity: 0 },
+                            show: {
+                              opacity: 1,
+                              transition: { staggerChildren: 0.05 }
+                            }
+                          }}
+                          initial="hidden"
+                          animate="show"
+                        >
+                          {link.megaMenu.map((column) => (
+                            <motion.div 
+                              key={column.title}
+                              variants={{
+                                hidden: { opacity: 0, y: 10 },
+                                show: { opacity: 1, y: 0 }
+                              }}
+                            >
+                              <h3 className="mb-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">{column.title}</h3>
+                              <ul className="space-y-3">
+                                {column.links.map((subLink) => (
+                                  <li key={subLink.href}>
+                                    <Link
+                                      href={subLink.href}
+                                      className="inline-flex items-center group/link text-sm font-medium text-gray-700 transition-all hover:text-primary-600"
+                                    >
+                                      <span className="relative">
                                         {subLink.label}
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            ))}
+                                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover/link:w-full" />
+                                      </span>
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            </motion.div>
+                          ))}
 
-                            {(link.label === 'Hotels' || link.label === 'Tours') && (
-                              <div className="rounded-3xl bg-[#132026] p-5 text-white">
-                                <p className="text-xs uppercase tracking-[0.25em] text-white/60">
-                                  {link.label === 'Hotels' ? 'Hotel Finder' : 'Tour Finder'}
-                                </p>
-                                <h3 className="mt-3 text-xl font-serif">Search from the hover menu</h3>
-                                <p className="mt-2 text-sm leading-6 text-white/70">
-                                  {link.label === 'Hotels' 
-                                    ? 'Open the full hotels page with your destination, category, and amenity filters already applied.'
-                                    : 'Explore our 50+ authentic tours with custom filters for duration, type, and more.'}
-                                </p>
-
-                                <form 
-                                  onSubmit={link.label === 'Hotels' ? handleHotelFinderSubmit : handleTourFinderSubmit} 
-                                  className="mt-5 space-y-4"
-                                >
-                                  <div>
-                                    <input
-                                      type="text"
-                                      value={link.label === 'Hotels' ? hotelFinder.search : tourFinder.search}
-                                      onChange={(event) => 
-                                        link.label === 'Hotels' 
-                                          ? updateHotelFinder('search', event.target.value) 
-                                          : updateTourFinder('search', event.target.value)
-                                      }
-                                      placeholder={link.label === 'Hotels' ? "Search hotel or destination" : "Search tours or activities"}
-                                      className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/45 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    />
-                                  </div>
-
-                                  {link.label === 'Hotels' ? (
-                                    <>
-                                      <select
-                                        value={hotelFinder.destination}
-                                        onChange={(event) => updateHotelFinder('destination', event.target.value)}
-                                        className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                      >
-                                        <option value="">Any destination</option>
-                                        {hotelDestinations.map((destination) => (
-                                          <option key={destination} value={destination} className="text-gray-900">
-                                            {destination}
-                                          </option>
-                                        ))}
-                                      </select>
-
-                                      <select
-                                        value={hotelFinder.type}
-                                        onChange={(event) => updateHotelFinder('type', event.target.value)}
-                                        className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white capitalize focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                      >
-                                        <option value="">Any style</option>
-                                        {hotelTypeOptions.map((type) => (
-                                          <option key={type} value={type} className="text-gray-900">
-                                            {type}
-                                          </option>
-                                        ))}
-                                      </select>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <select
-                                        value={tourFinder.type}
-                                        onChange={(event) => updateTourFinder('type', event.target.value)}
-                                        className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white capitalize focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                      >
-                                        <option value="">Any interest</option>
-                                        {['wildlife', 'beach', 'adventure', 'cultural', 'photography', 'family'].map((type) => (
-                                          <option key={type} value={type} className="text-gray-900">
-                                            {type}
-                                          </option>
-                                        ))}
-                                      </select>
-
-                                      <select
-                                        value={tourFinder.duration}
-                                        onChange={(event) => updateTourFinder('duration', event.target.value)}
-                                        className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                      >
-                                        <option value="">Any duration</option>
-                                        <option value="1-3" className="text-gray-900">1-3 Days</option>
-                                        <option value="4-7" className="text-gray-900">4-7 Days</option>
-                                        <option value="8-14" className="text-gray-900">8-14 Days</option>
-                                        <option value="15+" className="text-gray-900">15+ Days</option>
-                                      </select>
-                                    </>
-                                  )}
-
-                                  <Button type="submit" variant="primary" fullWidth>
-                                    {link.label === 'Hotels' ? 'Search Hotels' : 'Explore Tours'}
-                                  </Button>
-                                </form>
-
-                                {link.label === 'Hotels' && (
-                                  <div className="mt-5 space-y-3 border-t border-white/10 pt-5">
-                                    {featuredHotels.map((hotel) => (
-                                      <button
-                                        key={hotel.slug}
-                                        type="button"
-                                        onClick={() => goToHotelSearch({ destination: hotel.destination, search: hotel.name })}
-                                        className="flex w-full items-center gap-3 rounded-2xl bg-white/8 p-3 text-left transition-colors hover:bg-white/12"
-                                      >
-                                        <div className="relative h-16 w-20 overflow-hidden rounded-2xl bg-white/10">
-                                          <Image src={getHotelImage(hotel)} alt={hotel.name} fill className="object-cover" />
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                          <p className="truncate text-sm font-semibold text-white">{hotel.name}</p>
-                                          <p className="mt-1 flex items-center text-xs text-white/65">
-                                            <FiMapPin className="mr-1" />
-                                            {hotel.destination}
-                                          </p>
-                                        </div>
-                                        <span className="text-xs text-white/70">${hotel.price}</span>
-                                      </button>
+                          {link.label === 'Hotels' && (
+                            <motion.div 
+                              variants={{
+                                hidden: { opacity: 0, scale: 0.95 },
+                                show: { opacity: 1, scale: 1 }
+                              }}
+                              className="rounded-[2rem] bg-gray-950 p-6 text-white shadow-2xl relative overflow-hidden"
+                            >
+                              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/20 rounded-full blur-2xl -mr-16 -mt-16" />
+                              
+                              <p className="relative z-10 text-[10px] uppercase tracking-[0.3em] font-bold text-primary-400">
+                                Smart Finder
+                              </p>
+                              <h3 className="relative z-10 mt-3 text-xl font-serif font-bold italic">Curate your perfect stay</h3>
+                              
+                              <form 
+                                onSubmit={handleHotelFinderSubmit} 
+                                className="relative z-10 mt-6 space-y-3"
+                              >
+                                <div>
+                                  <input
+                                    type="text"
+                                    value={hotelFinder.search}
+                                    onChange={(event) => updateHotelFinder('search', event.target.value)}
+                                    placeholder="Where to?"
+                                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all font-medium"
+                                  />
+                                </div>
+                                <div className="grid grid-cols-1 gap-3">
+                                  <select
+                                    value={hotelFinder.type}
+                                    onChange={(event) => updateHotelFinder('type', event.target.value)}
+                                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all font-medium appearance-none"
+                                  >
+                                    <option value="" className="text-gray-900">All Styles</option>
+                                    {hotelTypeOptions.map((type) => (
+                                      <option key={type} value={type} className="text-gray-900 uppercase tracking-tighter">
+                                        {type}
+                                      </option>
                                     ))}
-                                  </div>
-                                )}
+                                  </select>
+                                </div>
+                                <Button type="submit" variant="primary" fullWidth className="!rounded-2xl !py-3 font-bold uppercase tracking-widest text-xs">
+                                  Search Hotels
+                                </Button>
+                              </form>
+                              
+                              <div className="relative z-10 mt-6 space-y-3 pt-6 border-t border-white/10">
+                                <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-2">Editor's Choice</p>
+                                {featuredHotels.slice(0, 2).map((hotel) => (
+                                  <button
+                                    key={hotel.slug}
+                                    type="button"
+                                    onClick={() => goToHotelSearch({ destination: hotel.destination, search: hotel.name })}
+                                    className="flex w-full items-center gap-3 rounded-2xl bg-white/5 p-2 text-left transition-all hover:bg-white/10 group/item"
+                                  >
+                                    <div className="relative h-12 w-12 overflow-hidden rounded-xl">
+                                      <Image src={getHotelImage(hotel)} alt={hotel.name} fill className="object-cover transition-transform duration-500 group-hover/item:scale-110" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="truncate text-xs font-bold text-white">{hotel.name}</p>
+                                      <p className="mt-0.5 flex items-center text-[10px] text-white/50 font-medium">
+                                        <FiMapPin className="mr-1" />
+                                        {hotel.destination}
+                                      </p>
+                                    </div>
+                                    <FiChevronDown className="text-white/30 -rotate-90" size={14} />
+                                  </button>
+                                ))}
                               </div>
-                            )}
-                          </div>
+                            </motion.div>
+                          )}
+                        </motion.div>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -421,43 +393,49 @@ export default function Navbar() {
               ))}
             </div>
 
-            <div className="hidden lg:flex items-center space-x-4">
-              <button
-                onClick={() => setSearchOpen(!searchOpen)}
-                className={`p-2 rounded-full transition-colors hover:bg-white/10 ${
-                  isScrolled ? 'text-gray-700' : 'text-white'
-                }`}
-              >
-                <FiSearch size={20} />
-              </button>
+            <div className="hidden lg:flex items-center space-x-3">
+              <div className={`flex items-center p-1 rounded-full transition-all duration-500 ${
+                isScrolled ? 'bg-gray-100' : 'bg-white/10 backdrop-blur-sm'
+              }`}>
+                <button
+                  onClick={() => setSearchOpen(!searchOpen)}
+                  className={`p-2.5 rounded-full transition-all duration-300 hover:scale-110 ${
+                    isScrolled ? 'text-gray-700 hover:bg-white hover:shadow-sm' : 'text-white hover:bg-white/20'
+                  }`}
+                >
+                  <FiSearch size={18} />
+                </button>
 
-              <Link
-                href="/wishlist"
-                className={`p-2 rounded-full transition-colors hover:bg-white/10 relative ${
-                  isScrolled ? 'text-gray-700' : 'text-white'
-                }`}
-              >
-                <FiHeart size={20} />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {wishlistCount}
-                  </span>
-                )}
-              </Link>
+                <Link
+                  href="/wishlist"
+                  className={`p-2.5 rounded-full transition-all duration-300 hover:scale-110 relative ${
+                    isScrolled ? 'text-gray-700 hover:bg-white hover:shadow-sm' : 'text-white hover:bg-white/20'
+                  }`}
+                >
+                  <FiHeart size={18} />
+                  {wishlistCount > 0 && (
+                    <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border-2 border-white">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
 
-              <Link
-                href="/cart"
-                className={`p-2 rounded-full transition-colors hover:bg-white/10 relative ${
-                  isScrolled ? 'text-gray-700' : 'text-white'
-                }`}
-              >
-                <FiShoppingBag size={20} />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
+                <Link
+                  href="/cart"
+                  className={`p-2.5 rounded-full transition-all duration-300 hover:scale-110 relative ${
+                    isScrolled ? 'text-gray-700 hover:bg-white hover:shadow-sm' : 'text-white hover:bg-white/20'
+                  }`}
+                >
+                  <FiShoppingBag size={18} />
+                  {cartCount > 0 && (
+                    <span className="absolute top-1 right-1 bg-primary-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border-2 border-white">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+              </div>
+
+              <div className="h-8 w-px bg-gray-200/50 mx-2" />
 
               {user ? (
                 <div className="relative group">
@@ -532,7 +510,7 @@ export default function Navbar() {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Search for destinations, tours, hotels..."
+                    placeholder="Search for destinations or hotels..."
                     className="w-full py-4 pr-12 text-lg border-b-2 border-gray-200 focus:border-primary-500 outline-none"
                     autoFocus
                   />
@@ -562,138 +540,105 @@ export default function Navbar() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'tween' }}
-            className="fixed inset-y-0 right-0 w-full max-w-sm bg-white z-50 shadow-2xl lg:hidden overflow-y-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-gray-950/40 backdrop-blur-2xl z-50 lg:hidden"
           >
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-8">
-                <Link href="/" onClick={() => setIsOpen(false)}>
-                  <span className="font-serif text-2xl font-bold text-gray-900">
-                    Nyle<span className="text-primary-500">Travel</span>
-                  </span>
+            <motion.div
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.1 }}
+              className="flex flex-col h-full bg-white/95 backdrop-blur-xl p-8"
+            >
+              <div className="flex justify-between items-center mb-12">
+                <Link href="/" onClick={() => setIsOpen(false)} className="group">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-600 p-[2px]">
+                      <div className="w-full h-full bg-white rounded-[9px] flex items-center justify-center">
+                        <Image src="/images/logo.svg" alt="Logo" width={24} height={24} />
+                      </div>
+                    </div>
+                    <span className="font-serif text-2xl font-bold tracking-tight">Nyle Travel</span>
+                  </div>
                 </Link>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 rounded-lg hover:bg-gray-100"
+                  className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100/80 text-gray-900 border border-black/5"
                 >
                   <FiX size={24} />
                 </button>
               </div>
 
-              {!user && (
-                <div className="mb-8">
-                  <Link href="/login" onClick={() => setIsOpen(false)}>
-                    <Button variant="primary" fullWidth className="mb-3">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/register" onClick={() => setIsOpen(false)}>
-                    <Button variant="outline" fullWidth>
-                      Create Account
-                    </Button>
-                  </Link>
-                </div>
-              )}
-
-              {user && (
-                <div className="mb-8 p-4 bg-gradient-to-r from-primary-50 to-secondary-50 rounded-xl">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center text-white font-bold text-lg">
-                      {user.first_name?.[0]}{user.last_name?.[0]}
-                    </div>
-                    <div>
-                      <p className="font-semibold">{user.first_name} {user.last_name}</p>
-                      <p className="text-sm text-gray-600">{user.email}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <nav className="space-y-1">
-                {navLinks.map((link) => (
-                  <div key={link.href}>
-                    {link.megaMenu ? (
-                      <div className="border-b border-gray-100 py-2">
-                        <p className="font-semibold text-gray-900 mb-2">{link.label}</p>
-                        <div className="grid grid-cols-2 gap-4 ml-4">
-                          {link.megaMenu.map((column) => (
-                            <div key={column.title}>
-                              <h4 className="text-xs font-semibold text-gray-500 mb-2">{column.title}</h4>
-                              <ul className="space-y-2">
-                                {column.links.map((subLink) => (
-                                  <li key={subLink.href}>
-                                    <Link
-                                      href={subLink.href}
-                                      className="text-sm text-gray-600 hover:text-primary-500"
-                                      onClick={() => setIsOpen(false)}
-                                    >
-                                      {subLink.label}
-                                    </Link>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
+              <nav className="flex-1 space-y-1 overflow-y-auto">
+                <motion.div 
+                  className="space-y-4"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+                  }}
+                  initial="hidden"
+                  animate="show"
+                >
+                  {navLinks.map((link) => (
+                    <motion.div
+                      key={link.href}
+                      variants={{
+                        hidden: { opacity: 0, x: -20 },
+                        show: { opacity: 1, x: 0 }
+                      }}
+                    >
                       <Link
                         href={link.href}
-                        className="block py-3 text-gray-700 hover:text-primary-500 font-medium border-b border-gray-100"
+                        className="block text-4xl font-serif font-bold text-gray-900 tracking-tight transition-all active:scale-95"
                         onClick={() => setIsOpen(false)}
                       >
                         {link.label}
                       </Link>
-                    )}
-                  </div>
-                ))}
+                      {link.megaMenu && (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {link.megaMenu.flatMap(col => col.links).slice(0, 4).map(sub => (
+                            <Link
+                              key={sub.label}
+                              href={sub.href}
+                              className="px-4 py-2 rounded-full border border-gray-200 text-xs font-bold uppercase tracking-widest text-gray-500"
+                              onClick={() => setIsOpen(false)}
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
+                </motion.div>
               </nav>
 
-              {user && (
-                <div className="mt-8 pt-8 border-t border-gray-200">
-                  <Link
-                    href="/dashboard"
-                    className="block py-2 text-gray-700 hover:text-primary-500"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="/dashboard/bookings"
-                    className="block py-2 text-gray-700 hover:text-primary-500"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    My Bookings
-                  </Link>
-                  <Link
-                    href="/wishlist"
-                    className="block py-2 text-gray-700 hover:text-primary-500"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Wishlist ({wishlistCount})
-                  </Link>
-                  <Link
-                    href="/dashboard/profile"
-                    className="block py-2 text-gray-700 hover:text-primary-500"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Profile
-                  </Link>
-                  <button
-                    onClick={() => {
-                      logout();
-                      setIsOpen(false);
-                    }}
-                    className="block w-full text-left py-2 text-red-600 hover:text-red-700"
-                  >
-                    Logout
-                  </button>
+              <div className="mt-auto py-8 border-t border-gray-100">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex space-x-4">
+                    <Link href="/wishlist" className="relative p-2" onClick={() => setIsOpen(false)}>
+                      <FiHeart size={24} />
+                      {wishlistCount > 0 && <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full border-2 border-white" />}
+                    </Link>
+                    <Link href="/cart" className="relative p-2" onClick={() => setIsOpen(false)}>
+                      <FiShoppingBag size={24} />
+                      {cartCount > 0 && <span className="absolute top-0 right-0 w-4 h-4 bg-primary-500 rounded-full border-2 border-white" />}
+                    </Link>
+                  </div>
+
+                  {user ? (
+                    <button onClick={logout} className="text-sm font-bold uppercase tracking-widest text-red-500">Sign Out</button>
+                  ) : (
+                    <Link href="/login" className="text-sm font-bold uppercase tracking-widest text-primary-500">Sign In</Link>
+                  )}
                 </div>
-              )}
-            </div>
+                
+                <Button variant="primary" fullWidth className="!rounded-2xl !py-5 text-sm uppercase tracking-[0.2em] font-bold">
+                  Book a Consult
+                </Button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

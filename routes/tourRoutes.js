@@ -1,43 +1,41 @@
-import { Router } from 'express';
+import express from 'express';
 import { 
-  getAllTours, getTour, createTour, updateTour, deleteTour,
-  addItinerary, checkAvailability, getFeaturedTours, searchTours
+  getAllTours, 
+  getTourBySlug, 
+  getFeaturedTours 
 } from '../controllers/tourController.js';
-import { protect, restrictTo } from '../middleware/auth.js';
-import { upload } from '../middleware/upload.js';
+import { 
+  createTour, 
+  updateTour, 
+  deleteTour, 
+  addItinerary, 
+  bulkUpdateItinerary, 
+  updateAvailability, 
+  getTourStats 
+} from '../controllers/admin/tourAdminController.js';
+import { protect, restrictTo } from '../middleware/authMiddleware.js';
 
-const router = Router();
+const router = express.Router();
 
-// Public routes
+/**
+ * Public Routes
+ */
 router.get('/', getAllTours);
 router.get('/featured', getFeaturedTours);
-router.get('/search', searchTours);
-router.get('/:slug', getTour);
-router.get('/:tourId/availability', checkAvailability);
+router.get('/:slug', getTourBySlug);
 
-// Protected routes (admin only)
+/**
+ * Admin Routes (Protected)
+ */
 router.use(protect);
 router.use(restrictTo('admin'));
 
-router.post('/', 
-  upload.fields([
-    { name: 'featured_image', maxCount: 1 },
-    { name: 'gallery_images', maxCount: 10 }
-  ]),
-  createTour
-);
-
-router.patch('/:id',
-  upload.fields([
-    { name: 'featured_image', maxCount: 1 },
-    { name: 'gallery_images', maxCount: 10 }
-  ]),
-  updateTour
-);
-
+router.get('/admin/stats', getTourStats);
+router.post('/', createTour);
+router.put('/:id', updateTour);
 router.delete('/:id', deleteTour);
-
-// Itinerary routes
-router.post('/:tourId/itineraries', addItinerary);
+router.post('/:id/itinerary', addItinerary);
+router.put('/:id/itinerary/bulk', bulkUpdateItinerary);
+router.put('/:id/availability', updateAvailability);
 
 export default router;
