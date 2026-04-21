@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiChevronRight, FiAlertCircle } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '@/hooks/useAuth';
-import { useAuthPopup } from '@/hooks/useAuthPopup';
+import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 
@@ -21,7 +21,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
   const { login: manualLogin } = useAuth();
-  const { signInWithPopup, isAuthenticating: googleLoading } = useAuthPopup();
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleManualLogin = async (e) => {
     e.preventDefault();
@@ -43,12 +43,9 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    signInWithPopup('google', {
-      onSuccess: () => {
-        router.push(callbackUrl);
-        router.refresh();
-      }
-    });
+    if (window.google) {
+      window.google.accounts.id.prompt();
+    }
   };
 
   return (
@@ -123,14 +120,17 @@ export default function LoginPage() {
               <span className="relative px-4 bg-white text-sm text-gray-400">Or continue with</span>
             </div>
 
-            <button
-              onClick={handleGoogleLogin}
-              disabled={googleLoading}
-              className="w-full flex items-center justify-center space-x-3 py-4 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <FcGoogle size={24} />
-              <span className="font-medium text-gray-700">Google</span>
-            </button>
+            <div className="w-full flex justify-center">
+              <GoogleIdentitySync />
+              <button 
+                id="google-signin-button"
+                onClick={handleGoogleLogin}
+                className="w-full h-14 flex items-center justify-center space-x-3 py-4 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm"
+              >
+                <FcGoogle size={24} />
+                <span className="font-medium text-gray-700">Google</span>
+              </button>
+            </div>
 
             <p className="mt-10 text-center text-gray-500">
               Don't have an account?{' '}

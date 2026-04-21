@@ -8,7 +8,7 @@ import { FiUser, FiMail, FiLock, FiPhone, FiChevronRight } from 'react-icons/fi'
 import { FcGoogle } from 'react-icons/fc';
 import { signIn } from 'next-auth/react';
 import { useAuth } from '@/hooks/useAuth';
-import { useAuthPopup } from '@/hooks/useAuthPopup';
+import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 
@@ -25,7 +25,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { register: manualRegister } = useAuth();
-  const { signInWithPopup, isAuthenticating: googleLoading } = useAuthPopup();
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -204,19 +204,18 @@ export default function RegisterPage() {
               <span className="relative px-4 bg-white text-sm text-gray-400">Or sign up with</span>
             </div>
 
-            <button
-              onClick={() => signInWithPopup('google', {
-                onSuccess: () => {
-                  router.push('/dashboard');
-                  router.refresh();
-                }
-              })}
-              disabled={googleLoading}
-              className="w-full flex items-center justify-center space-x-3 py-4 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <FcGoogle size={24} />
-              <span className="font-medium text-gray-700">Google</span>
-            </button>
+            <div className="w-full">
+              <GoogleIdentitySync />
+              <button
+                onClick={() => {
+                  if (window.google) window.google.accounts.id.prompt();
+                }}
+                className="w-full flex items-center justify-center space-x-3 py-4 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm"
+              >
+                <FcGoogle size={24} />
+                <span className="font-medium text-gray-700">Google</span>
+              </button>
+            </div>
 
             <p className="mt-10 text-center text-gray-500">
               Already have an account?{' '}

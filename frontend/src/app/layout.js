@@ -1,5 +1,6 @@
 // src/app/layout.js
 import { Inter, Playfair_Display, Montserrat, Cormorant_Garamond } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { NextAuthProvider } from '@/context/NextAuthContext';
@@ -108,6 +109,10 @@ export default function RootLayout({ children }) {
       className={`${inter.variable} ${playfair.variable} ${montserrat.variable} ${cormorant.variable}`}
     >
       <body className="font-sans antialiased bg-white text-gray-900">
+        <Script 
+          src="https://accounts.google.com/gsi/client" 
+          strategy="afterInteractive"
+        />
         <ThemeProvider>
           <NextAuthProvider>
             <AuthProvider>
@@ -130,5 +135,3 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-
-

@@ -27,13 +27,6 @@ export const authOptions = {
         
         const bcrypt = await import("bcryptjs");
         
-        // Ensure we have a prisma instance (this will only be called at runtime)
-        if (!prisma) {
-          const { default: p } = await import("@/lib/prisma");
-          // Note: prisma is exported as default, but during build it's null.
-          // At runtime it will be the real client.
-        }
-
         const user = await prisma.user.findUnique({
           where: { email: credentials.email }
         });
@@ -51,6 +44,95 @@ export const authOptions = {
           role: user.role,
         };
       }
+    }),
+    CredentialsProvider({
+      id: "google-id-token",
+      name: "Google ID Token",
+      credentials: {
+        id_token: { label: "ID Token", type: "text" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.id_token) return null;
+
+        try {
+          // Verify the token with Google
+          const response = await fetch(
+            `https://oauth2.googleapis.com/tokeninfo?id_token=${credentials.id_token}`
+          );
+          
+          if (!response.ok) {
+            console.error('[AUTH] Google token verification failed');
+            return null;
+          }
+
+          const googleUser = await response.json();
+          
+          // Verify audience (matches Client ID)
+          if (googleUser.aud !== process.env.GOOGLE_CLIENT_ID) {
+            console.error('[AUTH] Google token audience mismatch');
+            return null;
+          }
+
+          const email = googleUser.email;
+          const name = googleUser.name;
+          const image = googleUser.picture;
+          const googleId = googleUser.sub;
+
+          if (!prisma) {
+             const { default: p } = await import("@/lib/prisma"); 
+          }
+
+          // Find or create user
+          let user = await prisma.user.findUnique({
+            where: { email },
+          });
+
+          if (!user) {
+            // Create new user if not exists
+            user = await prisma.user.create({
+              data: {
+                email,
+                name: name || email.split('@')[0],
+                first_name: googleUser.given_name || "",
+                last_name: googleUser.family_name || "",
+                image,
+                emailVerified: new Date(),
+                role: 'USER',
+              },
+            });
+          }
+
+          // Link account if not already linked
+          const existingAccount = await prisma.account.findFirst({
+            where: {
+              provider: "google",
+              providerAccountId: googleId,
+            },
+          });
+
+          if (!existingAccount) {
+            await prisma.account.create({
+              data: {
+                userId: user.id,
+                type: "oauth",
+                provider: "google",
+                providerAccountId: googleId,
+                id_token: credentials.id_token,
+              },
+            });
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error('[AUTH] google-id-token authorize error:', error);
+          return null;
+        }
+      },
     }),
   ],
   callbacks: {
