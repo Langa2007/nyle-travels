@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { 
-  FiMapPin, 
-  FiPhone, 
-  FiMail, 
-  FiFacebook, 
-  FiTwitter, 
-  FiInstagram, 
+import {
+  FiMapPin,
+  FiPhone,
+  FiMail,
+  FiFacebook,
+  FiTwitter,
+  FiInstagram,
   FiLinkedin,
   FiYoutube,
   FiChevronRight
@@ -129,8 +129,8 @@ export default function Footer() {
               </div>
               <div className="flex items-center">
                 <FiPhone className="w-5 h-5 text-primary-400 mr-3 flex-shrink-0" />
-                <a href="tel:+254700000000" className="text-gray-300 hover:text-primary-400 transition-colors">
-                  +254 700 000 000
+                <a href="tel:+254704521408" className="text-gray-300 hover:text-primary-400 transition-colors">
+                  +254 704521408
                 </a>
               </div>
               <div className="flex items-center">
@@ -275,7 +275,7 @@ export default function Footer() {
                   Visa
                 </div>
                 <div className="w-12 h-8 bg-gray-800 rounded flex items-center justify-center text-xs text-gray-400">
-                  MC
+                  Mpesa
                 </div>
                 <div className="w-12 h-8 bg-gray-800 rounded flex items-center justify-center text-xs text-gray-400">
                   Amex

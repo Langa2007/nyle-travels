@@ -1,210 +1,260 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
-  FiArrowLeft,
-  FiCheckCircle,
   FiMapPin,
   FiStar,
+  FiCheck,
+  FiClock,
+  FiInfo,
+  FiChevronLeft,
+  FiShare2,
+  FiHeart
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import hotelsSeed from '@/data/hotels';
 import useHotelCatalog from '@/hooks/useHotelCatalog';
-import {
-  getFeaturedHotels,
-  getHotelImage,
-} from '@/lib/hotelCatalog';
+import { getHotelImage } from '@/lib/hotelCatalog';
 
-export default function HotelDetailPage() {
-  const params = useParams();
-  const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
+export default function HotelDetailPage({ params }) {
+  const router = useRouter();
   const { hotels, loading } = useHotelCatalog(hotelsSeed);
-  const hotel = hotels.find((item) => item.slug === slug);
+  const [hotel, setHotel] = useState(null);
 
-  const relatedHotels = hotel
-    ? hotels
-        .filter((item) => item.slug !== hotel.slug && item.destination === hotel.destination)
-        .slice(0, 3)
-    : getFeaturedHotels(hotels, 3);
+  useEffect(() => {
+    if (!loading && hotels) {
+      const found = hotels.find((h) => h.slug === params.slug);
+      if (found) {
+        setHotel(found);
+      } else {
+        router.replace('/hotels');
+      }
+    }
+  }, [loading, hotels, params.slug, router]);
 
-  if (!hotel) {
+  if (loading || !hotel) {
     return (
-      <div className="min-h-screen bg-[#faf8f2] pt-40">
-        <div className="container mx-auto px-4">
-          <div className="rounded-[2rem] border border-gray-100 bg-white p-10 text-center shadow-sm">
-            <h1 className="text-3xl font-serif text-gray-900">{loading ? 'Loading hotel...' : 'Hotel not found'}</h1>
-            <p className="mt-3 text-gray-500">
-              {loading
-                ? 'Fetching the shared hotels catalog.'
-                : 'This hotel is no longer in the shared catalog or the link is outdated.'}
-            </p>
-            <Link href="/hotels" className="mt-6 inline-block">
-              <Button variant="primary">Back to Hotels</Button>
-            </Link>
-          </div>
-        </div>
+      <div className="min-h-screen bg-[#faf8f2] flex items-center justify-center">
+        <div className="w-14 h-14 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto" />
       </div>
     );
   }
 
-  const heroImage = getHotelImage(hotel);
+  const images = hotel.gallery?.length > 0 ? hotel.gallery : [getHotelImage(hotel)];
 
   return (
-    <div className="min-h-screen bg-[#faf8f2]">
-      <section className="relative min-h-[70vh] overflow-hidden pt-32">
-        <div className="absolute inset-0">
-          <Image src={heroImage} alt={hotel.name} fill className="object-cover" priority />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/35" />
-        </div>
-
-        <div className="relative container mx-auto px-4 pb-16 pt-24 text-white">
-          <Link href="/hotels" className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20">
-            <FiArrowLeft className="mr-2" />
-            Back to hotels
+    <div className="min-h-screen bg-[#faf8f2] pb-24">
+      {/* Top Nav Bar */}
+      <div className="bg-white sticky top-0 z-40 border-b border-gray-100 shadow-sm">
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+          <Link href="/hotels" className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors">
+            <FiChevronLeft className="w-5 h-5 mr-1" />
+            Back to Hotels
           </Link>
+          <div className="flex items-center gap-4">
+            <button className="p-2 rounded-full hover:bg-gray-50 flex items-center text-gray-700 transition-colors">
+              <FiShare2 className="w-5 h-5" />
+            </button>
+            <button className="p-2 rounded-full hover:bg-red-50 hover:text-red-500 flex items-center text-gray-700 transition-colors">
+              <FiHeart className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
 
-          <div className="mt-10 max-w-4xl">
-            <p className="text-sm uppercase tracking-[0.3em] text-white/70">{hotel.badge}</p>
-            <h1 className="mt-4 text-5xl font-serif leading-tight md:text-6xl">{hotel.name}</h1>
-            <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-white/85">
-              <span className="inline-flex items-center">
-                <FiMapPin className="mr-2" />
-                {hotel.destination}, {hotel.region}
-              </span>
-              <span className="inline-flex items-center">
-                <FiStar className="mr-2 text-yellow-300" />
-                {hotel.starRating}.0 stars
-              </span>
-              <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 capitalize">
-                {hotel.type}
-              </span>
+      <main className="container mx-auto px-4 mt-8">
+        {/* Title Section */}
+        <div className="mb-8">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+             <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700 uppercase tracking-wider">
+               {hotel.type}
+             </span>
+             {hotel.badge && (
+               <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700 uppercase tracking-wider">
+                 {hotel.badge}
+               </span>
+             )}
+          </div>
+          <h1 className="text-4xl md:text-5xl font-serif text-gray-900 leading-tight">{hotel.name}</h1>
+          <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-gray-600">
+            <div className="flex items-center">
+              <FiMapPin className="w-4 h-4 mr-1 text-primary-600" />
+              {hotel.destination}, {hotel.region}
             </div>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/85">{hotel.description}</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="container mx-auto px-4 py-12 space-y-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Rate</p>
-            <p className="mt-2 text-3xl font-serif text-primary-600">${hotel.price}</p>
-            <p className="mt-2 text-sm text-gray-500">starting nightly guide</p>
-          </div>
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Destination</p>
-            <p className="mt-2 text-2xl font-serif text-gray-900">{hotel.destination}</p>
-            <p className="mt-2 text-sm text-gray-500">Kenya travel region</p>
-          </div>
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Style</p>
-            <p className="mt-2 text-2xl font-serif capitalize text-gray-900">{hotel.type}</p>
-            <p className="mt-2 text-sm text-gray-500">hotel collection category</p>
-          </div>
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Rating</p>
-            <p className="mt-2 text-2xl font-serif text-gray-900">{hotel.starRating}.0</p>
-            <p className="mt-2 text-sm text-gray-500">star position in the catalog</p>
+            <div className="flex items-center font-medium text-gray-900 border px-2 py-1 rounded-full border-gray-200">
+              <FiStar className="w-4 h-4 mr-1 text-yellow-400 fill-current" />
+              {hotel.starRating}.0 Rating
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-8">
-          <div className="space-y-8">
-            <div className="overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-sm">
-              <div className="relative h-[420px] bg-gray-100">
-                <Image src={heroImage} alt={hotel.name} fill className="object-cover" />
+        {/* Gallery Section */}
+        <div className="mb-12">
+          {images.length >= 3 ? (
+            <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 h-[50vh] md:h-[60vh] rounded-[2rem] overflow-hidden">
+              <div className="md:col-span-2 row-span-2 relative h-full w-full group cursor-pointer">
+                <Image src={images[0]} alt="Hero" fill className="object-cover transition-transform duration-700 group-hover:scale-105" priority />
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
               </div>
+              <div className="relative h-full w-full group cursor-pointer">
+                <Image src={images[1]} alt="Gallery 2" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
+              </div>
+              <div className="relative h-full w-full group cursor-pointer">
+                <Image src={images[2]} alt="Gallery 3" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
+              </div>
+              {images.length > 3 ? (
+                <div className="relative h-full w-full group cursor-pointer">
+                  <Image src={images[3]} alt="Gallery 4" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
+                </div>
+              ) : (
+                <div className="bg-primary-50 flex items-center justify-center p-6 text-center h-full w-full">
+                  <p className="text-primary-800 font-medium font-serif leading-relaxed">Relax and immerse yourself in luxury.</p>
+                </div>
+              )}
+               {images.length > 4 ? (
+                <div className="relative h-full w-full group cursor-pointer">
+                  <Image src={images[4]} alt="Gallery 5" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/30 transition-colors">
+                    <span className="text-white font-medium bg-black/30 px-4 py-2 rounded-full backdrop-blur-sm border border-white/20">+{images.length - 5} More</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-[#132026] flex items-center justify-center p-6 text-center h-full w-full">
+                  <FiStar className="text-white/20 w-16 h-16" />
+                </div>
+              )}
             </div>
+          ) : (
+             <div className="relative h-[60vh] rounded-[2rem] overflow-hidden group">
+               <Image src={images[0]} alt={hotel.name} fill className="object-cover transition-transform duration-700 group-hover:scale-105" priority />
+             </div>
+          )}
+        </div>
 
-            <div className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm">
-              <h2 className="text-3xl font-serif text-gray-900">Why travelers book this stay</h2>
-              <p className="mt-4 text-base leading-8 text-gray-600">{hotel.description}</p>
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {hotel.amenities.map((amenity) => (
-                  <div key={amenity} className="flex items-center rounded-2xl bg-[#f7f3ea] px-4 py-4 text-sm text-gray-700">
-                    <FiCheckCircle className="mr-3 text-primary-600" />
-                    {amenity}
+        {/* Content & Booking Sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          
+          <div className="lg:col-span-2 space-y-12">
+            
+            <section>
+              <h2 className="text-2xl font-serif text-gray-900 mb-4">About this stay</h2>
+              <p className="text-gray-600 leading-relaxed text-lg whitespace-pre-wrap">{hotel.description}</p>
+            </section>
+
+            <div className="border-t border-gray-200" />
+
+            <section>
+              <h2 className="text-2xl font-serif text-gray-900 mb-6">Amenities</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {hotel.amenities?.map((amenity, idx) => (
+                  <div key={idx} className="flex items-center text-gray-700">
+                    <FiCheck className="w-5 h-5 text-primary-500 mr-3 shrink-0" />
+                    <span>{amenity}</span>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
+            </section>
 
-          <div className="space-y-6">
-            <div className="rounded-[2rem] border border-gray-100 bg-white p-7 shadow-sm">
-              <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Plan This Stay</p>
-              <h2 className="mt-3 text-2xl font-serif text-gray-900">Use it in your shortlist</h2>
-              <p className="mt-3 text-sm leading-7 text-gray-600">
-                This hotel card is powered by the same editable admin catalog, so image changes and content edits update here without rebuilding the layout structure.
-              </p>
-              <div className="mt-6 space-y-3">
-                <Link href="/hotels" className="block">
-                  <Button variant="primary" fullWidth>
-                    Explore More Hotels
-                  </Button>
-                </Link>
-                <Link href={`/hotels?destination=${encodeURIComponent(hotel.destination)}`} className="block">
-                  <Button variant="outline" fullWidth>
-                    More In {hotel.destination}
-                  </Button>
-                </Link>
-              </div>
-            </div>
+            <div className="border-t border-gray-200" />
 
-            <div className="rounded-[2rem] border border-gray-100 bg-white p-7 shadow-sm">
-              <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Quick Facts</p>
-              <div className="mt-5 space-y-4 text-sm text-gray-600">
-                <div className="flex items-center justify-between gap-4">
-                  <span>Destination</span>
-                  <span className="font-medium text-gray-900">{hotel.destination}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span>Region</span>
-                  <span className="font-medium text-gray-900">{hotel.region}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span>Style</span>
-                  <span className="font-medium capitalize text-gray-900">{hotel.type}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span>Starting rate</span>
-                  <span className="font-medium text-gray-900">${hotel.price} / night</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-5">
-          <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Nearby Inspiration</p>
-            <h2 className="mt-2 text-3xl font-serif text-gray-900">More stays to compare</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {relatedHotels.map((item) => (
-              <article key={item.slug} className="overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-sm">
-                <div className="relative h-56 bg-gray-100">
-                  <Image src={getHotelImage(item)} alt={item.name} fill className="object-cover" />
-                </div>
-                <div className="p-5">
-                  <p className="text-xs uppercase tracking-[0.2em] text-gray-500">{item.destination}</p>
-                  <h3 className="mt-2 text-xl font-serif text-gray-900">{item.name}</h3>
-                  <p className="mt-2 text-sm leading-7 text-gray-600">{item.shortDescription}</p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="font-semibold text-primary-600">from ${item.price}</span>
-                    <Link href={`/hotels/${item.slug}`}>
-                      <Button variant="outline" size="sm">View</Button>
-                    </Link>
+            <section>
+              <h2 className="text-2xl font-serif text-gray-900 mb-6">Things to know</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <div>
+                  <h3 className="flex items-center font-semibold text-gray-900 mb-4">
+                    <FiClock className="w-5 h-5 mr-2 text-gray-400" />
+                    Check-in & Check-out
+                  </h3>
+                  <div className="space-y-3 text-sm text-gray-600 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                      <span>Check-in time</span>
+                      <span className="font-medium text-gray-900">{hotel.checkInTime || '14:00'}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                      <span>Check-out time</span>
+                      <span className="font-medium text-gray-900">{hotel.checkOutTime || '11:00'}</span>
+                    </div>
                   </div>
                 </div>
-              </article>
-            ))}
+
+                <div>
+                  <h3 className="flex items-center font-semibold text-gray-900 mb-4">
+                    <FiInfo className="w-5 h-5 mr-2 text-gray-400" />
+                    House Rules
+                  </h3>
+                  <ul className="space-y-3 text-sm text-gray-600 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm list-disc list-inside">
+                    {hotel.houseRules?.length > 0 ? hotel.houseRules.map((rule, idx) => (
+                      <li key={idx}>{rule}</li>
+                    )) : (
+                      <li>No specific house rules available.</li>
+                    )}
+                  </ul>
+                </div>
+
+              </div>
+              
+              <div className="mt-8 bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                <h3 className="font-semibold text-gray-900 mb-2">Cancellation Policy</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">{hotel.cancellationPolicy || 'Standard cancellation policy applies.'}</p>
+              </div>
+            </section>
+            
           </div>
+
+          <div className="lg:col-span-1">
+            <div className="sticky top-28 bg-white p-6 rounded-[2rem] border border-gray-200 shadow-xl shadow-gray-200/40">
+              <div className="flex items-end justify-between mb-6">
+                <div>
+                  <p className="text-sm text-gray-500 uppercase tracking-wider mb-1">From</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-serif font-semibold text-gray-900">${hotel.price}</span>
+                    <span className="text-gray-500">/night</span>
+                  </div>
+                </div>
+                <div className="flex items-center text-sm font-medium">
+                   <FiStar className="text-yellow-400 mr-1 fill-current" />
+                   {hotel.starRating}.0
+                </div>
+              </div>
+              
+              <p className="text-sm text-gray-500 mb-6 pb-6 border-b border-gray-100">
+                 Secure your stay at one of Kenya's finest destinations.
+              </p>
+
+              {/* Placeholder for the Booking Flow */}
+              <div className="space-y-4">
+                 <Button 
+                    variant="primary" 
+                    className="w-full justify-center py-4 text-base shadow-lg shadow-primary-500/20 hover:shadow-primary-500/40 transition-shadow"
+                    onClick={() => alert(`Booking flow placeholder for ${hotel.name}`)}
+                  >
+                   Book Now
+                 </Button>
+                 <Button 
+                    variant="outline" 
+                    className="w-full justify-center py-4 text-base"
+                    onClick={() => router.push('/contact')}
+                  >
+                   Inquire About Stay
+                 </Button>
+              </div>
+              
+              <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-400">
+                <FiCheck className="text-green-500" />
+                No hidden fees. Instant confirmation.
+              </div>
+            </div>
+          </div>
+
         </div>
-      </section>
+      </main>
     </div>
   );
 }

@@ -249,6 +249,10 @@ function buildHotel([name, destination, region, type, starRating, price, badge, 
     defaultImage: HOTEL_IMAGE_LIBRARY[imageKey],
     image: '',
     gallery: HOTEL_GALLERY_LIBRARY[imageKey] || [HOTEL_IMAGE_LIBRARY[imageKey]],
+    checkInTime: '14:00',
+    checkOutTime: '11:00',
+    cancellationPolicy: 'Standard cancellation policy applies. Please check during booking for specific terms.',
+    houseRules: ['No smoking inside rooms', 'Pets are not allowed', 'Quiet hours from 10:00 PM to 6:00 AM'],
   };
 }
 

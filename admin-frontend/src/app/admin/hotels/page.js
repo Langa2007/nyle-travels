@@ -71,6 +71,10 @@ function normalizeHotel(hotel, index = 0) {
     defaultImage: hotel.defaultImage ?? hotel.image ?? '',
     image: hotel.image ?? '',
     gallery: parseList(hotel.gallery),
+    checkInTime: hotel.checkInTime ?? '14:00',
+    checkOutTime: hotel.checkOutTime ?? '11:00',
+    cancellationPolicy: hotel.cancellationPolicy ?? 'Standard cancellation policy applies. Please check during booking for specific terms.',
+    houseRules: parseList(hotel.houseRules),
     featured: Boolean(hotel.featured),
     featuredOnHome: Boolean(hotel.featuredOnHome ?? hotel.featured),
   };
@@ -96,6 +100,10 @@ function createEmptyHotel() {
       defaultImage: '',
       image: '',
       gallery: [],
+      checkInTime: '14:00',
+      checkOutTime: '11:00',
+      cancellationPolicy: 'Standard cancellation policy applies. Please check during booking for specific terms.',
+      houseRules: ['No smoking inside rooms', 'Pets are not allowed', 'Quiet hours from 10:00 PM to 6:00 AM'],
       featured: false,
       featuredOnHome: false,
     },
@@ -233,6 +241,47 @@ export default function HotelsPage() {
       setUploadingField('');
     }
   }
+
+  async function uploadGalleryImage(event) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+
+    if (!file) {
+      return;
+    }
+
+    setUploadingField('gallery');
+
+    try {
+      const payload = new FormData();
+      payload.append('media', file);
+      const response = await adminAPI.uploadMedia(payload, false);
+      const imageUrl = response.data?.data?.url;
+
+      if (!imageUrl) {
+        throw new Error('Missing uploaded image URL');
+      }
+
+      setFormState((current) => ({
+        ...current,
+        gallery: [...current.gallery, imageUrl],
+      }));
+      toast.success('Gallery image added.');
+    } catch (error) {
+      console.error('Failed to upload image:', error);
+      toast.error(error.response?.data?.message || 'Failed to upload image.');
+    } finally {
+      setUploadingField('');
+    }
+  }
+
+  function removeGalleryImage(indexToRemove) {
+    setFormState((current) => ({
+      ...current,
+      gallery: current.gallery.filter((_, index) => index !== indexToRemove),
+    }));
+  }
+
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -582,6 +631,37 @@ export default function HotelsPage() {
             placeholder="Comma-separated list"
           />
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Check-In Time"
+              value={formState.checkInTime}
+              onChange={(event) => updateFormField('checkInTime', event.target.value)}
+              placeholder="e.g. 14:00"
+            />
+            <Input
+              label="Check-Out Time"
+              value={formState.checkOutTime}
+              onChange={(event) => updateFormField('checkOutTime', event.target.value)}
+              placeholder="e.g. 11:00"
+            />
+          </div>
+
+          <TextArea
+            label="Cancellation Policy"
+            value={formState.cancellationPolicy}
+            onChange={(event) => updateFormField('cancellationPolicy', event.target.value)}
+            rows={3}
+            placeholder="Standard cancellation policy applies..."
+          />
+
+          <TextArea
+            label="House Rules"
+            value={formState.houseRules.join(', ')}
+            onChange={(event) => updateFormField('houseRules', parseList(event.target.value))}
+            rows={3}
+            placeholder="Comma-separated list (e.g. No smoking, Pets not allowed)"
+          />
+
           <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-4">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div>
@@ -646,6 +726,44 @@ export default function HotelsPage() {
                   </div>
                 )}
               </div>
+            </div>
+
+            <div className="pt-4 border-t border-gray-200">
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <div>
+                  <h3 className="font-semibold text-gray-900">Gallery Images ({formState.gallery.length})</h3>
+                  <p className="text-sm text-gray-500">
+                    Additional images for the hotel detail page gallery.
+                  </p>
+                </div>
+                <label className="inline-flex items-center px-4 py-2 rounded-xl bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 shrink-0">
+                  <FiUpload className="mr-2" />
+                  <span>{uploadingField === 'gallery' ? 'Uploading...' : 'Add Gallery Image'}</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={uploadGalleryImage} />
+                </label>
+              </div>
+
+              {formState.gallery.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {formState.gallery.map((imgUrl, index) => (
+                    <div key={index} className="relative h-32 rounded-xl overflow-hidden bg-white border border-gray-200 group">
+                      <Image src={imgUrl} alt={`Gallery image ${index + 1}`} fill className="object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryImage(index)}
+                        className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shrink-0"
+                        title="Remove image"
+                      >
+                        <FiTrash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 bg-white rounded-xl border border-dashed border-gray-300 text-gray-500 text-sm">
+                  No gallery images added yet.
+                </div>
+              )}
             </div>
           </div>
 
