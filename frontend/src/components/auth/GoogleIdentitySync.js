@@ -3,10 +3,10 @@
 import { useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 
-/**
- * GoogleIdentitySync Component
- * Integrates Google Identity Services (One Tap & Popup) with NextAuth.
- */
+
+// GoogleIdentitySync Component
+// Integrates Google Identity Services (One Tap & Popup) with NextAuth.
+
 export default function GoogleIdentitySync() {
   const { status } = useSession();
 
@@ -19,12 +19,12 @@ export default function GoogleIdentitySync() {
     const handleCredentialResponse = async (response) => {
       try {
         console.log('Google credential received');
-        // Sign in via our custom token handler in NextAuth
+        // Sign in via  custom token handler in NextAuth
         await signIn('google-id-token', {
           id_token: response.credential,
           redirect: false,
         });
-        
+
         // Refresh the page to update auth state
         window.location.reload();
       } catch (error) {
