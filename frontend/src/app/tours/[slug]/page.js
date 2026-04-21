@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FiCheck, FiX, FiInfo, FiCalendar, FiArrowRight } from 'react-icons/fi';
 import { toursAPI } from '@/lib/api';
-import { toursAPI } from '@/lib/api';
 import TourHero from '@/components/tours/TourHero';
 import TourItinerary from '@/components/tours/TourItinerary';
 import TourCard from '@/components/tours/TourCard';

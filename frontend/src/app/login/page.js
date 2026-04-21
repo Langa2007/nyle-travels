@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiChevronRight, FiAlertCircle } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '@/hooks/useAuth';
+import { useAuthPopup } from '@/hooks/useAuthPopup';
 import Button from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 
@@ -20,6 +21,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
   const { login: manualLogin } = useAuth();
+  const { signInWithPopup, isAuthenticating: googleLoading } = useAuthPopup();
 
   const handleManualLogin = async (e) => {
     e.preventDefault();
@@ -41,7 +43,12 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    signIn('google', { callbackUrl });
+    signInWithPopup('google', {
+      onSuccess: () => {
+        router.push(callbackUrl);
+        router.refresh();
+      }
+    });
   };
 
   return (
@@ -118,7 +125,8 @@ export default function LoginPage() {
 
             <button
               onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center space-x-3 py-4 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm"
+              disabled={googleLoading}
+              className="w-full flex items-center justify-center space-x-3 py-4 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FcGoogle size={24} />
               <span className="font-medium text-gray-700">Google</span>

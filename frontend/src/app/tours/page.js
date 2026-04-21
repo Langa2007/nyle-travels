@@ -7,8 +7,6 @@ import useTourCatalog from '@/hooks/useTourCatalog';
 import { destinationsAPI } from '@/lib/api';
 import TourCard from '@/components/tours/TourCard';
 import TourFilters from '@/components/tours/TourFilters';
-import TourCard from '@/components/tours/TourCard';
-import TourFilters from '@/components/tours/TourFilters';
 
 export default function TourCatalogPage() {
   const {

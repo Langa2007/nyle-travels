@@ -8,6 +8,7 @@ import { FiUser, FiMail, FiLock, FiPhone, FiChevronRight } from 'react-icons/fi'
 import { FcGoogle } from 'react-icons/fc';
 import { signIn } from 'next-auth/react';
 import { useAuth } from '@/hooks/useAuth';
+import { useAuthPopup } from '@/hooks/useAuthPopup';
 import Button from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 
@@ -22,7 +23,9 @@ export default function RegisterPage() {
   });
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const { register: manualRegister } = useAuth();
+  const { signInWithPopup, isAuthenticating: googleLoading } = useAuthPopup();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -202,8 +205,14 @@ export default function RegisterPage() {
             </div>
 
             <button
-              onClick={() => signIn('google')}
-              className="w-full flex items-center justify-center space-x-3 py-4 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm"
+              onClick={() => signInWithPopup('google', {
+                onSuccess: () => {
+                  router.push('/dashboard');
+                  router.refresh();
+                }
+              })}
+              disabled={googleLoading}
+              className="w-full flex items-center justify-center space-x-3 py-4 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FcGoogle size={24} />
               <span className="font-medium text-gray-700">Google</span>
