@@ -1,8 +1,7 @@
 import hotelsSeed from '@/data/hotels';
 
 export const HOTELS_SETTINGS_KEY = 'hotels_catalog';
-export const HOTEL_FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=80';
+export const HOTEL_FALLBACK_IMAGE = 'https://picsum.photos/seed/nylefallback/1600/900';
 
 export function slugifyHotelValue(value) {
   return String(value || '')

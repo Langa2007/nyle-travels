@@ -25,7 +25,7 @@ import { adminAPI } from '@/lib/AdminApi';
 import { hotels as seedHotels } from '@/data/hotels';
 
 const SETTINGS_KEY = 'hotels_catalog';
-const IMAGE_FALLBACK = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=80';
+const IMAGE_FALLBACK = 'https://picsum.photos/seed/nylefallback/1600/900';
 const hotelTypes = ['luxury', 'boutique', 'beach', 'safari', 'wellness', 'city'];
 
 function slugify(value) {
@@ -136,11 +136,22 @@ export default function HotelsPage() {
 
     try {
       const response = await adminAPI.getSettings();
-      const savedCatalog = response.data?.data?.[SETTINGS_KEY];
+      let savedCatalog = response.data?.data?.[SETTINGS_KEY];
+
+      // Robustly handle stringified JSON from the database
+      if (typeof savedCatalog === 'string') {
+        try {
+          savedCatalog = JSON.parse(savedCatalog);
+        } catch (e) {
+          console.error('Failed to parse saved catalog string:', e);
+          savedCatalog = null;
+        }
+      }
 
       if (Array.isArray(savedCatalog) && savedCatalog.length > 0) {
         setHotels(savedCatalog.map((hotel, index) => normalizeHotel(hotel, index)));
       } else {
+        console.warn('No saved catalog found in DB or empty. Showing seed data.');
         setHotels(seedCatalog);
       }
     } catch (error) {

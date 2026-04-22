@@ -1,38 +1,21 @@
 const HOTEL_IMAGE_LIBRARY = {
-  nairobiManor:
-    'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1600&q=80',
-  nairobiCity:
-    'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=80',
-  nairobiModern:
-    'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1600&q=80',
-  maraLodge:
-    'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=1600&q=80',
-  maraCamp:
-    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80',
-  amboseliView:
-    'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1600&q=80',
-  amboseliCamp:
-    'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1600&q=80',
-  tsavoLodge:
-    'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1600&q=80',
-  samburuCamp:
-    'https://images.unsplash.com/photo-1492521778974-ad0b3f4f5f2b?auto=format&fit=crop&w=1600&q=80',
-  laikipiaRetreat:
-    'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=1600&q=80',
-  dianiBeach:
-    'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1600&q=80',
-  mombasaResort:
-    'https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=1600&q=80',
-  watamuBeach:
-    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80',
-  lamuBoutique:
-    'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=1600&q=80',
-  naivashaRetreat:
-    'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?auto=format&fit=crop&w=1600&q=80',
-  nakuruLodge:
-    'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&q=80',
-  aberdareLodge:
-    'https://images.unsplash.com/photo-1444201983204-c43cbd584d93?auto=format&fit=crop&w=1600&q=80',
+  nairobiManor: 'https://picsum.photos/seed/manor/1600/900',
+  nairobiCity: 'https://picsum.photos/seed/city/1600/900',
+  nairobiModern: 'https://picsum.photos/seed/modern/1600/900',
+  maraLodge: 'https://picsum.photos/seed/mara/1600/900',
+  maraCamp: 'https://picsum.photos/seed/camp/1600/900',
+  amboseliView: 'https://picsum.photos/seed/amboseli/1600/900',
+  amboseliCamp: 'https://picsum.photos/seed/amboselicamp/1600/900',
+  tsavoLodge: 'https://picsum.photos/seed/tsavo/1600/900',
+  samburuCamp: 'https://picsum.photos/seed/samburu/1600/900',
+  laikipiaRetreat: 'https://picsum.photos/seed/laikipia/1600/900',
+  dianiBeach: 'https://picsum.photos/seed/diani/1600/900',
+  mombasaResort: 'https://picsum.photos/seed/mombasa/1600/900',
+  watamuBeach: 'https://picsum.photos/seed/watamu/1600/900',
+  lamuBoutique: 'https://picsum.photos/seed/lamu/1600/900',
+  naivashaRetreat: 'https://picsum.photos/seed/naivasha/1600/900',
+  nakuruLodge: 'https://picsum.photos/seed/nakuru/1600/900',
+  aberdareLodge: 'https://picsum.photos/seed/aberdare/1600/900',
 };
 
 const HOTEL_GALLERY_LIBRARY = {

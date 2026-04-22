@@ -37,25 +37,27 @@ export function useHotelCatalog(seedHotels = []) {
         }
 
         const hasSaved = Array.isArray(rawCatalog) && rawCatalog.length > 0;
+        const source = settings?.[HOTELS_SETTINGS_KEY] ? 'DATABASE (hotels_catalog)' : (settings?.['luxury_stays_sections'] ? 'DATABASE (luxury_stays)' : 'NONE (Falling back to seed)');
 
-        console.info(
-          `${LOG_PREFIX} fetchAllSettings returned — ` +
-          `hasSaved=${hasSaved} ` +
-          `count=${hasSaved ? rawCatalog.length : 'n/a'} ` +
-          `source=${settings?.[HOTELS_SETTINGS_KEY] ? 'hotels_catalog' : (settings?.luxury_stays_sections ? 'luxury_stays' : 'none')}`
+        console.log(
+          `%c${LOG_PREFIX} DATA SYNC CHECK:`,
+          'color: #0070f3; font-weight: bold;',
+          {
+            hasSaved,
+            count: hasSaved ? rawCatalog.length : 0,
+            source,
+            firstItemName: hasSaved ? rawCatalog[0].name : 'N/A'
+          }
         );
 
         if (!mounted) return;
 
         if (hasSaved) {
           const normalized = normalizeHotels(rawCatalog);
-          console.info(`${LOG_PREFIX} Using admin catalog — ${normalized.length} hotels.`);
           setHotels(normalized);
         } else {
           const normalized = normalizeHotels(seedHotels);
-          console.info(
-            `${LOG_PREFIX} Admin catalog empty or unavailable — using seed data (${normalized.length} hotels).`
-          );
+          console.warn(`${LOG_PREFIX} Using local seed data (Unsplash-free) because no database settings were found.`);
           setHotels(normalized);
         }
       } catch (err) {
