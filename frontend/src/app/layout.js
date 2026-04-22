@@ -1,4 +1,5 @@
 // src/app/layout.js
+import { Suspense } from 'react';
 import { Inter, Playfair_Display, Montserrat, Cormorant_Garamond } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
@@ -118,7 +119,9 @@ export default function RootLayout({ children }) {
             <AuthProvider>
               <CartProvider>
                 <WishlistProvider>
-                  <LoadingBar />
+                  <Suspense fallback={null}>
+                    <LoadingBar />
+                  </Suspense>
                   <Navbar />
                   <main className="min-h-screen">
                     {children}

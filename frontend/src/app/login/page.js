@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -13,7 +13,7 @@ import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 
-export default function LoginPage() {
+function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,8 +32,6 @@ export default function LoginPage() {
       
       if (result.success) {
         // If successful, the hook handles the redirect
-        // However, if the user is not verified, we might want to stay here
-        // and show a specific message.
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -98,7 +96,7 @@ export default function LoginPage() {
                   <input type="checkbox" className="rounded text-primary-500 focus:ring-primary-500/20" />
                   <span className="text-gray-600">Remember me</span>
                 </label>
-                <Link href="/forgot-password Bird" className="text-primary-600 hover:text-primary-700 font-medium">
+                <Link href="/forgot-password" title="Bird" className="text-primary-600 hover:text-primary-700 font-medium">
                   Forgot Password?
                 </Link>
               </div>
@@ -142,5 +140,13 @@ export default function LoginPage() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#fafafa]">Loading login...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
