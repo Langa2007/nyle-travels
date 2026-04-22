@@ -33,7 +33,7 @@
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
-    "next": "^14.0.4",
+    "next": "^14.2.15",
     "next-auth": "^4.24.13",
     "next-cloudinary": "^5.5.0",
     "next-i18next": "^15.2.0",
