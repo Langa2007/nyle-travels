@@ -7,28 +7,66 @@ import {
 } from '@/lib/hotelCatalog';
 import { fetchAllSettings } from '@/utils/settings';
 
+const LOG_PREFIX = '[NyleTravel:useHotelCatalog]';
+
 export function useHotelCatalog(seedHotels = []) {
   const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     let mounted = true;
 
     async function loadHotels() {
+      console.info(`${LOG_PREFIX} Starting catalog fetch…`);
+
       try {
         const settings = await fetchAllSettings();
         const savedCatalog = settings?.[HOTELS_SETTINGS_KEY];
 
-        if (mounted) {
-          if (Array.isArray(savedCatalog) && savedCatalog.length > 0) {
-            setHotels(normalizeHotels(savedCatalog));
-          } else {
-            setHotels(normalizeHotels(seedHotels));
-          }
+        console.info(
+          `${LOG_PREFIX} fetchAllSettings returned — ` +
+          `hasSaved=${Array.isArray(savedCatalog)} ` +
+          `count=${Array.isArray(savedCatalog) ? savedCatalog.length : 'n/a'}`
+        );
+
+        if (!mounted) return;
+
+        if (Array.isArray(savedCatalog) && savedCatalog.length > 0) {
+          const normalized = normalizeHotels(savedCatalog);
+          console.info(`${LOG_PREFIX} Using admin catalog — ${normalized.length} hotels.`);
+          setHotels(normalized);
+        } else {
+          const normalized = normalizeHotels(seedHotels);
+          console.info(
+            `${LOG_PREFIX} Admin catalog empty or unavailable — using seed data (${normalized.length} hotels).`
+          );
+          setHotels(normalized);
         }
+      } catch (err) {
+        console.error(`${LOG_PREFIX} Unexpected error loading catalog:`, {
+          message: err?.message,
+          name: err?.name,
+          stack: err?.stack,
+        });
+
+        if (!mounted) return;
+
+        // Fall back to seed data so the page still renders
+        try {
+          const fallback = normalizeHotels(seedHotels);
+          console.warn(`${LOG_PREFIX} Falling back to seed data — ${fallback.length} hotels.`);
+          setHotels(fallback);
+        } catch (seedErr) {
+          console.error(`${LOG_PREFIX} Seed data normalization also failed:`, seedErr);
+          setHotels([]);
+        }
+
+        setError(err);
       } finally {
         if (mounted) {
           setLoading(false);
+          console.info(`${LOG_PREFIX} Catalog load complete.`);
         }
       }
     }
@@ -41,7 +79,7 @@ export function useHotelCatalog(seedHotels = []) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { hotels, loading };
+  return { hotels, loading, error };
 }
 
 export default useHotelCatalog;
