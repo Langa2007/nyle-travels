@@ -41,11 +41,13 @@ export function normalizeHotel(hotel, index = 0) {
   const starRating = Number(hotel.starRating ?? hotel.star_rating ?? hotel.rating ?? 0);
   const price = Number(hotel.price ?? hotel.price_per_night ?? 0);
 
+  const rawSlug = hotel.slug || slugifyHotelValue(hotel.name || `hotel-${index + 1}`);
+
   return {
     ...hotel,
     id: hotel.id ?? `hotel-${index + 1}`,
     name: hotel.name ?? '',
-    slug: hotel.slug ?? slugifyHotelValue(hotel.name || `hotel-${index + 1}`),
+    slug: slugifyHotelValue(rawSlug),  // always hyphenated – prevents spaces in URLs
     destination: hotel.destination ?? hotel.destination_name ?? '',
     region: hotel.region ?? '',
     country: hotel.country ?? 'Kenya',
