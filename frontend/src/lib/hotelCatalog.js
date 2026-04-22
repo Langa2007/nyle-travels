@@ -31,13 +31,8 @@ export function normalizeHotel(hotel, index = 0) {
   const amenities = parseHotelList(hotel.amenities);
   const explicitGallery = parseHotelList(hotel.gallery);
   const fallbackGallery = parseHotelList(hotel.gallery_images);
-  const defaultImage =
-    hotel.defaultImage ||
-    hotel.default_image ||
-    hotel.featured_image ||
-    hotel.image ||
-    '';
-  const image = hotel.image || hotel.featured_image || '';
+  const image = (hotel.image || hotel.featured_image || hotel.defaultImage || hotel.default_image || '').trim();
+  const defaultImage = (hotel.defaultImage || hotel.default_image || hotel.featured_image || hotel.image || '').trim();
   const starRating = Number(hotel.starRating ?? hotel.star_rating ?? hotel.rating ?? 0);
   const price = Number(hotel.price ?? hotel.price_per_night ?? 0);
 
@@ -56,7 +51,7 @@ export function normalizeHotel(hotel, index = 0) {
     rating: Number(hotel.rating ?? starRating),
     price,
     priceCurrency: hotel.priceCurrency ?? hotel.price_currency ?? 'USD',
-    badge: hotel.badge ?? '',
+    badge: hotel.badge ?? hotel.tag ?? '',
     featured: Boolean(hotel.featured),
     featuredOnHome: Boolean(hotel.featuredOnHome ?? hotel.featured),
     shortDescription:
@@ -77,16 +72,17 @@ export function normalizeHotel(hotel, index = 0) {
         ? explicitGallery
         : fallbackGallery.length > 0
           ? fallbackGallery
-          : [defaultImage].filter(Boolean),
+          : [image, defaultImage].filter(Boolean),
   };
 }
 
 export function normalizeHotels(catalog = hotelsSeed) {
-  return catalog.map((hotel, index) => normalizeHotel(hotel, index));
+  return (Array.isArray(catalog) ? catalog : []).map((hotel, index) => normalizeHotel(hotel, index));
 }
 
 export function getHotelImage(hotel) {
-  return hotel?.image?.trim() || hotel?.defaultImage?.trim() || HOTEL_FALLBACK_IMAGE;
+  const url = hotel?.image || hotel?.defaultImage || hotel?.featured_image;
+  return (typeof url === 'string' && url.trim()) ? url.trim() : HOTEL_FALLBACK_IMAGE;
 }
 
 export function matchesHotelAmenity(hotel, amenity) {

@@ -22,18 +22,33 @@ export function useHotelCatalog(seedHotels = []) {
 
       try {
         const settings = await fetchAllSettings();
-        const savedCatalog = settings?.[HOTELS_SETTINGS_KEY];
+        
+        // Try the primary key first, then the legacy/homepage key
+        let rawCatalog = settings?.[HOTELS_SETTINGS_KEY] || settings?.['luxury_stays_sections'];
+
+        // Robustly handle stringified JSON if the DB driver returns it as such
+        if (typeof rawCatalog === 'string') {
+          try {
+            rawCatalog = JSON.parse(rawCatalog);
+          } catch (e) {
+            console.error(`${LOG_PREFIX} Failed to parse stringified catalog:`, e);
+            rawCatalog = null;
+          }
+        }
+
+        const hasSaved = Array.isArray(rawCatalog) && rawCatalog.length > 0;
 
         console.info(
           `${LOG_PREFIX} fetchAllSettings returned — ` +
-          `hasSaved=${Array.isArray(savedCatalog)} ` +
-          `count=${Array.isArray(savedCatalog) ? savedCatalog.length : 'n/a'}`
+          `hasSaved=${hasSaved} ` +
+          `count=${hasSaved ? rawCatalog.length : 'n/a'} ` +
+          `source=${settings?.[HOTELS_SETTINGS_KEY] ? 'hotels_catalog' : (settings?.luxury_stays_sections ? 'luxury_stays' : 'none')}`
         );
 
         if (!mounted) return;
 
-        if (Array.isArray(savedCatalog) && savedCatalog.length > 0) {
-          const normalized = normalizeHotels(savedCatalog);
+        if (hasSaved) {
+          const normalized = normalizeHotels(rawCatalog);
           console.info(`${LOG_PREFIX} Using admin catalog — ${normalized.length} hotels.`);
           setHotels(normalized);
         } else {
