@@ -1,114 +1,98 @@
 'use client';
 
 /**
- * HotelDetailClient — the actual hotel detail view.
+ * hotels/[slug]/_client.js  ── CLIENT COMPONENT
  *
- * Lives in _client.js so the parent page.js can stay as a plain Server
- * Component and supply the required <Suspense> boundary.
+ * Receives `slug` and `initialHotel` from the Server Component parent.
+ * NO useParams / useRouter used during the server render pass.
  *
- * Debugging strategy:
- *   – Every failure path is logged with a [NyleTravel:HotelDetail] prefix so
- *     you can filter Vercel function logs with that string.
- *   – The hook loading cycle, catalog state, and slug resolution are all logged
- *     so you can see exactly where things go wrong.
+ * After mount, fires useHotelCatalog to check for admin overrides.
+ * If the admin has updated photos or copy, those replace the seed data.
+ *
+ * All console output is prefixed [NyleTravel:HotelDetailClient] so you
+ * can filter Vercel function logs and browser console in one search.
  */
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
-  FiMapPin,
-  FiStar,
-  FiCheck,
-  FiClock,
-  FiInfo,
-  FiChevronLeft,
-  FiShare2,
-  FiHeart,
-  FiX,
   FiAlertCircle,
+  FiCheck,
+  FiChevronLeft,
+  FiClock,
+  FiHeart,
+  FiInfo,
+  FiMapPin,
+  FiRefreshCw,
+  FiShare2,
+  FiStar,
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import hotelsSeed from '@/data/hotels';
 import useHotelCatalog from '@/hooks/useHotelCatalog';
 import { getHotelImage, slugifyHotelValue } from '@/lib/hotelCatalog';
 
-const LOG_PREFIX = '[NyleTravel:HotelDetail]';
+const LOG = '[NyleTravel:HotelDetailClient]';
 
-export default function HotelDetailClient() {
+export default function HotelDetailClient({ slug, initialHotel }) {
   const router = useRouter();
-  const params = useParams();
 
-  // ── Slug ─────────────────────────────────────────────────────────────────
-  const rawSlug = params?.slug ?? '';
-  const slug = slugifyHotelValue(decodeURIComponent(String(rawSlug)));
+  // Start with seed data — zero loading time on first paint
+  const [hotel, setHotel] = useState(initialHotel);
+  const [notFound, setNotFound] = useState(!initialHotel);
 
-  console.info(`${LOG_PREFIX} Mounting — rawSlug="${rawSlug}" normalised="${slug}"`);
-
-  // ── Catalog ───────────────────────────────────────────────────────────────
-  const { hotels, loading, error: catalogError } = useHotelCatalog(hotelsSeed);
-
-  const [hotel, setHotel] = useState(null);
-  const [notFound, setNotFound] = useState(false);
+  // Check admin catalog for overrides (runs only in browser)
+  const { hotels: adminHotels, loading: adminLoading, error: adminError } = useHotelCatalog(hotelsSeed);
 
   useEffect(() => {
-    console.info(
-      `${LOG_PREFIX} Catalog state — loading=${loading} count=${hotels.length} slug="${slug}"`
-    );
+    if (adminLoading) return;
 
-    if (catalogError) {
-      console.error(`${LOG_PREFIX} Catalog fetch error:`, catalogError);
+    if (adminError) {
+      console.warn(`${LOG} Admin catalog error (using seed fallback):`, adminError?.message);
+      return;
     }
 
-    if (loading) return;
-
-    if (hotels.length === 0) {
-      console.warn(`${LOG_PREFIX} Catalog is empty — falling back to seed data is likely disabled?`);
+    if (!adminHotels?.length) {
+      console.warn(`${LOG} Admin catalog empty — keeping seed hotel.`);
+      return;
     }
 
-    // Try matching by slug, then by name-derived slug (handles legacy/spaced URLs)
-    const found = hotels.find(
+    const adminMatch = adminHotels.find(
       (h) =>
         slugifyHotelValue(h.slug) === slug ||
         slugifyHotelValue(h.name) === slug
     );
 
-    if (found) {
-      console.info(`${LOG_PREFIX} Matched hotel: "${found.name}" (id=${found.id})`);
-      setHotel(found);
-    } else {
+    if (adminMatch) {
+      console.info(`${LOG} Admin override found for "${adminMatch.name}" — updating view.`);
+      setHotel(adminMatch);
+      setNotFound(false);
+    } else if (!initialHotel) {
+      // Seed had nothing, admin has nothing either
       console.warn(
-        `${LOG_PREFIX} No hotel found for slug="${slug}". ` +
-        `Available slugs (first 10): [${hotels.slice(0, 10).map((h) => h.slug).join(', ')}]`
+        `${LOG} No hotel for slug="${slug}". ` +
+        `Admin slugs (first 8): [${adminHotels.slice(0, 8).map((h) => h.slug).join(', ')}]`
       );
       setNotFound(true);
     }
-  }, [loading, hotels, slug, catalogError]);
+  }, [adminLoading, adminHotels, adminError, slug, initialHotel]);
 
-  // ── Loading ───────────────────────────────────────────────────────────────
-  if (loading || (!hotel && !notFound)) {
-    return (
-      <div className="min-h-screen bg-[#faf8f2] flex flex-col items-center justify-center gap-4">
-        <div className="w-14 h-14 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-400 font-serif italic">Preparing your stay…</p>
-      </div>
-    );
-  }
-
-  // ── Not Found ─────────────────────────────────────────────────────────────
+  // ── Not found ──────────────────────────────────────────────────────────────
   if (notFound) {
     return (
       <div className="min-h-screen bg-[#faf8f2] flex flex-col items-center justify-center p-6 text-center">
         <div className="w-20 h-20 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 mb-8">
           <FiAlertCircle size={40} />
         </div>
-        <h1 className="text-3xl font-serif font-bold text-gray-900 mb-4">Hotel Not Found</h1>
+        <h1 className="text-3xl font-serif font-bold text-gray-900 mb-3">Hotel Not Found</h1>
         <p className="text-gray-500 max-w-md mb-2">
-          We couldn&apos;t locate a hotel for <code className="bg-gray-100 px-2 py-0.5 rounded text-sm">{slug}</code>.
+          No hotel found for{' '}
+          <code className="bg-gray-100 px-2 py-0.5 rounded text-sm">{slug}</code>.
         </p>
         <p className="text-gray-400 text-sm mb-8">
-          This can happen if the link is outdated or the hotel was removed from the catalog.
+          The link may be outdated or the hotel was removed from the catalog.
         </p>
         <Button variant="primary" onClick={() => router.push('/hotels')}>
           Browse All Hotels
@@ -117,17 +101,26 @@ export default function HotelDetailClient() {
     );
   }
 
-  // ── Images ────────────────────────────────────────────────────────────────
-  const heroImage = getHotelImage(hotel);
-  const rawGallery = Array.isArray(hotel.gallery) ? hotel.gallery : [];
-  const images = rawGallery.length > 0 ? rawGallery : [heroImage];
+  // ── Admin catalog still loading & no seed fallback ─────────────────────────
+  if (!hotel) {
+    return (
+      <div className="min-h-screen bg-[#faf8f2] flex flex-col items-center justify-center gap-4">
+        <div className="w-14 h-14 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-400 font-serif italic">Preparing your stay…</p>
+      </div>
+    );
+  }
 
-  console.info(`${LOG_PREFIX} Rendering "${hotel.name}" — ${images.length} gallery image(s).`);
+  // ── Images ─────────────────────────────────────────────────────────────────
+  const heroSrc = getHotelImage(hotel);
+  const gallery = Array.isArray(hotel.gallery) && hotel.gallery.length > 0
+    ? hotel.gallery
+    : [heroSrc];
 
   return (
     <div className="min-h-screen bg-[#faf8f2] pb-24">
 
-      {/* ── Back nav ── */}
+      {/* ── Breadcrumb bar ── */}
       <div className="bg-white sticky top-0 z-40 border-b border-gray-100 shadow-sm">
         <div className="container mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
           <Link
@@ -137,6 +130,15 @@ export default function HotelDetailClient() {
             <FiChevronLeft className="w-5 h-5 mr-1" />
             Back to Hotels
           </Link>
+
+          {/* Live admin-sync indicator */}
+          {adminLoading && (
+            <span className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
+              <FiRefreshCw className="w-3.5 h-3.5 animate-spin" />
+              Syncing latest details…
+            </span>
+          )}
+
           <div className="flex items-center gap-3">
             <button aria-label="Share" className="p-2 rounded-full hover:bg-gray-50 text-gray-600 transition-colors">
               <FiShare2 className="w-5 h-5" />
@@ -173,6 +175,7 @@ export default function HotelDetailClient() {
           <h1 className="text-4xl md:text-5xl font-serif text-gray-900 leading-tight">
             {hotel.name}
           </h1>
+
           <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-gray-600">
             <div className="flex items-center gap-1">
               <FiMapPin className="w-4 h-4 text-primary-600 shrink-0" />
@@ -189,41 +192,40 @@ export default function HotelDetailClient() {
 
         {/* ── Gallery ── */}
         <div className="mb-12">
-          {images.length >= 3 ? (
+          {gallery.length >= 3 ? (
             <div className="grid grid-cols-4 grid-rows-2 gap-3 h-[50vh] md:h-[62vh] rounded-[2rem] overflow-hidden">
-              {/* Hero – 2 cols × 2 rows */}
+              {/* Hero — 2 cols × 2 rows */}
               <div className="col-span-4 md:col-span-2 row-span-2 relative group cursor-pointer overflow-hidden">
                 <Image
-                  src={images[0]}
+                  src={gallery[0]}
                   alt={hotel.name}
                   fill
                   priority
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  onError={() => console.warn(`${LOG_PREFIX} Hero image failed to load: ${images[0]}`)}
                 />
               </div>
               {[1, 2, 3, 4].map((i) => {
-                const src = images[i];
+                const src = gallery[i];
                 if (!src) {
                   return (
                     <div key={i} className="hidden md:flex bg-[#132026] items-center justify-center">
-                      <FiStar className="text-white/10 w-10 h-10" />
+                      <FiStar className="text-white/10 w-8 h-8" />
                     </div>
                   );
                 }
-                const showOverlay = i === 4 && images.length > 5;
+                const isOverlay = i === 4 && gallery.length > 5;
                 return (
                   <div key={i} className="hidden md:block relative group cursor-pointer overflow-hidden">
                     <Image
                       src={src}
-                      alt={`${hotel.name} – photo ${i + 1}`}
+                      alt={`${hotel.name} — photo ${i + 1}`}
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    {showOverlay && (
+                    {isOverlay && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                         <span className="text-white text-sm font-medium bg-black/30 px-4 py-2 rounded-full border border-white/20">
-                          +{images.length - 5} More
+                          +{gallery.length - 5} More
                         </span>
                       </div>
                     )}
@@ -234,7 +236,7 @@ export default function HotelDetailClient() {
           ) : (
             <div className="relative h-[55vh] rounded-[2rem] overflow-hidden group">
               <Image
-                src={images[0]}
+                src={gallery[0]}
                 alt={hotel.name}
                 fill
                 priority
@@ -247,7 +249,7 @@ export default function HotelDetailClient() {
         {/* ── Content + Sidebar ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
-          {/* ── Left content ── */}
+          {/* Left */}
           <div className="lg:col-span-2 space-y-12">
 
             <section>
@@ -278,6 +280,7 @@ export default function HotelDetailClient() {
             <section>
               <h2 className="text-2xl font-serif text-gray-900 mb-8">Things to know</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
                 <div>
                   <h3 className="flex items-center gap-2 font-semibold text-gray-900 mb-4">
                     <FiClock className="w-5 h-5 text-gray-400" />
@@ -312,14 +315,13 @@ export default function HotelDetailClient() {
               <div className="mt-8 bg-gray-50 p-6 rounded-2xl border border-gray-200">
                 <h3 className="font-semibold text-gray-900 mb-2">Cancellation Policy</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  {hotel.cancellationPolicy || 'Standard cancellation policy applies. Please check during your booking process for the full terms.'}
+                  {hotel.cancellationPolicy || 'Standard cancellation policy applies.'}
                 </p>
               </div>
             </section>
-
           </div>
 
-          {/* ── Booking sidebar ── */}
+          {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 bg-white p-7 rounded-[2rem] border border-gray-200 shadow-xl shadow-gray-200/50">
               <div className="flex items-end justify-between mb-5">

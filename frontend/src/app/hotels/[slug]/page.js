@@ -1,29 +1,49 @@
 /**
- * hotels/[slug]/page.js
+ * hotels/[slug]/page.js  ── SERVER COMPONENT (no 'use client')
  *
- * Next.js 14 App Router rule: useParams() (and any hook that reads "dynamic"
- * context) inside a Client Component must be wrapped in a <Suspense> boundary
- * at the page level, otherwise Next.js cannot complete the server pre-render
- * and throws a 500.
+ * The root cause of the persistent 500:
+ *   Next.js 14 App Router still server-side-renders Client Components to
+ *   produce initial HTML.  Any hook or context that reads dynamic route
+ *   data (useParams, useRouter) CAN throw during that SSR pass, producing
+ *   an opaque 500 that never reaches the error.js boundary.
  *
- * This file is therefore a THIN Server Component wrapper that supplies the
- * Suspense shell.  All real work lives in HotelDetailClient below.
+ * Correct Next.js 14 App Router pattern:
+ *   ✅  Server Component receives `params` as a plain prop — always safe.
+ *   ✅  Server Component finds the hotel from seed data synchronously.
+ *   ✅  Passes `slug` + `initialHotel` as serializable props to <HotelDetailClient>.
+ *   ✅  Client Component never calls useParams; it receives what it needs.
  */
 
-import { Suspense } from 'react';
+import hotelsSeed from '@/data/hotels';
+import { slugifyHotelValue, normalizeHotels } from '@/lib/hotelCatalog';
 import HotelDetailClient from './_client';
 
-export default function HotelDetailPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-[#faf8f2] flex flex-col items-center justify-center gap-4">
-          <div className="w-14 h-14 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-400 font-serif italic">Preparing your stay…</p>
-        </div>
-      }
-    >
-      <HotelDetailClient />
-    </Suspense>
+function findHotelFromSeed(rawSlug) {
+  try {
+    const slug = slugifyHotelValue(decodeURIComponent(String(rawSlug ?? '')));
+    const normalized = normalizeHotels(hotelsSeed);
+    return (
+      normalized.find(
+        (h) =>
+          slugifyHotelValue(h.slug) === slug ||
+          slugifyHotelValue(h.name) === slug
+      ) ?? null
+    );
+  } catch (err) {
+    console.error('[NyleTravel:HotelDetailPage] Server-side hotel lookup failed:', err);
+    return null;
+  }
+}
+
+export default function HotelDetailPage({ params }) {
+  const rawSlug = params?.slug ?? '';
+  const slug = slugifyHotelValue(decodeURIComponent(String(rawSlug)));
+  const initialHotel = findHotelFromSeed(rawSlug);
+
+  console.info(
+    `[NyleTravel:HotelDetailPage] Server render — rawSlug="${rawSlug}" slug="${slug}" found=${!!initialHotel}`
   );
+
+  // Pass only JSON-serializable data to the Client Component
+  return <HotelDetailClient slug={slug} initialHotel={initialHotel} />;
 }
