@@ -4,8 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiPhone, FiChevronRight } from 'react-icons/fi';
-import { FaGoogle } from 'react-icons/fa';
+import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '@/hooks/useAuth';
+import { useAuthPopup } from '@/hooks/useAuthPopup';
 import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
 import { signIn } from 'next-auth/react';
@@ -23,6 +24,7 @@ export default function RegisterPage() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
   const { register: manualRegister } = useAuth();
+  const { signInWithPopup, isAuthenticating } = useAuthPopup();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -205,10 +207,15 @@ export default function RegisterPage() {
               <Button
                 variant="outline"
                 fullWidth
-                className="py-4 rounded-2xl border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm"
-                onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+                loading={isAuthenticating}
+                className="py-4 rounded-2xl border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 shadow-sm font-semibold transition-all duration-300 flex items-center justify-center gap-3"
+                onClick={() => signInWithPopup('google', {
+                  onSuccess: () => {
+                    window.location.href = '/dashboard';
+                  }
+                })}
               >
-                <FaGoogle className="mr-3 text-red-500" /> Sign Up with Google
+                <FcGoogle size={24} /> Sign Up with Google
               </Button>
 
               <div className="w-full">
