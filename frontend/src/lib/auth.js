@@ -2,6 +2,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/prisma";
+import jwt from "jsonwebtoken";
 
 export const authOptions = {
   // Use a getter to prevent adapter initialization during static analysis/build phase
@@ -125,7 +126,8 @@ export const authOptions = {
           return {
             id: user.id,
             email: user.email,
-            name: user.name,
+            name: googleUser.name || user.name,
+            image: googleUser.picture || user.image,
             role: user.role,
           };
         } catch (error) {
@@ -205,17 +207,35 @@ export const authOptions = {
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
+        session.user.name = token.name ?? session.user.name;
+        session.user.image = token.picture ?? session.user.image;
         session.user.role = token.role;
         session.user.emailVerified = token.emailVerified;
+        session.accessToken = token.accessToken;
       }
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.name = user.name;
+        token.picture = user.image;
         token.role = user.role;
         token.emailVerified = user.emailVerified;
       }
+
+      if (!token.accessToken || user) {
+        token.accessToken = jwt.sign(
+          { 
+            id: token.id, 
+            email: token.email, 
+            role: token.role || 'USER' 
+          },
+          process.env.JWT_SECRET || 'secret-key',
+          { expiresIn: '7d' }
+        );
+      }
+
       return token;
     }
   },

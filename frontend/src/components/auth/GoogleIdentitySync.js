@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { getSession, signIn, useSession } from 'next-auth/react';
+import Cookies from 'js-cookie';
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
@@ -60,6 +61,10 @@ export default function GoogleIdentitySync({
         }
 
         const session = await waitForSession();
+        
+        if (session?.accessToken) {
+          Cookies.set('token', session.accessToken, { expires: 7 });
+        }
 
         if (onSuccessRef.current) {
           await onSuccessRef.current(session);

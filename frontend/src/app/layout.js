@@ -12,6 +12,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Toast from '@/components/ui/Toast';
 import LoadingBar from '@/components/ui/LoadingBar';
+import SessionSync from '@/components/auth/SessionSync';
 import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({
@@ -117,6 +118,7 @@ export default function RootLayout({ children }) {
         <ThemeProvider>
           <NextAuthProvider>
             <AuthProvider>
+              <SessionSync />
               <CartProvider>
                 <WishlistProvider>
                   <Suspense fallback={null}>
