@@ -1,30 +1,22 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-/**
- * Google OAuth Popup Redirect
- * Opened inside the popup window.  It immediately POSTs to NextAuth's
- * /api/auth/signin/google endpoint using a dynamically-created form, which
- * causes the popup to skip the NextAuth sign-in page and go straight to
- * Google's OAuth consent screen.
- */
-export default function GooglePopupRedirect() {
+function GooglePopupRedirectInner() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/auth/popup-callback';
 
   useEffect(() => {
     const redirect = async () => {
       try {
-        // Fetch the CSRF token required by NextAuth for form submissions
+        // Fetch the CSRF token required by NextAuth for form POST submissions
         const csrfRes = await fetch('/api/auth/csrf');
         const { csrfToken } = await csrfRes.json();
 
-        // Build and auto-submit a hidden form to /api/auth/signin/google
-        // This is the only reliable way to bypass the NextAuth sign-in page
+        // Auto-submit a hidden form to /api/auth/signin/google.
+        // A POST with a valid CSRF token bypasses NextAuth's sign-in page and
+        // redirects the popup directly to Google's OAuth consent screen.
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '/api/auth/signin/google';
@@ -57,5 +49,19 @@ export default function GooglePopupRedirect() {
         <p className="text-gray-600 text-sm font-medium">Connecting to Google...</p>
       </div>
     </div>
+  );
+}
+
+export default function GooglePopupRedirect() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-white">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <GooglePopupRedirectInner />
+    </Suspense>
   );
 }
