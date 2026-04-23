@@ -13,7 +13,6 @@ import {
 } from 'react-icons/fi';
 import StaticPageHeader from '@/components/ui/StaticPageHeader';
 import Button from '@/components/ui/Button';
-import hotelsSeed from '@/data/hotels';
 import useHotelCatalog from '@/hooks/useHotelCatalog';
 import {
   filterHotels,
@@ -31,7 +30,7 @@ const defaultFilters = {
 
 function HotelsPageContent() {
   const searchParams = useSearchParams();
-  const { hotels, loading } = useHotelCatalog(hotelsSeed);
+  const { hotels, loading } = useHotelCatalog([], { allowSeedFallback: false });
   const [filters, setFilters] = useState(defaultFilters);
 
   useEffect(() => {

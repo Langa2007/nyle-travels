@@ -25,7 +25,18 @@ export const fetchAllSettings = async () => {
     const result = await res.json();
     
     if (result.status === 'success' && result.data) {
-      return result.data;
+      const data = result.data;
+      // Auto-parse stringified JSON fields from the database
+      Object.keys(data).forEach(key => {
+        if (typeof data[key] === 'string' && (data[key].startsWith('[') || data[key].startsWith('{'))) {
+          try {
+            data[key] = JSON.parse(data[key]);
+          } catch (e) {
+            // Not actual JSON, leave as string
+          }
+        }
+      });
+      return data;
     }
     return null;
   } catch (error) {

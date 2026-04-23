@@ -1,12 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiPhone, FiChevronRight } from 'react-icons/fi';
-import { FcGoogle } from 'react-icons/fc';
-import { signIn } from 'next-auth/react';
 import { useAuth } from '@/hooks/useAuth';
 import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
@@ -23,9 +20,7 @@ export default function RegisterPage() {
   });
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const { register: manualRegister } = useAuth();
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -205,16 +200,14 @@ export default function RegisterPage() {
             </div>
 
             <div className="w-full">
-              <GoogleIdentitySync />
-              <button
-                onClick={() => {
-                  if (window.google) window.google.accounts.id.prompt();
+              <GoogleIdentitySync
+                context="signup"
+                text="signup_with"
+                className="w-full"
+                onSuccess={() => {
+                  window.location.href = '/dashboard';
                 }}
-                className="w-full flex items-center justify-center space-x-3 py-4 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm"
-              >
-                <FcGoogle size={24} />
-                <span className="font-medium text-gray-700">Google</span>
-              </button>
+              />
             </div>
 
             <p className="mt-10 text-center text-gray-500">

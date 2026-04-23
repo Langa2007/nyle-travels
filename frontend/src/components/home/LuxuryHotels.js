@@ -11,7 +11,6 @@ import {
   FiChevronRight,
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
-import hotelsSeed from '@/data/hotels';
 import useHotelCatalog from '@/hooks/useHotelCatalog';
 import {
   getFeaturedHotels,
@@ -20,7 +19,7 @@ import {
 
 export default function LuxuryHotels() {
   const [wishlist, setWishlist] = useState([]);
-  const { hotels } = useHotelCatalog(hotelsSeed);
+  const { hotels } = useHotelCatalog([], { allowSeedFallback: false });
   const featuredHotels = getFeaturedHotels(hotels, 4);
 
   const toggleWishlist = (hotelId) => {

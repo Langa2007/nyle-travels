@@ -1,27 +1,21 @@
 'use client';
 
 import { useState, Suspense } from 'react';
-import { signIn } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { FiMail, FiLock, FiChevronRight, FiAlertCircle } from 'react-icons/fi';
-import { FcGoogle } from 'react-icons/fc';
+import { FiMail, FiLock, FiChevronRight } from 'react-icons/fi';
 import { useAuth } from '@/hooks/useAuth';
 import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
-import toast from 'react-hot-toast';
 
 function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
   const { login: manualLogin } = useAuth();
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleManualLogin = async (e) => {
     e.preventDefault();
@@ -37,12 +31,6 @@ function LoginContent() {
       console.error('Login error:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = () => {
-    if (window.google) {
-      window.google.accounts.id.prompt();
     }
   };
 
@@ -119,15 +107,14 @@ function LoginContent() {
             </div>
 
             <div className="w-full flex justify-center">
-              <GoogleIdentitySync />
-              <button 
-                id="google-signin-button"
-                onClick={handleGoogleLogin}
-                className="w-full h-14 flex items-center justify-center space-x-3 py-4 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm"
-              >
-                <FcGoogle size={24} />
-                <span className="font-medium text-gray-700">Google</span>
-              </button>
+              <GoogleIdentitySync
+                context="signin"
+                text="signin_with"
+                className="w-full"
+                onSuccess={() => {
+                  window.location.href = callbackUrl;
+                }}
+              />
             </div>
 
             <p className="mt-10 text-center text-gray-500">

@@ -18,7 +18,6 @@ import {
   FiMapPin,
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
-import hotelsSeed from '@/data/hotels';
 import useHotelCatalog from '@/hooks/useHotelCatalog';
 import {
   buildHotelQuery,
@@ -137,7 +136,7 @@ export default function Navbar() {
     amenity: '',
   });
 
-  const { hotels } = useHotelCatalog(hotelsSeed);
+  const { hotels } = useHotelCatalog([], { allowSeedFallback: false });
   const featuredHotels = getFeaturedHotels(hotels, 3);
   const hotelDestinations = [...new Set(hotels.map((hotel) => hotel.destination).filter(Boolean))].slice(0, 6);
 

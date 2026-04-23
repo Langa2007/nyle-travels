@@ -1,18 +1,5 @@
 'use client';
 
-/**
- * hotels/[slug]/_client.js  ── CLIENT COMPONENT
- *
- * Receives `slug` and `initialHotel` from the Server Component parent.
- * NO useParams / useRouter used during the server render pass.
- *
- * After mount, fires useHotelCatalog to check for admin overrides.
- * If the admin has updated photos or copy, those replace the seed data.
- *
- * All console output is prefixed [NyleTravel:HotelDetailClient] so you
- * can filter Vercel function logs and browser console in one search.
- */
-
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -30,7 +17,6 @@ import {
   FiStar,
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
-import hotelsSeed from '@/data/hotels';
 import useHotelCatalog from '@/hooks/useHotelCatalog';
 import { getHotelImage, slugifyHotelValue } from '@/lib/hotelCatalog';
 
@@ -38,48 +24,42 @@ const LOG = '[NyleTravel:HotelDetailClient]';
 
 export default function HotelDetailClient({ slug, initialHotel }) {
   const router = useRouter();
-
-  // Start with seed data — zero loading time on first paint
   const [hotel, setHotel] = useState(initialHotel);
-  const [notFound, setNotFound] = useState(!initialHotel);
+  const [notFound, setNotFound] = useState(false);
 
-  // Check admin catalog for overrides (runs only in browser)
-  const { hotels: adminHotels, loading: adminLoading, error: adminError } = useHotelCatalog(hotelsSeed);
+  const { hotels: adminHotels, loading: adminLoading, error: adminError } = useHotelCatalog([], {
+    allowSeedFallback: false,
+  });
 
   useEffect(() => {
     if (adminLoading) return;
 
     if (adminError) {
-      console.warn(`${LOG} Admin catalog error (using seed fallback):`, adminError?.message);
-      return;
-    }
-
-    if (!adminHotels?.length) {
-      console.warn(`${LOG} Admin catalog empty — keeping seed hotel.`);
-      return;
+      console.warn(`${LOG} Admin catalog error:`, adminError?.message);
     }
 
     const adminMatch = adminHotels.find(
-      (h) =>
-        slugifyHotelValue(h.slug) === slug ||
-        slugifyHotelValue(h.name) === slug
+      (item) =>
+        slugifyHotelValue(item.slug) === slug ||
+        slugifyHotelValue(item.name) === slug
     );
 
     if (adminMatch) {
-      console.info(`${LOG} Admin override found for "${adminMatch.name}" — updating view.`);
+      console.info(`${LOG} Admin record found for "${adminMatch.name}" - updating view.`);
       setHotel(adminMatch);
       setNotFound(false);
-    } else if (!initialHotel) {
-      // Seed had nothing, admin has nothing either
+      return;
+    }
+
+    if (!initialHotel) {
       console.warn(
         `${LOG} No hotel for slug="${slug}". ` +
-        `Admin slugs (first 8): [${adminHotels.slice(0, 8).map((h) => h.slug).join(', ')}]`
+        `Admin slugs (first 8): [${adminHotels.slice(0, 8).map((item) => item.slug).join(', ')}]`
       );
       setNotFound(true);
     }
   }, [adminLoading, adminHotels, adminError, slug, initialHotel]);
 
-  // ── Not found ──────────────────────────────────────────────────────────────
   if (notFound) {
     return (
       <div className="min-h-screen bg-[#faf8f2] flex flex-col items-center justify-center p-6 text-center">
@@ -92,7 +72,7 @@ export default function HotelDetailClient({ slug, initialHotel }) {
           <code className="bg-gray-100 px-2 py-0.5 rounded text-sm">{slug}</code>.
         </p>
         <p className="text-gray-400 text-sm mb-8">
-          The link may be outdated or the hotel was removed from the catalog.
+          The link may be outdated or the hotel was removed from the admin catalog.
         </p>
         <Button variant="primary" onClick={() => router.push('/hotels')}>
           Browse All Hotels
@@ -101,17 +81,15 @@ export default function HotelDetailClient({ slug, initialHotel }) {
     );
   }
 
-  // ── Admin catalog still loading & no seed fallback ─────────────────────────
   if (!hotel) {
     return (
       <div className="min-h-screen bg-[#faf8f2] flex flex-col items-center justify-center gap-4">
         <div className="w-14 h-14 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-400 font-serif italic">Preparing your stay…</p>
+        <p className="text-gray-400 font-serif italic">Preparing your stay...</p>
       </div>
     );
   }
 
-  // ── Images ─────────────────────────────────────────────────────────────────
   const heroSrc = getHotelImage(hotel);
   const gallery = Array.isArray(hotel.gallery) && hotel.gallery.length > 0
     ? hotel.gallery
@@ -119,8 +97,6 @@ export default function HotelDetailClient({ slug, initialHotel }) {
 
   return (
     <div className="min-h-screen bg-[#faf8f2] pb-24">
-
-      {/* ── Breadcrumb bar ── */}
       <div className="bg-white sticky top-0 z-40 border-b border-gray-100 shadow-sm">
         <div className="container mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
           <Link
@@ -131,11 +107,10 @@ export default function HotelDetailClient({ slug, initialHotel }) {
             Back to Hotels
           </Link>
 
-          {/* Live admin-sync indicator */}
           {adminLoading && (
             <span className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
               <FiRefreshCw className="w-3.5 h-3.5 animate-spin" />
-              Syncing latest details…
+              Syncing latest details...
             </span>
           )}
 
@@ -151,8 +126,6 @@ export default function HotelDetailClient({ slug, initialHotel }) {
       </div>
 
       <main className="container mx-auto px-4 mt-8">
-
-        {/* ── Title ── */}
         <div className="mb-8">
           <div className="flex flex-wrap items-center gap-2 mb-3">
             {hotel.type && (
@@ -190,11 +163,9 @@ export default function HotelDetailClient({ slug, initialHotel }) {
           </div>
         </div>
 
-        {/* ── Gallery ── */}
         <div className="mb-12">
           {gallery.length >= 3 ? (
             <div className="grid grid-cols-4 grid-rows-2 gap-3 h-[50vh] md:h-[62vh] rounded-[2rem] overflow-hidden">
-              {/* Hero — 2 cols × 2 rows */}
               <div className="col-span-4 md:col-span-2 row-span-2 relative group cursor-pointer overflow-hidden">
                 <Image
                   src={gallery[0]}
@@ -204,21 +175,24 @@ export default function HotelDetailClient({ slug, initialHotel }) {
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
-              {[1, 2, 3, 4].map((i) => {
-                const src = gallery[i];
+              {[1, 2, 3, 4].map((index) => {
+                const src = gallery[index];
+
                 if (!src) {
                   return (
-                    <div key={i} className="hidden md:flex bg-[#132026] items-center justify-center">
+                    <div key={index} className="hidden md:flex bg-[#132026] items-center justify-center">
                       <FiStar className="text-white/10 w-8 h-8" />
                     </div>
                   );
                 }
-                const isOverlay = i === 4 && gallery.length > 5;
+
+                const isOverlay = index === 4 && gallery.length > 5;
+
                 return (
-                  <div key={i} className="hidden md:block relative group cursor-pointer overflow-hidden">
+                  <div key={index} className="hidden md:block relative group cursor-pointer overflow-hidden">
                     <Image
                       src={src}
-                      alt={`${hotel.name} — photo ${i + 1}`}
+                      alt={`${hotel.name} - photo ${index + 1}`}
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
@@ -246,12 +220,8 @@ export default function HotelDetailClient({ slug, initialHotel }) {
           )}
         </div>
 
-        {/* ── Content + Sidebar ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-
-          {/* Left */}
           <div className="lg:col-span-2 space-y-12">
-
             <section>
               <h2 className="text-2xl font-serif text-gray-900 mb-4">About this stay</h2>
               <p className="text-gray-600 leading-8 text-lg whitespace-pre-wrap">
@@ -265,8 +235,8 @@ export default function HotelDetailClient({ slug, initialHotel }) {
               <section>
                 <h2 className="text-2xl font-serif text-gray-900 mb-6">Amenities</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {hotel.amenities.map((amenity, idx) => (
-                    <div key={idx} className="flex items-center gap-3 text-gray-700">
+                  {hotel.amenities.map((amenity, index) => (
+                    <div key={index} className="flex items-center gap-3 text-gray-700">
                       <FiCheck className="w-5 h-5 text-primary-500 shrink-0" />
                       <span>{amenity}</span>
                     </div>
@@ -280,7 +250,6 @@ export default function HotelDetailClient({ slug, initialHotel }) {
             <section>
               <h2 className="text-2xl font-serif text-gray-900 mb-8">Things to know</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
                 <div>
                   <h3 className="flex items-center gap-2 font-semibold text-gray-900 mb-4">
                     <FiClock className="w-5 h-5 text-gray-400" />
@@ -305,9 +274,8 @@ export default function HotelDetailClient({ slug, initialHotel }) {
                   </h3>
                   <ul className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-3 text-sm text-gray-600 list-disc list-inside">
                     {hotel.houseRules?.length > 0
-                      ? hotel.houseRules.map((rule, idx) => <li key={idx}>{rule}</li>)
-                      : <li>No specific house rules listed.</li>
-                    }
+                      ? hotel.houseRules.map((rule, index) => <li key={index}>{rule}</li>)
+                      : <li>No specific house rules listed.</li>}
                   </ul>
                 </div>
               </div>
@@ -321,7 +289,6 @@ export default function HotelDetailClient({ slug, initialHotel }) {
             </section>
           </div>
 
-          {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 bg-white p-7 rounded-[2rem] border border-gray-200 shadow-xl shadow-gray-200/50">
               <div className="flex items-end justify-between mb-5">
@@ -367,7 +334,6 @@ export default function HotelDetailClient({ slug, initialHotel }) {
               </div>
             </div>
           </div>
-
         </div>
       </main>
     </div>

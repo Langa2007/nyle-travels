@@ -1,0 +1,19 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#132026"/>
+  <rect x="96" y="96" width="1408" height="708" rx="40" fill="url(#paint0_linear)"/>
+  <path d="M325 631V411.5C325 401.835 332.835 394 342.5 394H504.5C514.165 394 522 401.835 522 411.5V631" stroke="#D7C4A3" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M696 631V304.5C696 294.835 703.835 287 713.5 287H886.5C896.165 287 904 294.835 904 304.5V631" stroke="#D7C4A3" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M1078 631V470.5C1078 460.835 1085.84 453 1095.5 453H1257.5C1267.16 453 1275 460.835 1275 470.5V631" stroke="#D7C4A3" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M265 631H1335" stroke="#D7C4A3" stroke-width="28" stroke-linecap="round"/>
+  <path d="M621 224L800 122L979 224" stroke="#F0E7D8" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="1246" cy="218" r="54" fill="#B6843B" fill-opacity="0.35"/>
+  <path d="M1174 292C1223.36 292 1263.5 251.856 1263.5 202.5C1263.5 153.144 1223.36 113 1174 113C1124.64 113 1084.5 153.144 1084.5 202.5C1084.5 251.856 1124.64 292 1174 292Z" stroke="#E7D7BC" stroke-width="18" stroke-dasharray="16 18"/>
+  <text x="800" y="725" text-anchor="middle" fill="#F7F1E6" font-family="Georgia, 'Times New Roman', serif" font-size="54" letter-spacing="10">NYLE TRAVEL HOTELS</text>
+  <text x="800" y="778" text-anchor="middle" fill="#D7C4A3" font-family="Arial, Helvetica, sans-serif" font-size="24" letter-spacing="6">ADMIN IMAGE NOT AVAILABLE YET</text>
+  <defs>
+    <linearGradient id="paint0_linear" x1="190" y1="114" x2="1396" y2="814" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1D3038"/>
+      <stop offset="1" stop-color="#324B57"/>
+    </linearGradient>
+  </defs>
+</svg>

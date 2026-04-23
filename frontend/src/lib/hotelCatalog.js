@@ -1,7 +1,7 @@
-import hotelsSeed from '@/data/hotels';
-
 export const HOTELS_SETTINGS_KEY = 'hotels_catalog';
-export const HOTEL_FALLBACK_IMAGE = 'https://picsum.photos/seed/nylefallback/1600/900';
+export const HOTEL_FALLBACK_IMAGE = '/images/hotel-placeholder.svg';
+
+const BLOCKED_IMAGE_HOSTS = ['images.unsplash.com', 'source.unsplash.com', 'picsum.photos'];
 
 export function slugifyHotelValue(value) {
   return String(value || '')
@@ -26,28 +26,86 @@ export function parseHotelList(value) {
     .filter(Boolean);
 }
 
+export function isBlockedHotelImage(url) {
+  if (typeof url !== 'string') {
+    return false;
+  }
+
+  const value = url.trim();
+
+  if (!value) {
+    return false;
+  }
+
+  return BLOCKED_IMAGE_HOSTS.some((host) => value.includes(host));
+}
+
+export function sanitizeHotelImage(url) {
+  if (typeof url !== 'string') {
+    return '';
+  }
+
+  const value = url.trim();
+
+  if (!value || isBlockedHotelImage(value)) {
+    return '';
+  }
+
+  return value;
+}
+
+export function pickHotelImage(...values) {
+  for (const value of values.flat()) {
+    const sanitized = sanitizeHotelImage(value);
+
+    if (sanitized) {
+      return sanitized;
+    }
+  }
+
+  return '';
+}
+
+function uniqueHotelImages(values = []) {
+  const seen = new Set();
+  const images = [];
+
+  values.flat().forEach((value) => {
+    const sanitized = sanitizeHotelImage(value);
+
+    if (!sanitized || seen.has(sanitized)) {
+      return;
+    }
+
+    seen.add(sanitized);
+    images.push(sanitized);
+  });
+
+  return images;
+}
+
 export function normalizeHotel(hotel, index = 0) {
   const amenities = parseHotelList(hotel.amenities);
   const explicitGallery = parseHotelList(hotel.gallery);
   const fallbackGallery = parseHotelList(hotel.gallery_images);
-  const image = (hotel.image || hotel.featured_image || hotel.defaultImage || hotel.default_image || '').trim();
-  const defaultImage = (hotel.defaultImage || hotel.default_image || hotel.featured_image || hotel.image || '').trim();
-  const starRating = Number(hotel.starRating ?? hotel.star_rating ?? hotel.rating ?? 0);
+  const image = pickHotelImage(hotel.image, hotel.featured_image, hotel.defaultImage, hotel.default_image);
+  const defaultImage = pickHotelImage(hotel.defaultImage, hotel.default_image, hotel.image, hotel.featured_image);
+  const starRating = Number(hotel.starRating ?? hotel.star_rating ?? hotel.rating ?? hotel.average_rating ?? 0);
   const price = Number(hotel.price ?? hotel.price_per_night ?? 0);
-
   const rawSlug = hotel.slug || slugifyHotelValue(hotel.name || `hotel-${index + 1}`);
+  const gallery = uniqueHotelImages(explicitGallery, fallbackGallery, image, defaultImage);
 
   return {
     ...hotel,
     id: hotel.id ?? `hotel-${index + 1}`,
     name: hotel.name ?? '',
-    slug: slugifyHotelValue(rawSlug),  // always hyphenated – prevents spaces in URLs
+    slug: slugifyHotelValue(rawSlug),
     destination: hotel.destination ?? hotel.destination_name ?? '',
-    region: hotel.region ?? '',
-    country: hotel.country ?? 'Kenya',
+    region: hotel.region ?? hotel.address ?? '',
+    country: hotel.country ?? hotel.destination_country ?? 'Kenya',
     type: hotel.type ?? hotel.hotel_type ?? 'luxury',
     starRating,
-    rating: Number(hotel.rating ?? starRating),
+    rating: Number(hotel.rating ?? hotel.average_rating ?? starRating),
     price,
     priceCurrency: hotel.priceCurrency ?? hotel.price_currency ?? 'USD',
     badge: hotel.badge ?? hotel.tag ?? '',
@@ -66,22 +124,22 @@ export function normalizeHotel(hotel, index = 0) {
     amenities,
     defaultImage,
     image,
-    gallery:
-      explicitGallery.length > 0
-        ? explicitGallery
-        : fallbackGallery.length > 0
-          ? fallbackGallery
-          : [image, defaultImage].filter(Boolean),
+    gallery,
   };
 }
 
-export function normalizeHotels(catalog = hotelsSeed) {
+export function normalizeHotels(catalog = []) {
   return (Array.isArray(catalog) ? catalog : []).map((hotel, index) => normalizeHotel(hotel, index));
 }
 
 export function getHotelImage(hotel) {
-  const url = hotel?.image || hotel?.defaultImage || hotel?.featured_image;
-  return (typeof url === 'string' && url.trim()) ? url.trim() : HOTEL_FALLBACK_IMAGE;
+  return pickHotelImage(
+    hotel?.image,
+    hotel?.defaultImage,
+    hotel?.featured_image,
+    hotel?.default_image,
+    hotel?.gallery
+  ) || HOTEL_FALLBACK_IMAGE;
 }
 
 export function matchesHotelAmenity(hotel, amenity) {
