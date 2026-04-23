@@ -9,7 +9,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAuthPopup } from '@/hooks/useAuthPopup';
 import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
-import { signIn } from 'next-auth/react';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
