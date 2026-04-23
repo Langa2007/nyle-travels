@@ -38,19 +38,12 @@ export default function SessionSync() {
                 // window.location.reload(); 
             }
         } else if (status === "unauthenticated") {
-            // Only remove if it was likely a NextAuth session
-            // We can check if localStorage 'user' exists and has no password field
-            const userStr = localStorage.getItem("user");
-            if (userStr) {
-                try {
-                    const user = JSON.parse(userStr);
-                    // If it's a social login, we might want to clear it on logout
-                    if (Cookies.get("token")) {
-                        // Cookies.remove("token");
-                        // localStorage.removeItem("user");
-                    }
-                } catch (e) {}
-            }
+            // NextAuth has no active session — clear any stale token/user data that
+            // was left behind from a previous Google sign-in so the AuthContext does
+            // not auto-restore the backend session on refresh.
+            Cookies.remove("token");
+            Cookies.remove("refreshToken");
+            localStorage.removeItem("user");
         }
     }, [session, status]);
 

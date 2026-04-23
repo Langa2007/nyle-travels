@@ -34,10 +34,14 @@ export const useAuthPopup = () => {
     // The URL the popup should land on after successful authentication
     const popupCallbackUrl = `${window.location.origin}/auth/popup-callback`;
 
-    // Build the NextAuth OAuth initiation URL directly.
-    // This navigates the popup through: Google → /api/auth/callback/google → /auth/popup-callback
-    // We do NOT call signIn() in the main window — that always hijacks the main page.
-    const signinUrl = `/api/auth/signin/${provider}?callbackUrl=${encodeURIComponent(popupCallbackUrl)}`;
+    // Navigate the popup to our /auth/google-popup page which:
+    //   1. Fetches the NextAuth CSRF token
+    //   2. Auto-POSTs to /api/auth/signin/google
+    //   3. Google redirects back → NextAuth → /auth/popup-callback
+    // We cannot POST directly from the main window because the redirect would
+    // hijack the main page. Opening this intermediary page in the popup is the
+    // only reliable cross-browser approach.
+    const signinUrl = `/auth/google-popup?callbackUrl=${encodeURIComponent(popupCallbackUrl)}`;
 
     // Open the popup synchronously (before any async work) to avoid popup blockers
     const popup = window.open(signinUrl, 'NyleTravelAuth', popupFeatures);
