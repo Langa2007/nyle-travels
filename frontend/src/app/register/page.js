@@ -4,9 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiPhone, FiChevronRight } from 'react-icons/fi';
+import { FaGoogle } from 'react-icons/fa';
 import { useAuth } from '@/hooks/useAuth';
 import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
+import { signIn } from 'next-auth/react';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
@@ -199,15 +201,26 @@ export default function RegisterPage() {
               <span className="relative px-4 bg-white text-sm text-gray-400">Or sign up with</span>
             </div>
 
-            <div className="w-full">
-              <GoogleIdentitySync
-                context="signup"
-                text="signup_with"
-                className="w-full"
-                onSuccess={() => {
-                  window.location.href = '/dashboard';
-                }}
-              />
+            <div className="w-full space-y-4">
+              <Button
+                variant="outline"
+                fullWidth
+                className="py-4 rounded-2xl border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm"
+                onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+              >
+                <FaGoogle className="mr-3 text-red-500" /> Sign Up with Google
+              </Button>
+
+              <div className="w-full">
+                <GoogleIdentitySync
+                  context="signup"
+                  text="signup_with"
+                  className="w-full"
+                  onSuccess={() => {
+                    window.location.href = '/dashboard';
+                  }}
+                />
+              </div>
             </div>
 
             <p className="mt-10 text-center text-gray-500">

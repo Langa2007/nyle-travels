@@ -5,9 +5,11 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiChevronRight } from 'react-icons/fi';
+import { FaGoogle } from 'react-icons/fa';
 import { useAuth } from '@/hooks/useAuth';
 import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
+import { signIn } from 'next-auth/react';
 
 function LoginContent() {
   const [email, setEmail] = useState('');
@@ -106,15 +108,26 @@ function LoginContent() {
               <span className="relative px-4 bg-white text-sm text-gray-400">Or continue with</span>
             </div>
 
-            <div className="w-full flex justify-center">
-              <GoogleIdentitySync
-                context="signin"
-                text="signin_with"
-                className="w-full"
-                onSuccess={() => {
-                  window.location.href = callbackUrl;
-                }}
-              />
+            <div className="w-full space-y-4">
+              <Button
+                variant="outline"
+                fullWidth
+                className="py-4 rounded-2xl border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm"
+                onClick={() => signIn('google', { callbackUrl })}
+              >
+                <FaGoogle className="mr-3 text-red-500" /> Sign In with Google
+              </Button>
+
+              <div className="w-full flex justify-center">
+                <GoogleIdentitySync
+                  context="signin"
+                  text="signin_with"
+                  className="w-full"
+                  onSuccess={() => {
+                    window.location.href = callbackUrl;
+                  }}
+                />
+              </div>
             </div>
 
             <p className="mt-10 text-center text-gray-500">
