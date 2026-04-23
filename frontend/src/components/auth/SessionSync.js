@@ -29,7 +29,8 @@ export default function SessionSync() {
                         name: session.user.name,
                         email: session.user.email,
                         image: session.user.image,
-                        role: session.user.role
+                        // role is intentionally omitted — this is a customer-facing
+                        // app; admin access is enforced by the backend, not here.
                     }));
                 }
                 

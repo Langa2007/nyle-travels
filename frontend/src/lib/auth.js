@@ -42,6 +42,7 @@ export const authOptions = {
           id: user.id,
           email: user.email,
           name: `${user.first_name} ${user.last_name}`,
+          // Credentials login: use the DB role (admins may log in via email/password)
           role: user.role,
         };
       }
@@ -128,7 +129,9 @@ export const authOptions = {
             email: user.email,
             name: googleUser.name || user.name,
             image: googleUser.picture || user.image,
-            role: user.role,
+            // Always treat as USER on this customer-facing frontend regardless of
+            // what the DB record says — admin access is managed by the backend only.
+            role: 'USER',
           };
         } catch (error) {
           console.error('[AUTH] google-id-token authorize error:', error);
@@ -209,19 +212,23 @@ export const authOptions = {
         session.user.id = token.id;
         session.user.name = token.name ?? session.user.name;
         session.user.image = token.picture ?? session.user.image;
-        session.user.role = token.role;
+        // Only expose role if it's a non-Google provider (credentials).
+        // Google sessions on this site are always regular users.
+        session.user.role = token.provider === 'google' ? 'USER' : (token.role ?? 'USER');
         session.user.emailVerified = token.emailVerified;
         session.accessToken = token.accessToken;
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
         token.name = user.name;
         token.picture = user.image;
-        token.role = user.role;
+        token.role = user.role ?? 'USER';
         token.emailVerified = user.emailVerified;
+        // Track which provider was used so the session callback can cap role
+        if (account?.provider) token.provider = account.provider;
       }
 
       if (!token.accessToken || user) {
