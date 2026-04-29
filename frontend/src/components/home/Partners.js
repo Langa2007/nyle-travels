@@ -12,6 +12,7 @@ const permanentPartners = [
   { id: 'perm-sarova-shield', name: 'Sarova Hotels', logo: 'https://www.sarovahotels.com/assets/images/logo.png' },
   { id: 'perm-serena', name: 'Serena Hotels', logo: '/brands/serena-hotels.svg' },
   { id: 'perm-safarilink', name: 'Safarilink', logo: '/brands/safarilink.svg' },
+  { id: 'perm-iata', name: 'IATA', logo: '/brands/iata-svgrepo-com.svg' },
 ];
 
 export default function Partners() {

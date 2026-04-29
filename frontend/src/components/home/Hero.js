@@ -9,6 +9,8 @@ import Button from '@/components/ui/Button';
 import DatePicker from '@/components/common/DatePicker';
 import { defaultHeroSlides, normalizeHeroSlides } from '@/data/heroSlides';
 import { fetchSettings } from '@/utils/settings';
+import { destinationsAPI } from '@/lib/api';
+import { useRouter } from 'next/navigation';
 
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -19,18 +21,31 @@ export default function Hero() {
     guests: 2,
   });
 
+  const router = useRouter();
   const [heroSlides, setHeroSlides] = useState(defaultHeroSlides);
+  const [destinations, setDestinations] = useState([]);
+  const [bestTimeToVisit, setBestTimeToVisit] = useState('');
 
   useEffect(() => {
-    const loadHeroSlides = async () => {
+    const loadData = async () => {
       try {
-        const data = await fetchSettings('hero_sections');
-        setHeroSlides(normalizeHeroSlides(data));
+        const [settingsData, destinationsData] = await Promise.all([
+          fetchSettings('hero_sections'),
+          destinationsAPI.getAll()
+        ]);
+        setHeroSlides(normalizeHeroSlides(settingsData));
+        if (destinationsData && destinationsData.data && destinationsData.data.data) {
+          setDestinations(destinationsData.data.data);
+        } else if (destinationsData && destinationsData.data) {
+          setDestinations(destinationsData.data);
+        }
+      } catch (error) {
+        console.error('Failed to load hero data:', error);
       } finally {
         setIsLoading(false);
       }
     };
-    loadHeroSlides();
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -104,13 +119,23 @@ export default function Hero() {
                   <select
                     className="w-full pl-10 pr-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 appearance-none cursor-pointer"
                     value={searchParams.destination}
-                    onChange={(e) => setSearchParams({ ...searchParams, destination: e.target.value })}
+                    onChange={(e) => {
+                      const destValue = e.target.value;
+                      setSearchParams({ ...searchParams, destination: destValue });
+                      const selectedDest = destinations.find(d => d.slug === destValue);
+                      if (selectedDest && selectedDest.best_time_to_visit) {
+                        setBestTimeToVisit(selectedDest.best_time_to_visit);
+                      } else {
+                        setBestTimeToVisit('');
+                      }
+                    }}
                   >
                     <option value="" className="text-gray-900">Select Destination</option>
-                    <option value="maasai-mara" className="text-gray-900">Maasai Mara</option>
-                    <option value="diani" className="text-gray-900">Diani Beach</option>
-                    <option value="amboseli" className="text-gray-900">Amboseli</option>
-                    <option value="tsavo" className="text-gray-900">Tsavo</option>
+                    {destinations.map(dest => (
+                      <option key={dest.id} value={dest.slug} className="text-gray-900">
+                        {dest.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -119,8 +144,49 @@ export default function Hero() {
                   <DatePicker
                     selected={searchParams.date}
                     onChange={(date) => setSearchParams({ ...searchParams, date })}
-                    placeholderText="Select Date"
+                    minDate={new Date()}
+                    placeholderText={bestTimeToVisit ? `Best time: ${bestTimeToVisit}` : "Select Date"}
                     className="w-full pl-10 pr-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50"
+                    renderCustomHeader={({
+                      date,
+                      changeYear,
+                      decreaseMonth,
+                      increaseMonth,
+                      prevMonthButtonDisabled,
+                      nextMonthButtonDisabled,
+                    }) => (
+                      <div className="flex items-center justify-between px-2 py-2">
+                        <button
+                          type="button"
+                          onClick={decreaseMonth}
+                          disabled={prevMonthButtonDisabled}
+                          className={`p-1 rounded-full ${prevMonthButtonDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200 text-gray-800'}`}
+                        >
+                          {'<'}
+                        </button>
+                        <div className="font-semibold text-gray-800">
+                          {date.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                        </div>
+                        <div className="flex space-x-1">
+                          <button
+                            type="button"
+                            onClick={increaseMonth}
+                            disabled={nextMonthButtonDisabled}
+                            className="p-1 rounded-full hover:bg-gray-200 text-gray-800"
+                          >
+                            {'>'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => changeYear(date.getFullYear() + 1)}
+                            className="p-1 rounded-full hover:bg-gray-200 text-gray-800 font-bold"
+                            title="Next Year"
+                          >
+                            {'>>'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   />
                 </div>
 
@@ -137,19 +203,24 @@ export default function Hero() {
                   />
                 </div>
 
-                <Link href="/search" className="w-full">
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="w-full group relative overflow-hidden"
-                  >
-                    <span className="relative z-10 flex items-center justify-center">
-                      Search
-                      <FiSearch className="ml-2 group-hover:translate-x-1 transition-transform" />
-                    </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-secondary-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </Button>
-                </Link>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full group relative overflow-hidden"
+                  onClick={() => {
+                    const query = new URLSearchParams();
+                    if (searchParams.destination) query.append('dest', searchParams.destination);
+                    if (searchParams.date) query.append('date', searchParams.date.toISOString());
+                    if (searchParams.guests) query.append('guests', searchParams.guests.toString());
+                    router.push(`/search?${query.toString()}`);
+                  }}
+                >
+                  <span className="relative z-10 flex items-center justify-center">
+                    Search
+                    <FiSearch className="ml-2 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-secondary-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Button>
               </div>
             </div>
           </motion.div>

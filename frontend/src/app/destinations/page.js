@@ -116,7 +116,7 @@ export default function DestinationsPage() {
           <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
             <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Catalog</p>
             <p className="text-3xl font-serif text-gray-900 mt-2">{destinations.length}</p>
-            <p className="text-sm text-gray-500 mt-2">destinations to behold</p>
+            <p className="text-sm text-gray-500 mt-2">destinations to behold.</p>
           </div>
           <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
             <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Featured</p>
