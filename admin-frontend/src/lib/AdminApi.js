@@ -1,3 +1,4 @@
+import axios from 'axios';
 import api from './api';
 
 export const adminAPI = {
@@ -69,10 +70,25 @@ export const adminAPI = {
   updateSettings: (data) =>
     api.patch('/admin/settings', data),
   
-  uploadMedia: (formData, isVideo = false) =>
-    api.post(`/admin/settings/${isVideo ? 'video' : 'media'}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    }),
+  uploadMedia: (formData, isVideo = false) => {
+    // For media uploads, especially large videos, we bypass the Vercel proxy 
+    // to avoid the 4.5MB request body limit on Vercel Serverless Functions.
+    const directApiUrl = 'https://nyle-travels.onrender.com/api';
+    const isProduction = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
+    
+    const uploadApi = isProduction 
+      ? axios.create({ baseURL: directApiUrl }) 
+      : api;
+
+    // Add token to direct upload if needed
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const headers = { 'Content-Type': 'multipart/form-data' };
+    if (token && isProduction) headers.Authorization = `Bearer ${token}`;
+
+    return uploadApi.post(`/admin/settings/${isVideo ? 'video' : 'media'}`, formData, {
+      headers
+    });
+  },
 
   getSettings: () =>
     api.get('/settings'),

@@ -110,7 +110,7 @@ export const Hotel = {
        LEFT JOIN destinations d ON h.destination_id = d.id
        LEFT JOIN reviews r ON h.id = r.hotel_id AND r.status = 'approved'
        ${whereString}
-       GROUP BY h.id, d.id
+       GROUP BY h.id, d.id, d.name, d.country, d.slug
        ORDER BY h.${sort_by} ${sort_order}
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
       [...values, limit, offset]

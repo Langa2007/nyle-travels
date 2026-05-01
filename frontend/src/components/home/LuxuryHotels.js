@@ -32,7 +32,7 @@ export default function LuxuryHotels() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {featuredHotels.map((hotel, index) => (
+      {Array.isArray(featuredHotels) && featuredHotels.map((hotel, index) => (
         <motion.div
           key={hotel.id}
           initial={{ opacity: 0, y: 20 }}
@@ -91,7 +91,7 @@ export default function LuxuryHotels() {
               <p className="text-sm text-gray-600 mb-4 line-clamp-2">{hotel.shortDescription}</p>
 
               <div className="flex flex-wrap gap-2 mb-4">
-                {hotel.amenities.map((amenity) => (
+                {Array.isArray(hotel.amenities) && hotel.amenities.map((amenity) => (
                   <span
                     key={`${hotel.slug}-${amenity}`}
                     className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600"

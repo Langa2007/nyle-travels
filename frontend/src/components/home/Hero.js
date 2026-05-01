@@ -230,7 +230,7 @@ export default function Hero() {
 
           {/* Slide Indicators */}
           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex space-x-2">
-            {heroSlides.map((_, index) => (
+            {Array.isArray(heroSlides) && heroSlides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
