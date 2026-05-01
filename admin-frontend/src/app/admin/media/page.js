@@ -116,7 +116,7 @@ export default function MediaManagement() {
     const file = e.target.files[0];
     if (!file) return;
 
-    const isVideo = file.mimetype?.startsWith('video') || file.type?.startsWith('video');
+    const isVideo = file.mimetype?.startsWith('video') || file.type?.startsWith('video') || file.name?.toLowerCase().endsWith('.mp4') || file.name?.toLowerCase().endsWith('.mov') || file.name?.toLowerCase().endsWith('.webm');
     const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
     const limitLabel = isVideo ? '50MB' : '10MB';
 
@@ -141,7 +141,7 @@ export default function MediaManagement() {
         const fieldName = section === 'partners_section' ? 'logo' : (section === 'testimonials_section' ? 'avatar' : 'image');
         handleInputChange(section, index, fieldName, url);
       }
-      toast.success('Uploaded successfully!', { id: toastId });
+      toast.success('Uploaded successfully! Click "Publish Changes" to save permanently.', { id: toastId, duration: 5000 });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Upload failed.', { id: toastId });
     } finally {
@@ -460,9 +460,11 @@ export default function MediaManagement() {
                   <div className="relative aspect-video bg-black rounded-[24px] overflow-hidden group shadow-2xl">
                     {settings.showcase_video_section.url ? (
                       <video 
+                        key={settings.showcase_video_section.url}
                         src={settings.showcase_video_section.url}
                         className="w-full h-full object-cover"
                         poster={settings.showcase_video_section.thumbnail}
+                        controls
                       />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-gray-600">

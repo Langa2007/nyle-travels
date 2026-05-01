@@ -73,6 +73,7 @@ export default function VideoShowcase() {
           )
         ) : (
           <video
+            key={videoUrl}
             ref={videoRef}
             className="w-full h-full object-cover"
             loop
