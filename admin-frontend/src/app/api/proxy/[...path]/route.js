@@ -15,6 +15,7 @@ const HOP_BY_HOP_HEADERS = [
 ];
 
 export const runtime = 'nodejs';
+export const maxDuration = 60; // 60 seconds
 export const dynamic = 'force-dynamic';
 
 function getProxyTarget() {

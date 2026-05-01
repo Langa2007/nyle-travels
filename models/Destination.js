@@ -51,13 +51,13 @@ export const Destination = {
     }
 
     if (is_featured !== undefined) {
-      whereClause.push(`is_featured = $${paramIndex}`);
+      whereClause.push(`d.is_featured = $${paramIndex}`);
       values.push(is_featured);
       paramIndex++;
     }
 
     if (search) {
-      whereClause.push(`(name ILIKE $${paramIndex} OR description ILIKE $${paramIndex})`);
+      whereClause.push(`(d.name ILIKE $${paramIndex} OR d.description ILIKE $${paramIndex})`);
       values.push(`%${search}%`);
       paramIndex++;
     }

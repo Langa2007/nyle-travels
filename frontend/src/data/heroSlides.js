@@ -37,11 +37,24 @@ export const defaultHeroSlides = [
 ];
 
 export function normalizeHeroSlides(slides) {
-  if (!Array.isArray(slides) || slides.length === 0) {
+  let parsedSlides = slides;
+  
+  // Handle stringified JSON if it comes from the API as a string
+  if (typeof slides === 'string') {
+    try {
+      parsedSlides = JSON.parse(slides);
+    } catch (e) {
+      console.error('[SETTINGS] Failed to parse hero slides JSON string:', e);
+      return defaultHeroSlides;
+    }
+  }
+
+  if (!Array.isArray(parsedSlides) || parsedSlides.length === 0) {
+    console.log('[SETTINGS] No hero slides array found, using defaults');
     return defaultHeroSlides;
   }
 
-  const normalized = slides.map((slide, index) => {
+  const normalized = parsedSlides.map((slide, index) => {
     const fallback = defaultHeroSlides[index % defaultHeroSlides.length];
 
     return {
