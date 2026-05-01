@@ -46,16 +46,25 @@ async function proxyRequest(request, { params }) {
   const pathname = path.join('/');
   const targetUrl = `${proxyTarget}/${pathname}${search}`;
   const method = request.method.toUpperCase();
-  const body = method === 'GET' || method === 'HEAD' ? undefined : await request.arrayBuffer();
+  const hasBody = !['GET', 'HEAD'].includes(method);
+  const body = hasBody ? request.body : undefined;
 
   try {
-    const upstreamResponse = await fetch(targetUrl, {
+    const fetchOptions = {
       method,
       headers: filterHeaders(request.headers),
       body,
       cache: 'no-store',
       redirect: 'manual',
-    });
+    };
+
+    // Required for streaming request bodies in modern fetch (Node.js 18+)
+    if (hasBody) {
+      fetchOptions.duplex = 'half';
+    }
+
+    const upstreamResponse = await fetch(targetUrl, fetchOptions);
+
 
     return new Response(upstreamResponse.body, {
       status: upstreamResponse.status,
