@@ -84,7 +84,7 @@ export default function TravelBlog() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      {posts.map((post, index) => (
+      {Array.isArray(posts) && posts.map((post, index) => (
         <motion.article
           key={post.id}
           initial={{ opacity: 0, y: 20 }}

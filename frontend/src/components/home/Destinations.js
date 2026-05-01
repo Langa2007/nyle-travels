@@ -112,7 +112,7 @@ export default function Destinations() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {destinations.map((destination, index) => (
+      {Array.isArray(destinations) && destinations.map((destination, index) => (
         <motion.div
           key={destination.id}
           variants={fadeInUp}

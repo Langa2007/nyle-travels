@@ -167,7 +167,7 @@ export default function FeaturedTours() {
         }}
         className="featured-tours-slider"
       >
-        {tours.map((tour) => (
+        {Array.isArray(tours) && tours.map((tour) => (
           <SwiperSlide key={tour.id}>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -238,7 +238,7 @@ export default function FeaturedTours() {
 
                 {/* Highlights */}
                 <ul className="space-y-2 mb-4">
-                  {tour.highlights.slice(0, 2).map((highlight, index) => (
+                  {Array.isArray(tour.highlights) && tour.highlights.slice(0, 2).map((highlight, index) => (
                     <li key={index} className="text-sm text-gray-600 flex items-center">
                       <span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2" />
                       {highlight}

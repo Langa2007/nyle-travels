@@ -126,7 +126,7 @@ export default function ExclusiveOffers() {
 
         {/* Offers Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {activeOffers.map((offer, index) => (
+          {Array.isArray(activeOffers) && activeOffers.map((offer, index) => (
             <motion.div
               key={offer.id}
               initial={{ opacity: 0, y: 20 }}

@@ -103,7 +103,7 @@ export default function VideoShowcase() {
 
             {/* Title */}
             <h2 className="text-5xl md:text-7xl font-serif font-bold mb-6 drop-shadow-lg">
-              {title.split(' ').map((word, i, arr) => (
+              {(title || '').split(' ').map((word, i, arr) => (
                 <span key={i}>
                   {i === arr.length - 2 ? <span className="text-primary-400">{word} </span> : word + ' '}
                 </span>
