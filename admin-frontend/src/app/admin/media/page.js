@@ -116,12 +116,15 @@ export default function MediaManagement() {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size must be less than 5MB');
+    const isVideo = file.mimetype?.startsWith('video') || file.type?.startsWith('video');
+    const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    const limitLabel = isVideo ? '50MB' : '10MB';
+
+    if (file.size > maxSize) {
+      toast.error(`File size must be less than ${limitLabel}`);
       return;
     }
 
-    const isVideo = file.mimetype?.startsWith('video') || file.type?.startsWith('video');
     const formData = new FormData();
     formData.append('media', file);
 
