@@ -46,7 +46,7 @@ export default function Partners() {
         </motion.div>
 
         <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
-          {activePartners.map((partner) => (
+          {Array.isArray(activePartners) && activePartners.map((partner) => (
             <motion.div
               key={partner.id}
               className="group flex h-20 items-center justify-center transition-all duration-300"

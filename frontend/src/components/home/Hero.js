@@ -134,7 +134,7 @@ export default function Hero() {
                     }}
                   >
                     <option value="" className="text-gray-900">Select Destination</option>
-                    {destinations.map(dest => (
+                    {Array.isArray(destinations) && destinations.map(dest => (
                       <option key={dest.id} value={dest.slug} className="text-gray-900">
                         {dest.name}
                       </option>

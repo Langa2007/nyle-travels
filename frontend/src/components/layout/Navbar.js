@@ -138,7 +138,7 @@ export default function Navbar() {
 
   const { hotels } = useHotelCatalog([], { allowSeedFallback: false });
   const featuredHotels = getFeaturedHotels(hotels, 3);
-  const hotelDestinations = [...new Set(hotels.map((hotel) => hotel.destination).filter(Boolean))].slice(0, 6);
+  const hotelDestinations = Array.isArray(hotels) ? [...new Set(hotels.map((hotel) => hotel.destination).filter(Boolean))].slice(0, 6) : [];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -361,7 +361,7 @@ export default function Navbar() {
                               
                               <div className="relative z-10 mt-6 space-y-3 pt-6 border-t border-white/10">
                                 <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-2">Editor's Choice</p>
-                                {featuredHotels.slice(0, 2).map((hotel) => (
+                                {Array.isArray(featuredHotels) && featuredHotels.slice(0, 2).map((hotel) => (
                                   <button
                                     key={hotel.slug}
                                     type="button"

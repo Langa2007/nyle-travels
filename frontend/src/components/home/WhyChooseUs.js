@@ -72,7 +72,7 @@ export default function WhyChooseUs() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {activeFeatures.map((feature, index) => {
+      {Array.isArray(activeFeatures) && activeFeatures.map((feature, index) => {
         const Icon = iconMap[feature.icon] || FiStar;
         return (
           <motion.div

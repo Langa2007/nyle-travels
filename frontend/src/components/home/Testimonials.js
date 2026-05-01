@@ -105,7 +105,7 @@ export default function Testimonials() {
         }}
         className="testimonials-slider"
       >
-        {activeTestimonials.map((testimonial) => (
+        {Array.isArray(activeTestimonials) && activeTestimonials.map((testimonial) => (
           <SwiperSlide key={testimonial.id}>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
