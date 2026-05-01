@@ -12,7 +12,7 @@ export const Destination = {
     } = destinationData;
 
     const result = await query(
-      `INSERT INTO destinations (
+      `INSERT INTO public.destinations (
         name, slug, country, region, description, short_description,
         latitude, longitude, best_time_to_visit, how_to_get_there,
         visa_requirements, health_safety, currency, languages,
@@ -40,7 +40,7 @@ export const Destination = {
       offset = 0
     } = filters;
 
-    let whereClause = ['is_active = TRUE'];
+    let whereClause = ['d.is_active = TRUE'];
     const values = [];
     let paramIndex = 1;
 
@@ -67,7 +67,7 @@ export const Destination = {
     const result = await query(
       `SELECT d.*, 
               COUNT(DISTINCT tp.id) as tour_count
-       FROM destinations d
+       FROM public.destinations d
        LEFT JOIN tour_packages tp ON d.id = tp.destination_id AND tp.is_active = TRUE
        ${whereString}
        GROUP BY d.id
@@ -96,7 +96,7 @@ export const Destination = {
                   'average_rating', COALESCE(AVG(r.rating) OVER (PARTITION BY tp.id), 0)
                 )
               ) FILTER (WHERE tp.id IS NOT NULL) as tours
-       FROM destinations d
+       FROM public.destinations d
        LEFT JOIN tour_packages tp ON d.id = tp.destination_id AND tp.is_active = TRUE
        LEFT JOIN reviews r ON tp.id = r.tour_package_id AND r.status = 'approved'
        WHERE d.slug = $1 AND d.is_active = TRUE
@@ -107,7 +107,7 @@ export const Destination = {
     if (result.rows[0]) {
       // Increment view count
       await query(
-        'UPDATE destinations SET views_count = views_count + 1 WHERE id = $1',
+        'UPDATE public.destinations SET views_count = views_count + 1 WHERE id = $1',
         [result.rows[0].id]
       );
     }
@@ -118,7 +118,7 @@ export const Destination = {
   // Find by ID
   async findById(id) {
     const result = await query(
-      'SELECT * FROM destinations WHERE id = $1 AND is_active = TRUE',
+      'SELECT * FROM public.destinations WHERE id = $1 AND is_active = TRUE',
       [id]
     );
     return result.rows[0];
@@ -150,7 +150,7 @@ export const Destination = {
 
     values.push(id);
     const result = await query(
-      `UPDATE destinations SET ${setClause.join(', ')}, updated_at = CURRENT_TIMESTAMP 
+      `UPDATE public.destinations SET ${setClause.join(', ')}, updated_at = CURRENT_TIMESTAMP 
        WHERE id = $${paramIndex} RETURNING *`,
       values
     );
@@ -164,7 +164,7 @@ export const Destination = {
       `SELECT d.*, 
               COUNT(DISTINCT b.id) as booking_count,
               COUNT(DISTINCT tp.id) as tour_count
-       FROM destinations d
+       FROM public.destinations d
        LEFT JOIN tour_packages tp ON d.id = tp.destination_id
        LEFT JOIN bookings b ON tp.id = b.tour_package_id
        WHERE d.is_active = TRUE
@@ -181,7 +181,7 @@ export const Destination = {
     const result = await query(
       `SELECT d.*, 
               COUNT(DISTINCT tp.id) as tour_count
-       FROM destinations d
+       FROM public.destinations d
        LEFT JOIN tour_packages tp ON d.id = tp.destination_id AND tp.is_active = TRUE
        WHERE d.is_featured = TRUE AND d.is_active = TRUE
        GROUP BY d.id
@@ -197,7 +197,7 @@ export const Destination = {
     const result = await query(
       `SELECT *,
               ts_rank(to_tsvector('english', name || ' ' || COALESCE(description, '')), plainto_tsquery('english', $1)) as rank
-       FROM destinations
+       FROM public.destinations
        WHERE to_tsvector('english', name || ' ' || COALESCE(description, '')) @@ plainto_tsquery('english', $1)
          AND is_active = TRUE
        ORDER BY rank DESC

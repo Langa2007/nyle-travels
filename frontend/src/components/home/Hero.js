@@ -33,14 +33,17 @@ export default function Hero() {
           fetchSettings('hero_sections'),
           destinationsAPI.getAll()
         ]);
-        setHeroSlides(normalizeHeroSlides(settingsData));
+        console.log('[HERO] Raw settings data:', settingsData);
+        const normalized = normalizeHeroSlides(settingsData);
+        console.log('[HERO] Normalized slides:', normalized);
+        setHeroSlides(normalized);
         if (destinationsData && destinationsData.data && destinationsData.data.data) {
           setDestinations(destinationsData.data.data);
         } else if (destinationsData && destinationsData.data) {
           setDestinations(destinationsData.data);
         }
       } catch (error) {
-        console.error('Failed to load hero data:', error);
+        console.error('[HERO] Failed to load data:', error);
       } finally {
         setIsLoading(false);
       }

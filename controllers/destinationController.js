@@ -4,21 +4,30 @@ import catchAsync from '../utils/CatchAsync.js';
 import { cloudinaryService } from '../services/cloudinaryService.js';
 
 export const getAllDestinations = catchAsync(async (req, res, next) => {
-  const filters = {
-    country: req.query.country,
-    is_featured: req.query.featured === 'true',
-    search: req.query.search,
-    limit: parseInt(req.query.limit) || 50,
-    offset: parseInt(req.query.offset) || 0
-  };
+  try {
+    const filters = {
+      country: req.query.country,
+      is_featured: req.query.featured === 'true',
+      search: req.query.search,
+      limit: parseInt(req.query.limit) || 50,
+      offset: parseInt(req.query.offset) || 0
+    };
 
-  const destinations = await Destination.findAll(filters);
+    const destinations = await Destination.findAll(filters);
 
-  res.status(200).json({
-    status: 'success',
-    results: destinations.length,
-    data: { destinations }
-  });
+    res.status(200).json({
+      status: 'success',
+      results: destinations.length,
+      data: { destinations }
+    });
+  } catch (error) {
+    console.error('DESTINATION CONTROLLER ERROR [getAllDestinations]:', {
+      message: error.message,
+      stack: error.stack,
+      query: req.query
+    });
+    next(error);
+  }
 });
 
 export const getDestination = catchAsync(async (req, res, next) => {

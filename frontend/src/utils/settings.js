@@ -9,6 +9,7 @@ export const fetchSettings = async (section) => {
     const res = await fetch(buildApiUrl(`/settings/${section}`), { cache: 'no-store' });
     const result = await res.json();
     
+    console.log(`[SETTINGS] Fetched settings for ${section}:`, result.data ? 'DATA FOUND' : 'NO DATA');
     if (result.status === 'success' && result.data) {
       return result.data;
     }

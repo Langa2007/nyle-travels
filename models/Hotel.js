@@ -12,7 +12,7 @@ export const Hotel = {
     } = hotelData;
 
     const result = await query(
-      `INSERT INTO hotels (
+      `INSERT INTO public.hotels (
         destination_id, name, slug, hotel_type, star_rating,
         description, short_description, address, latitude, longitude,
         check_in_time, check_out_time, amenities, room_types,
@@ -96,7 +96,7 @@ export const Hotel = {
     const whereString = whereClause.length > 0 ? `WHERE ${whereClause.join(' AND ')}` : '';
 
     const countResult = await query(
-      `SELECT COUNT(*) FROM hotels h ${whereString}`,
+      `SELECT COUNT(*) FROM public.hotels h ${whereString}`,
       values
     );
 
@@ -106,7 +106,7 @@ export const Hotel = {
               d.slug as destination_slug,
               COALESCE(AVG(r.rating), 0) as average_rating,
               COUNT(DISTINCT r.id) as review_count
-       FROM hotels h
+       FROM public.hotels h
        LEFT JOIN destinations d ON h.destination_id = d.id
        LEFT JOIN reviews r ON h.id = r.hotel_id AND r.status = 'approved'
        ${whereString}
@@ -142,7 +142,7 @@ export const Hotel = {
                   'created_at', r.created_at
                 )
               ) FILTER (WHERE r.id IS NOT NULL) as recent_reviews
-       FROM hotels h
+       FROM public.hotels h
        LEFT JOIN destinations d ON h.destination_id = d.id
        LEFT JOIN reviews r ON h.id = r.hotel_id AND r.status = 'approved'
        LEFT JOIN users u ON r.user_id = u.id
@@ -154,7 +154,7 @@ export const Hotel = {
     if (result.rows[0]) {
       // Increment view count
       await query(
-        'UPDATE hotels SET views_count = views_count + 1 WHERE id = $1',
+        'UPDATE public.hotels SET views_count = views_count + 1 WHERE id = $1',
         [result.rows[0].id]
       );
     }
@@ -169,7 +169,7 @@ export const Hotel = {
               d.name as destination_name,
               COALESCE(AVG(r.rating), 0) as average_rating,
               COUNT(DISTINCT r.id) as review_count
-       FROM hotels h
+       FROM public.hotels h
        LEFT JOIN destinations d ON h.destination_id = d.id
        LEFT JOIN reviews r ON h.id = r.hotel_id AND r.status = 'approved'
        WHERE h.id = $1 AND h.is_active = TRUE
@@ -205,7 +205,7 @@ export const Hotel = {
 
     values.push(id);
     const result = await query(
-      `UPDATE hotels SET ${setClause.join(', ')}, updated_at = CURRENT_TIMESTAMP 
+      `UPDATE public.hotels SET ${setClause.join(', ')}, updated_at = CURRENT_TIMESTAMP 
        WHERE id = $${paramIndex} RETURNING *`,
       values
     );
@@ -216,7 +216,7 @@ export const Hotel = {
   // Delete hotel (soft delete)
   async delete(id) {
     const result = await query(
-      'UPDATE hotels SET is_active = FALSE, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING id',
+      'UPDATE public.hotels SET is_active = FALSE, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING id',
       [id]
     );
     return result.rows[0];

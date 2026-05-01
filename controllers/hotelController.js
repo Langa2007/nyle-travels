@@ -7,30 +7,39 @@ import { googleMapsService } from '../services/googleMapsService.js';
 
 // Get all hotels
 export const getAllHotels = catchAsync(async (req, res, next) => {
-  const filters = {
-    destination_id: req.query.destination,
-    hotel_type: req.query.type,
-    min_price: req.query.minPrice,
-    max_price: req.query.maxPrice,
-    min_rating: req.query.minRating,
-    amenities: req.query.amenities,
-    search: req.query.search
-  };
+  try {
+    const filters = {
+      destination_id: req.query.destination,
+      hotel_type: req.query.type,
+      min_price: req.query.minPrice,
+      max_price: req.query.maxPrice,
+      min_rating: req.query.minRating,
+      amenities: req.query.amenities,
+      search: req.query.search
+    };
 
-  const pagination = {
-    limit: parseInt(req.query.limit) || 20,
-    offset: parseInt(req.query.offset) || 0,
-    sort_by: req.query.sortBy || 'created_at',
-    sort_order: req.query.sortOrder || 'DESC'
-  };
+    const pagination = {
+      limit: parseInt(req.query.limit) || 20,
+      offset: parseInt(req.query.offset) || 0,
+      sort_by: req.query.sortBy || 'created_at',
+      sort_order: req.query.sortOrder || 'DESC'
+    };
 
-  const result = await Hotel.findAll(filters, pagination);
+    const result = await Hotel.findAll(filters, pagination);
 
-  res.status(200).json({
-    status: 'success',
-    results: result.hotels.length,
-    data: result
-  });
+    res.status(200).json({
+      status: 'success',
+      results: result.hotels.length,
+      data: result
+    });
+  } catch (error) {
+    console.error('HOTEL CONTROLLER ERROR [getAllHotels]:', {
+      message: error.message,
+      stack: error.stack,
+      query: req.query
+    });
+    next(error);
+  }
 });
 
 // Get single hotel
@@ -43,9 +52,9 @@ export const getHotel = catchAsync(async (req, res, next) => {
 
   // Get nearby hotels
   const nearby = await Hotel.getNearby(
-    hotel.latitude, 
-    hotel.longitude, 
-    10, 
+    hotel.latitude,
+    hotel.longitude,
+    10,
     5
   );
 
@@ -210,9 +219,9 @@ export const checkAvailability = catchAsync(async (req, res, next) => {
   }
 
   const availability = await Hotel.checkAvailability(
-    hotelId, 
-    check_in, 
-    check_out, 
+    hotelId,
+    check_in,
+    check_out,
     room_type
   );
 
@@ -225,7 +234,7 @@ export const checkAvailability = catchAsync(async (req, res, next) => {
 // Get featured hotels
 export const getFeaturedHotels = catchAsync(async (req, res, next) => {
   const limit = parseInt(req.query.limit) || 6;
-  
+
   const hotels = await Hotel.getFeatured(limit);
 
   res.status(200).json({
@@ -238,7 +247,7 @@ export const getFeaturedHotels = catchAsync(async (req, res, next) => {
 // Get luxury hotels
 export const getLuxuryHotels = catchAsync(async (req, res, next) => {
   const limit = parseInt(req.query.limit) || 10;
-  
+
   const hotels = await Hotel.getLuxuryHotels(limit);
 
   res.status(200).json({
@@ -349,8 +358,8 @@ export const updateRoomType = catchAsync(async (req, res, next) => {
   }
 
   const roomTypes = await Hotel.updateRoomType(
-    hotelId, 
-    parseInt(roomTypeIndex), 
+    hotelId,
+    parseInt(roomTypeIndex),
     req.body
   );
 

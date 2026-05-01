@@ -55,7 +55,18 @@ export const testConnection = connectDB;
  * @param {Array} params - The parameters for the query
  * @returns {Promise} - The result of the query
  */
-export const query = (text, params) => pool.query(text, params);
+export const query = async (text, params) => {
+  try {
+    return await pool.query(text, params);
+  } catch (err) {
+    console.error('DATABASE QUERY ERROR:', {
+      sql: text.substring(0, 500), // Limit length for logs
+      params,
+      error: err.message
+    });
+    throw err;
+  }
+};
 
 /**
  * Run a database transaction
