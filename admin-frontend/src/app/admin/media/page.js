@@ -136,7 +136,10 @@ export default function MediaManagement() {
       const url = response.data.data.url;
       
       if (index === null) {
-        handleInputChange(section, null, isVideo ? 'url' : 'thumbnail', url);
+        handleInputChange(section, null, 'url', url);
+        if (isVideo && response.data.data.thumbnail) {
+          handleInputChange(section, null, 'thumbnail', response.data.data.thumbnail);
+        }
       } else {
         const fieldName = section === 'partners_section' ? 'logo' : (section === 'testimonials_section' ? 'avatar' : 'image');
         handleInputChange(section, index, fieldName, url);

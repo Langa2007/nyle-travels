@@ -127,7 +127,19 @@ export const uploadMedia = async (req, res, next) => {
     );
     console.log('Cloudinary upload success:', result.secure_url);
 
-    res.status(200).json({ status: 'success', data: { url: result.secure_url } });
+    let thumbnail = null;
+    if (isVideo) {
+      // Generate a thumbnail from the video
+      thumbnail = result.secure_url.replace(/\.[^.]+$/, '.jpg');
+    }
+
+    res.status(200).json({ 
+      status: 'success', 
+      data: { 
+        url: result.secure_url,
+        thumbnail: thumbnail
+      } 
+    });
   } catch (error) {
     console.error('Settings Media Upload ERROR:', error);
     next(error);

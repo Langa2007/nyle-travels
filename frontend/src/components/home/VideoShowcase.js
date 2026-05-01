@@ -20,7 +20,7 @@ export default function VideoShowcase() {
   useEffect(() => {
     const loadVideoSettings = async () => {
       try {
-        const data = await fetchSettings('video');
+        const data = await fetchSettings(`video?t=${Date.now()}`);
         if (data) {
           if (data.url) setVideoUrl(data.url);
           if (data.title) setTitle(data.title);
