@@ -2,33 +2,33 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiAlertTriangle, FiMessageSquare, FiEye, FiX, FiCheck } from 'react-icons/fi';
+import { FiMessageCircle, FiCheck, FiMail, FiFilter, FiEye, FiX } from 'react-icons/fi';
 import { formatDistanceToNow } from 'date-fns';
 import { adminAPI } from '@/lib/AdminApi';
 import toast from 'react-hot-toast';
 
-export default function ReportsPage() {
-  const [reports, setReports] = useState([]);
+export default function InquiriesPage() {
+  const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedReport, setSelectedReport] = useState(null);
-  const [filter, setFilter] = useState('all'); // all, pending, reviewing, resolved
+  const [selectedInquiry, setSelectedInquiry] = useState(null);
+  const [filter, setFilter] = useState('all'); // all, unread, read, replied
 
   useEffect(() => {
-    fetchReports();
+    fetchInquiries();
   }, [filter]);
 
-  const fetchReports = async () => {
+  const fetchInquiries = async () => {
     setLoading(true);
     try {
       const params = {};
       if (filter !== 'all') {
         params.status = filter;
       }
-      const response = await adminAPI.getReports(params);
-      setReports(response.data.data.reports);
+      const response = await adminAPI.getContacts(params);
+      setInquiries(response.data.data.contacts);
     } catch (error) {
-      console.error('Failed to fetch reports:', error);
-      toast.error('Failed to load reports');
+      console.error('Failed to fetch inquiries:', error);
+      toast.error('Failed to load inquiries');
     } finally {
       setLoading(false);
     }
@@ -36,13 +36,13 @@ export default function ReportsPage() {
 
   const handleUpdateStatus = async (id, status) => {
     try {
-      await adminAPI.updateReportStatus(id, status);
+      await adminAPI.updateContactStatus(id, status);
       toast.success(`Marked as ${status}`);
-      setReports(reports.map(rep => 
-        rep._id === id ? { ...rep, status } : rep
+      setInquiries(inquiries.map(inq => 
+        inq._id === id ? { ...inq, status } : inq
       ));
-      if (selectedReport?._id === id) {
-        setSelectedReport({ ...selectedReport, status });
+      if (selectedInquiry?._id === id) {
+        setSelectedInquiry({ ...selectedInquiry, status });
       }
     } catch (error) {
       console.error('Failed to update status:', error);
@@ -52,19 +52,10 @@ export default function ReportsPage() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return 'bg-red-100 text-red-800 border-red-200';
-      case 'reviewing': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'resolved': return 'bg-green-100 text-green-800 border-green-200';
+      case 'unread': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'read': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'replied': return 'bg-green-100 text-green-800 border-green-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getTypeColor = (type) => {
-    switch (type) {
-      case 'bug': return 'text-red-600 bg-red-50';
-      case 'content': return 'text-orange-600 bg-orange-50';
-      case 'feedback': return 'text-blue-600 bg-blue-50';
-      default: return 'text-gray-600 bg-gray-50';
     }
   };
 
@@ -73,13 +64,13 @@ export default function ReportsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-serif font-bold text-gray-900">User Reports</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage user-submitted reports, bugs, and feedback</p>
+          <h1 className="text-2xl font-serif font-bold text-gray-900">Inquiries</h1>
+          <p className="text-gray-500 text-sm mt-1">Manage contact messages and inquiries</p>
         </div>
 
         {/* Filters */}
         <div className="flex items-center space-x-2 bg-white p-1 rounded-xl shadow-sm border border-gray-100">
-          {['all', 'pending', 'reviewing', 'resolved'].map((f) => (
+          {['all', 'unread', 'read', 'replied'].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -100,54 +91,59 @@ export default function ReportsPage() {
         {loading ? (
           <div className="p-12 text-center">
             <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="mt-4 text-gray-500">Loading reports...</p>
+            <p className="mt-4 text-gray-500">Loading inquiries...</p>
           </div>
-        ) : reports.length === 0 ? (
+        ) : inquiries.length === 0 ? (
           <div className="p-12 text-center">
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
-              <FiAlertTriangle size={32} />
+              <FiMessageCircle size={32} />
             </div>
-            <h3 className="text-lg font-medium text-gray-900">No reports found</h3>
-            <p className="text-gray-500 mt-1">There are no reports matching your filter.</p>
+            <h3 className="text-lg font-medium text-gray-900">No inquiries found</h3>
+            <p className="text-gray-500 mt-1">There are no inquiries matching your filter.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Reporter</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Sender</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Interest</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
                   <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {reports.map((report) => (
+                {inquiries.map((inquiry) => (
                   <tr 
-                    key={report._id}
-                    className={`hover:bg-gray-50 transition-colors ${report.status === 'pending' ? 'bg-red-50/20' : ''}`}
+                    key={inquiry._id}
+                    className={`hover:bg-gray-50 transition-colors ${inquiry.status === 'unread' ? 'bg-primary-50/30' : ''}`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2.5 py-1 inline-flex text-xs font-semibold rounded-md ${getTypeColor(report.type)} capitalize`}>
-                        {report.type}
-                      </span>
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center text-primary-700 font-bold">
+                          {inquiry.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{inquiry.name}</div>
+                          <div className="text-sm text-gray-500">{inquiry.email}</div>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{report.name}</div>
-                      <div className="text-sm text-gray-500">{report.email}</div>
+                      <div className="text-sm text-gray-900">{inquiry.interest}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusColor(report.status)} capitalize`}>
-                        {report.status}
+                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusColor(inquiry.status)}`}>
+                        {inquiry.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(inquiry.createdAt), { addSuffix: true })}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
-                        onClick={() => setSelectedReport(report)}
+                        onClick={() => setSelectedInquiry(inquiry)}
                         className="text-primary-600 hover:text-primary-900 bg-primary-50 p-2 rounded-lg transition-colors"
                         title="View Details"
                       >
@@ -164,7 +160,7 @@ export default function ReportsPage() {
 
       {/* Detail Modal */}
       <AnimatePresence>
-        {selectedReport && (
+        {selectedInquiry && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -173,14 +169,9 @@ export default function ReportsPage() {
               className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden"
             >
               <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
-                <div className="flex items-center space-x-3">
-                  <h3 className="text-lg font-serif font-bold text-gray-900">Report Details</h3>
-                  <span className={`px-2 py-0.5 inline-flex text-xs font-semibold rounded-md ${getTypeColor(selectedReport.type)} capitalize`}>
-                    {selectedReport.type}
-                  </span>
-                </div>
+                <h3 className="text-lg font-serif font-bold text-gray-900">Inquiry Details</h3>
                 <button
-                  onClick={() => setSelectedReport(null)}
+                  onClick={() => setSelectedInquiry(null)}
                   className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
                 >
                   <FiX size={20} />
@@ -190,24 +181,29 @@ export default function ReportsPage() {
               <div className="p-6">
                 <div className="grid grid-cols-2 gap-6 mb-6">
                   <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Reporter</p>
-                    <p className="text-sm font-medium text-gray-900">{selectedReport.name}</p>
-                    <p className="text-sm text-gray-600 mt-1">
-                      <a href={`mailto:${selectedReport.email}`} className="hover:text-primary-600">
-                        {selectedReport.email}
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">From</p>
+                    <p className="text-sm font-medium text-gray-900">{selectedInquiry.name}</p>
+                    <p className="text-sm text-gray-600 flex items-center mt-1">
+                      <FiMail className="mr-2 text-gray-400" />
+                      <a href={`mailto:${selectedInquiry.email}`} className="hover:text-primary-600">
+                        {selectedInquiry.email}
                       </a>
                     </p>
+                    {selectedInquiry.phone && (
+                      <p className="text-sm text-gray-600 mt-1">{selectedInquiry.phone}</p>
+                    )}
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Timeline</p>
-                    <p className="text-sm text-gray-900"><span className="font-medium">Submitted:</span> {new Date(selectedReport.createdAt).toLocaleString()}</p>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Details</p>
+                    <p className="text-sm text-gray-900"><span className="font-medium">Interest:</span> {selectedInquiry.interest}</p>
+                    <p className="text-sm text-gray-900 mt-1"><span className="font-medium">Date:</span> {new Date(selectedInquiry.createdAt).toLocaleString()}</p>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Description</p>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Message</p>
                   <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-gray-800 text-sm whitespace-pre-wrap leading-relaxed">
-                    {selectedReport.description}
+                    {selectedInquiry.message}
                   </div>
                 </div>
 
@@ -215,25 +211,25 @@ export default function ReportsPage() {
                   <div className="flex items-center space-x-3">
                     <span className="text-sm font-medium text-gray-700">Update Status:</span>
                     <select
-                      value={selectedReport.status}
-                      onChange={(e) => handleUpdateStatus(selectedReport._id, e.target.value)}
+                      value={selectedInquiry.status}
+                      onChange={(e) => handleUpdateStatus(selectedInquiry._id, e.target.value)}
                       className={`text-sm border-0 rounded-lg ring-1 ring-inset pl-3 pr-8 py-1.5 focus:ring-2 focus:ring-primary-600 ${
-                        selectedReport.status === 'pending' ? 'ring-red-300 bg-red-50 text-red-800' :
-                        selectedReport.status === 'reviewing' ? 'ring-yellow-300 bg-yellow-50 text-yellow-800' :
+                        selectedInquiry.status === 'unread' ? 'ring-yellow-300 bg-yellow-50 text-yellow-800' :
+                        selectedInquiry.status === 'read' ? 'ring-blue-300 bg-blue-50 text-blue-800' :
                         'ring-green-300 bg-green-50 text-green-800'
                       }`}
                     >
-                      <option value="pending">Pending</option>
-                      <option value="reviewing">Reviewing</option>
-                      <option value="resolved">Resolved</option>
+                      <option value="unread">Unread</option>
+                      <option value="read">Read</option>
+                      <option value="replied">Replied</option>
                     </select>
                   </div>
                   <button
                     onClick={() => {
-                      if (selectedReport.status === 'pending') {
-                        handleUpdateStatus(selectedReport._id, 'reviewing');
+                      if (selectedInquiry.status === 'unread') {
+                        handleUpdateStatus(selectedInquiry._id, 'read');
                       }
-                      setSelectedReport(null);
+                      setSelectedInquiry(null);
                     }}
                     className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
                   >

@@ -4,6 +4,8 @@ import { restrictToAdmin, restrictToSuperAdmin } from '../middleware/admin.js';
 import { upload, uploadVideo } from '../middleware/upload.js';
 import * as adminController from '../controllers/adminController.js';
 import * as settingsController from '../controllers/settingsController.js';
+import * as contactController from '../controllers/contactController.js';
+import * as reportController from '../controllers/reportController.js';
 
 const router = Router();
 
@@ -26,6 +28,12 @@ router.get('/payments', adminController.getAllPayments);
 router.post('/payments/:paymentId/refund', adminController.processRefund);
 
 router.get('/reports/generate', adminController.generateReport);
+
+router.get('/contacts', contactController.getContacts);
+router.patch('/contacts/:id/status', contactController.updateContactStatus);
+
+router.get('/reports/user', reportController.getReports);
+router.patch('/reports/user/:id/status', reportController.updateReportStatus);
 
 router.patch('/settings', settingsController.updateSettings);
 router.get('/settings/:section', settingsController.getSectionSettings);

@@ -138,6 +138,18 @@ export const paymentsAPI = {
 };
 
 // Reviews API
+export const newsletterAPI = {
+  subscribe: (email) => api.post('/newsletter/subscribe', { email })
+};
+
+export const contactAPI = {
+  submitContact: (data) => api.post('/contacts', data),
+};
+
+export const reportAPI = {
+  submitReport: (data) => api.post('/reports', data),
+};
+
 export const reviewsAPI = {
   create: (data) => api.post('/reviews', data),
   getHotelReviews: (hotelId, params) => api.get(`/reviews/hotel/${hotelId}`, { params }),

@@ -102,6 +102,20 @@ export const adminAPI = {
   
   deleteSubscriber: (id) =>
     api.delete(`/newsletter/admin/subscribers/${id}`),
+
+  // Contacts / Inquiries
+  getContacts: (params) =>
+    api.get('/admin/contacts', { params }),
+  
+  updateContactStatus: (id, status) =>
+    api.patch(`/admin/contacts/${id}/status`, { status }),
+
+  // User Reports
+  getReports: (params) =>
+    api.get('/admin/reports/user', { params }),
+  
+  updateReportStatus: (id, status) =>
+    api.patch(`/admin/reports/user/${id}/status`, { status }),
 };
 
 export default adminAPI;

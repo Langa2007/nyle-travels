@@ -4,18 +4,38 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiSend, FiCheckCircle } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
+import { contactAPI } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    interest: 'General Inquiry',
+    message: ''
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    try {
+      await contactAPI.submitContact(formData);
+      setIsSubmitted(true);
+      toast.success('Message sent successfully!');
+    } catch (error) {
+      console.error('Failed to submit contact:', error);
+      toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {
@@ -47,6 +67,9 @@ export default function ContactForm() {
           <input
             required
             type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
             className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
             placeholder="your name"
           />
@@ -56,6 +79,9 @@ export default function ContactForm() {
           <input
             required
             type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
             className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
             placeholder="your email"
           />
@@ -67,13 +93,21 @@ export default function ContactForm() {
           <label className="text-sm font-medium text-gray-700 ml-1">Phone Number</label>
           <input
             type="tel"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
             className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
             placeholder="phone number"
           />
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700 ml-1">Interest</label>
-          <select className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all appearance-none cursor-pointer">
+          <select 
+            name="interest"
+            value={formData.interest}
+            onChange={handleChange}
+            className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all appearance-none cursor-pointer"
+          >
             <option>General Inquiry</option>
             <option>Luxury Safari Booking</option>
             <option>Beach Holiday Packages</option>
@@ -88,6 +122,9 @@ export default function ContactForm() {
         <textarea
           required
           rows={5}
+          name="message"
+          value={formData.message}
+          onChange={handleChange}
           className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all resize-none"
           placeholder="Tell us about your dream trip..."
         />

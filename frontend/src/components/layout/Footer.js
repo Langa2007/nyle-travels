@@ -27,6 +27,7 @@ const footerLinks = {
   ],
   support: [
     { label: 'Contact Us', href: '/contact' },
+    { label: 'Report an Issue', href: '/report' },
     { label: 'FAQs', href: '/faqs' },
     { label: 'Booking Guide', href: '/guide' },
     { label: 'Travel Insurance', href: '/insurance' },
