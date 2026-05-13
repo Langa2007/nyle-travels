@@ -39,9 +39,9 @@ export default function ReportsPage() {
       await adminAPI.updateReportStatus(id, status);
       toast.success(`Marked as ${status}`);
       setReports(reports.map(rep => 
-        rep._id === id ? { ...rep, status } : rep
+        rep.id === id ? { ...rep, status } : rep
       ));
-      if (selectedReport?._id === id) {
+      if (selectedReport?.id === id) {
         setSelectedReport({ ...selectedReport, status });
       }
     } catch (error) {
@@ -125,7 +125,7 @@ export default function ReportsPage() {
               <tbody className="divide-y divide-gray-100">
                 {reports.map((report) => (
                   <tr 
-                    key={report._id}
+                    key={report.id}
                     className={`hover:bg-gray-50 transition-colors ${report.status === 'pending' ? 'bg-red-50/20' : ''}`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -143,7 +143,7 @@ export default function ReportsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(report.created_at), { addSuffix: true })}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
@@ -200,7 +200,7 @@ export default function ReportsPage() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Timeline</p>
-                    <p className="text-sm text-gray-900"><span className="font-medium">Submitted:</span> {new Date(selectedReport.createdAt).toLocaleString()}</p>
+                    <p className="text-sm text-gray-900"><span className="font-medium">Submitted:</span> {new Date(selectedReport.created_at).toLocaleString()}</p>
                   </div>
                 </div>
 
@@ -216,7 +216,7 @@ export default function ReportsPage() {
                     <span className="text-sm font-medium text-gray-700">Update Status:</span>
                     <select
                       value={selectedReport.status}
-                      onChange={(e) => handleUpdateStatus(selectedReport._id, e.target.value)}
+                      onChange={(e) => handleUpdateStatus(selectedReport.id, e.target.value)}
                       className={`text-sm border-0 rounded-lg ring-1 ring-inset pl-3 pr-8 py-1.5 focus:ring-2 focus:ring-primary-600 ${
                         selectedReport.status === 'pending' ? 'ring-red-300 bg-red-50 text-red-800' :
                         selectedReport.status === 'reviewing' ? 'ring-yellow-300 bg-yellow-50 text-yellow-800' :
@@ -231,7 +231,7 @@ export default function ReportsPage() {
                   <button
                     onClick={() => {
                       if (selectedReport.status === 'pending') {
-                        handleUpdateStatus(selectedReport._id, 'reviewing');
+                        handleUpdateStatus(selectedReport.id, 'reviewing');
                       }
                       setSelectedReport(null);
                     }}

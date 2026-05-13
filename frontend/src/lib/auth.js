@@ -52,6 +52,7 @@ export const authOptions = {
       name: "Google ID Token",
       credentials: {
         id_token: { label: "ID Token", type: "text" },
+        flow: { label: "Flow", type: "text" }, // 'signin' or 'signup'
       },
       async authorize(credentials) {
         if (!credentials?.id_token) return null;
@@ -90,7 +91,11 @@ export const authOptions = {
           });
 
           if (!user) {
-            // Create new user if not exists
+            if (credentials.flow === 'signin') {
+              throw new Error('No account found with this Google email. Please sign up first.');
+            }
+
+            // Create new user if flow is 'signup' or not specified
             user = await prisma.user.create({
               data: {
                 email,

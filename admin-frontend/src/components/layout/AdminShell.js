@@ -47,7 +47,7 @@ const menuItems = [
       { href: '/admin/tours', label: 'Tours', icon: FiMap },
       { href: '/admin/hotels', label: 'Hotels', icon: FiMap },
       { href: '/admin/destinations', label: 'Destinations', icon: FiStar },
-      { href: '/admin/inquiries', label: 'Inquiries', icon: FiMessageCircle },
+      { href: '/admin/inquiries', label: 'Contact Inquiries', icon: FiMessageCircle },
     ]
   },
   {

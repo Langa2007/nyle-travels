@@ -209,8 +209,9 @@ export default function RegisterPage() {
                 loading={isAuthenticating}
                 className="py-4 rounded-2xl border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 shadow-sm font-semibold transition-all duration-300 flex items-center justify-center gap-3"
                 onClick={() => signInWithPopup('google', {
+                  flow: 'signup',
                   onSuccess: () => {
-                    window.location.href = '/dashboard';
+                    window.location.href = '/';
                   }
                 })}
               >
@@ -223,7 +224,7 @@ export default function RegisterPage() {
                   text="signup_with"
                   className="w-full"
                   onSuccess={() => {
-                    window.location.href = '/dashboard';
+                    window.location.href = '/';
                   }}
                 />
               </div>

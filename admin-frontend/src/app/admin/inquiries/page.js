@@ -39,9 +39,9 @@ export default function InquiriesPage() {
       await adminAPI.updateContactStatus(id, status);
       toast.success(`Marked as ${status}`);
       setInquiries(inquiries.map(inq => 
-        inq._id === id ? { ...inq, status } : inq
+        inq.id === id ? { ...inq, status } : inq
       ));
-      if (selectedInquiry?._id === id) {
+      if (selectedInquiry?.id === id) {
         setSelectedInquiry({ ...selectedInquiry, status });
       }
     } catch (error) {
@@ -116,7 +116,7 @@ export default function InquiriesPage() {
               <tbody className="divide-y divide-gray-100">
                 {inquiries.map((inquiry) => (
                   <tr 
-                    key={inquiry._id}
+                    key={inquiry.id}
                     className={`hover:bg-gray-50 transition-colors ${inquiry.status === 'unread' ? 'bg-primary-50/30' : ''}`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -139,7 +139,7 @@ export default function InquiriesPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDistanceToNow(new Date(inquiry.createdAt), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(inquiry.created_at), { addSuffix: true })}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
@@ -196,7 +196,7 @@ export default function InquiriesPage() {
                   <div>
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Details</p>
                     <p className="text-sm text-gray-900"><span className="font-medium">Interest:</span> {selectedInquiry.interest}</p>
-                    <p className="text-sm text-gray-900 mt-1"><span className="font-medium">Date:</span> {new Date(selectedInquiry.createdAt).toLocaleString()}</p>
+                    <p className="text-sm text-gray-900 mt-1"><span className="font-medium">Date:</span> {new Date(selectedInquiry.created_at).toLocaleString()}</p>
                   </div>
                 </div>
 
@@ -212,7 +212,7 @@ export default function InquiriesPage() {
                     <span className="text-sm font-medium text-gray-700">Update Status:</span>
                     <select
                       value={selectedInquiry.status}
-                      onChange={(e) => handleUpdateStatus(selectedInquiry._id, e.target.value)}
+                      onChange={(e) => handleUpdateStatus(selectedInquiry.id, e.target.value)}
                       className={`text-sm border-0 rounded-lg ring-1 ring-inset pl-3 pr-8 py-1.5 focus:ring-2 focus:ring-primary-600 ${
                         selectedInquiry.status === 'unread' ? 'ring-yellow-300 bg-yellow-50 text-yellow-800' :
                         selectedInquiry.status === 'read' ? 'ring-blue-300 bg-blue-50 text-blue-800' :
@@ -227,7 +227,7 @@ export default function InquiriesPage() {
                   <button
                     onClick={() => {
                       if (selectedInquiry.status === 'unread') {
-                        handleUpdateStatus(selectedInquiry._id, 'read');
+                        handleUpdateStatus(selectedInquiry.id, 'read');
                       }
                       setSelectedInquiry(null);
                     }}

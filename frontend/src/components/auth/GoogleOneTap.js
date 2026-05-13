@@ -34,6 +34,7 @@ export default function GoogleOneTap() {
       try {
         const result = await signIn('google-id-token', {
           id_token: response.credential,
+          flow: 'signin',
           redirect: false,
         });
 

@@ -29,7 +29,7 @@ export const getDashboardStats = catchAsync(async (req, res, next) => {
       (SELECT 'user' as type, id, email as reference, created_at 
        FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 5)
       UNION ALL
-      (SELECT 'payment' as type, id, payment_number as reference, created_at 
+      (SELECT 'payment' as type, id, reference_number as reference, created_at 
        FROM payments ORDER BY created_at DESC LIMIT 5)
       ORDER BY created_at DESC LIMIT 10
     `)
@@ -405,7 +405,7 @@ export const getAllPayments = catchAsync(async (req, res, next) => {
   }
 
   if (search) {
-    whereClause.push(`(p.payment_number ILIKE $${paramIndex} OR u.email ILIKE $${paramIndex} OR b.booking_number ILIKE $${paramIndex})`);
+    whereClause.push(`(p.reference_number ILIKE $${paramIndex} OR u.email ILIKE $${paramIndex} OR b.booking_number ILIKE $${paramIndex})`);
     values.push(`%${search}%`);
     paramIndex++;
   }

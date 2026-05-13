@@ -41,7 +41,8 @@ export const useAuthPopup = () => {
     // We cannot POST directly from the main window because the redirect would
     // hijack the main page. Opening this intermediary page in the popup is the
     // only reliable cross-browser approach.
-    const signinUrl = `/auth/google-popup?callbackUrl=${encodeURIComponent(popupCallbackUrl)}`;
+    const flow = options.flow || 'signin';
+    const signinUrl = `/auth/google-popup?callbackUrl=${encodeURIComponent(popupCallbackUrl)}&flow=${flow}`;
 
     // Open the popup synchronously (before any async work) to avoid popup blockers
     const popup = window.open(signinUrl, 'NyleTravelAuth', popupFeatures);
@@ -80,7 +81,7 @@ export const useAuthPopup = () => {
           if (options.onSuccess) {
             await options.onSuccess(session);
           } else {
-            window.location.reload();
+            window.location.href = '/';
           }
         } catch (callbackError) {
           console.error('[useAuthPopup] onSuccess handler error:', callbackError);

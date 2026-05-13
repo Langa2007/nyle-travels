@@ -41,6 +41,8 @@ model User {
   bookings                Booking[]
   reviews                 Review[]
   payments                Payment[]
+  admin_logs              AdminLog[]
+  user_activities         UserActivity[]
 
   @@map("users")
 }
@@ -113,7 +115,7 @@ model TourPackage {
   video_url               String?   @db.VarChar(500)
   cancellation_policy     String?   @db.Text
   terms_conditions        String?   @db.Text
-  min_age                 Int       @default(0)
+  min_age                 Int?      @default(0)
   max_age                 Int?
   health_requirements     String?   @db.Text
   meta_title              String?   @db.VarChar(255)
@@ -329,4 +331,60 @@ model AppSetting {
   updated_at DateTime @default(now()) @updatedAt
 
   @@map("app_settings")
+}
+
+// Contact inquiries
+model Contact {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name       String   @db.VarChar(255)
+  email      String   @db.VarChar(255)
+  phone      String?  @db.VarChar(50)
+  interest   String   @db.VarChar(255)
+  message    String   @db.Text
+  status     String   @default("unread") @db.VarChar(50)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@map("contacts")
+}
+
+// User reports
+model Report {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  type        String   @db.VarChar(50)
+  name        String   @db.VarChar(255)
+  email       String   @db.VarChar(255)
+  description String   @db.Text
+  status      String   @default("pending") @db.VarChar(50)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
+
+  @@map("reports")
+}
+
+// Admin action logs
+model AdminLog {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  admin_id    String?  @db.Uuid
+  action      String   @db.VarChar(100)
+  details     Json?    @db.JsonB
+  created_at  DateTime @default(now())
+
+  admin       User?    @relation(fields: [admin_id], references: [id])
+
+  @@map("admin_logs")
+}
+
+// User activity logs
+model UserActivity {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id     String?  @db.Uuid
+  action      String   @db.VarChar(100)
+  ip_address  String?  @db.VarChar(50)
+  user_agent  String?  @db.Text
+  created_at  DateTime @default(now())
+
+  user        User?    @relation(fields: [user_id], references: [id])
+
+  @@map("user_activity")
 }

@@ -627,9 +627,16 @@ export default function Navbar() {
                   </div>
 
                   {user ? (
-                    <button onClick={logout} className="text-sm font-bold uppercase tracking-widest text-red-500">Sign Out</button>
+                    <div className="flex items-center space-x-4">
+                      <Link href="/dashboard" className="flex items-center space-x-2" onClick={() => setIsOpen(false)}>
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center text-white font-semibold">
+                          {user.first_name?.[0]}{user.last_name?.[0]}
+                        </div>
+                      </Link>
+                      <button onClick={logout} className="text-sm font-bold uppercase tracking-widest text-red-500">Sign Out</button>
+                    </div>
                   ) : (
-                    <Link href="/login" className="text-sm font-bold uppercase tracking-widest text-primary-500">Sign In</Link>
+                    <Link href="/login" className="text-sm font-bold uppercase tracking-widest text-primary-500" onClick={() => setIsOpen(false)}>Sign In</Link>
                   )}
                 </div>
                 

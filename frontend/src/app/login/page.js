@@ -116,8 +116,9 @@ function LoginContent() {
                 loading={isAuthenticating}
                 className="py-4 rounded-2xl border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 shadow-sm font-semibold transition-all duration-300 flex items-center justify-center gap-3"
                 onClick={() => signInWithPopup('google', {
+                  flow: 'signin',
                   onSuccess: () => {
-                    window.location.href = callbackUrl;
+                    window.location.href = '/';
                   }
                 })}
               >
@@ -130,7 +131,7 @@ function LoginContent() {
                   text="signin_with"
                   className="w-full"
                   onSuccess={() => {
-                    window.location.href = callbackUrl;
+                    window.location.href = '/';
                   }}
                 />
               </div>

@@ -53,6 +53,7 @@ export default function GoogleIdentitySync({
       try {
         const result = await signIn('google-id-token', {
           id_token: response.credential,
+          flow: context,
           redirect: false,
         });
 
@@ -73,7 +74,7 @@ export default function GoogleIdentitySync({
         }
       } catch (error) {
         console.error('[Nyle Travel] Google popup sign-in error:', error);
-        onErrorRef.current?.('Google sign-in failed. Please try again.');
+        onErrorRef.current?.(error.message || 'Google sign-in failed. Please try again.');
       }
     };
 
