@@ -13,6 +13,7 @@ import Footer from '@/components/layout/Footer';
 import Toast from '@/components/ui/Toast';
 import LoadingBar from '@/components/ui/LoadingBar';
 import SessionSync from '@/components/auth/SessionSync';
+import GoogleOneTap from '@/components/auth/GoogleOneTap';
 import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({
@@ -119,6 +120,7 @@ export default function RootLayout({ children }) {
           <NextAuthProvider>
             <AuthProvider>
               <SessionSync />
+              <GoogleOneTap />
               <CartProvider>
                 <WishlistProvider>
                   <Suspense fallback={null}>

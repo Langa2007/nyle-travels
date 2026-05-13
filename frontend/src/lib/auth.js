@@ -222,7 +222,7 @@ export const authOptions = {
     },
     async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id;
+        token.id = String(user.id); // aggressively capture ID as string (often already the internal DB ID)
         token.name = user.name;
         token.picture = user.image;
         token.role = user.role ?? 'USER';
