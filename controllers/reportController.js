@@ -1,6 +1,6 @@
 import prisma from '../lib/prisma.js';
-import { catchAsync } from '../utils/CatchAsync.js';
-import { AppError } from '../utils/AppError.js';
+import catchAsync from '../utils/CatchAsync.js';
+import AppError from '../utils/AppError.js';
 
 export const submitReport = catchAsync(async (req, res, next) => {
   const report = await prisma.report.create({

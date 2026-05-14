@@ -11,6 +11,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Toast from '@/components/ui/Toast';
+import CookieBanner from '@/components/layout/CookieBanner';
 import LoadingBar from '@/components/ui/LoadingBar';
 import SessionSync from '@/components/auth/SessionSync';
 import GoogleOneTap from '@/components/auth/GoogleOneTap';
@@ -134,6 +135,7 @@ export default function RootLayout({ children }) {
                   </main>
                   <Footer />
                   <Toast />
+                  <CookieBanner />
                   {shouldRenderAnalytics && <Analytics />}
                 </WishlistProvider>
               </CartProvider>
