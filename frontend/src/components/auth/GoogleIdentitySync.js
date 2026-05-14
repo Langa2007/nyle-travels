@@ -4,6 +4,10 @@ import { useEffect, useRef } from 'react';
 import { getSession, signIn, useSession } from 'next-auth/react';
 import Cookies from 'js-cookie';
 import { getPostAuthRedirect } from '@/lib/authRedirect';
+import {
+  buildGoogleAccountNotFoundUrl,
+  isGoogleAccountNotFoundError,
+} from '@/lib/googleAuthError';
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
@@ -59,6 +63,11 @@ export default function GoogleIdentitySync({
         });
 
         if (result?.error) {
+          if (context === 'signin' && isGoogleAccountNotFoundError(result.error)) {
+            window.location.href = buildGoogleAccountNotFoundUrl('/login');
+            return;
+          }
+
           throw new Error(result.error);
         }
 

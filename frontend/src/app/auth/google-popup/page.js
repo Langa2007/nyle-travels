@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 function GooglePopupRedirectInner() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/auth/popup-callback';
+  const flow = searchParams.get('flow') || 'signin';
 
   useEffect(() => {
     const redirect = async () => {
@@ -30,8 +31,13 @@ function GooglePopupRedirectInner() {
         callbackInput.name = 'callbackUrl';
         callbackInput.value = callbackUrl;
 
+        const flowInput = document.createElement('input');
+        flowInput.name = 'flow';
+        flowInput.value = flow;
+
         form.appendChild(csrfInput);
         form.appendChild(callbackInput);
+        form.appendChild(flowInput);
         document.body.appendChild(form);
         form.submit();
       } catch (err) {
@@ -40,7 +46,7 @@ function GooglePopupRedirectInner() {
     };
 
     redirect();
-  }, [callbackUrl]);
+  }, [callbackUrl, flow]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">

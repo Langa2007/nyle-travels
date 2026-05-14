@@ -4,6 +4,10 @@ import { useEffect, useRef } from 'react';
 import { getSession, signIn, useSession } from 'next-auth/react';
 import Cookies from 'js-cookie';
 import { getPostAuthRedirect } from '@/lib/authRedirect';
+import {
+  buildGoogleAccountNotFoundUrl,
+  isGoogleAccountNotFoundError,
+} from '@/lib/googleAuthError';
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
@@ -39,7 +43,14 @@ export default function GoogleOneTap() {
           redirect: false,
         });
 
-        if (result?.error) throw new Error(result.error);
+        if (result?.error) {
+          if (isGoogleAccountNotFoundError(result.error)) {
+            window.location.href = buildGoogleAccountNotFoundUrl('/login');
+            return;
+          }
+
+          throw new Error(result.error);
+        }
 
         const session = await waitForSession();
         

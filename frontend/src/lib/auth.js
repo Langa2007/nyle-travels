@@ -3,6 +3,32 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
+import { GOOGLE_ACCOUNT_NOT_FOUND } from "@/lib/googleAuthError";
+
+function getGoogleAuthFlow() {
+  try {
+    const cookieStore = cookies();
+    const callbackUrl =
+      cookieStore.get("next-auth.callback-url")?.value ||
+      cookieStore.get("__Secure-next-auth.callback-url")?.value ||
+      "";
+
+    if (!callbackUrl) return "signin";
+
+    const url = callbackUrl.startsWith("http")
+      ? new URL(callbackUrl)
+      : new URL(callbackUrl, "http://nyle.local");
+
+    return url.searchParams.get("flow") || "signin";
+  } catch {
+    return "signin";
+  }
+}
+
+function buildPopupAuthErrorUrl() {
+  return `/auth/popup-callback?flow=signin&error=${GOOGLE_ACCOUNT_NOT_FOUND}`;
+}
 
 export const authOptions = {
   // Use a getter to prevent adapter initialization during static analysis/build phase
@@ -92,7 +118,7 @@ export const authOptions = {
 
           if (!user) {
             if (credentials.flow === 'signin') {
-              throw new Error('No account found with this Google email. Please sign up first.');
+              throw new Error(GOOGLE_ACCOUNT_NOT_FOUND);
             }
 
             // Create new user if flow is 'signup' or not specified
@@ -140,6 +166,9 @@ export const authOptions = {
           };
         } catch (error) {
           console.error('[AUTH] google-id-token authorize error:', error);
+          if (error?.message === GOOGLE_ACCOUNT_NOT_FOUND) {
+            throw error;
+          }
           return null;
         }
       },
@@ -151,10 +180,15 @@ export const authOptions = {
         if (!prisma) return true;
         
         try {
+          const flow = getGoogleAuthFlow();
           // Check if a user with this email already exists
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
           });
+
+          if (!existingUser && flow === "signin") {
+            return buildPopupAuthErrorUrl();
+          }
 
           if (existingUser) {
             // Check if this Google account is already linked

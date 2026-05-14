@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -11,6 +11,11 @@ import { useAuthPopup } from '@/hooks/useAuthPopup';
 import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
 import { getPostAuthRedirect } from '@/lib/authRedirect';
+import {
+  GOOGLE_ACCOUNT_NOT_FOUND,
+  GOOGLE_ACCOUNT_NOT_FOUND_MESSAGE,
+} from '@/lib/googleAuthError';
+import toast from 'react-hot-toast';
 
 function LoginContent() {
   const [email, setEmail] = useState('');
@@ -18,8 +23,15 @@ function LoginContent() {
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const redirectTo = getPostAuthRedirect(searchParams.get('callbackUrl'));
+  const googleAccountNotFound = searchParams.get('authError') === GOOGLE_ACCOUNT_NOT_FOUND;
   const { login: manualLogin } = useAuth();
   const { signInWithPopup, isAuthenticating } = useAuthPopup();
+
+  useEffect(() => {
+    if (searchParams.get('authError') === GOOGLE_ACCOUNT_NOT_FOUND) {
+      toast.error(GOOGLE_ACCOUNT_NOT_FOUND_MESSAGE);
+    }
+  }, [searchParams]);
 
   const handleManualLogin = async (e) => {
     e.preventDefault();
@@ -111,6 +123,16 @@ function LoginContent() {
             </div>
 
             <div className="w-full space-y-4">
+              {googleAccountNotFound && (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  {GOOGLE_ACCOUNT_NOT_FOUND_MESSAGE}{' '}
+                  <Link href="/register" className="font-bold underline underline-offset-4">
+                    Proceed to sign up
+                  </Link>
+                  .
+                </div>
+              )}
+
               <Button
                 variant="outline"
                 fullWidth

@@ -4,6 +4,10 @@ import { useState, useCallback } from 'react';
 import { getSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
 import { getPostAuthRedirect } from '@/lib/authRedirect';
+import {
+  buildGoogleAccountNotFoundUrl,
+  GOOGLE_ACCOUNT_NOT_FOUND_MESSAGE,
+} from '@/lib/googleAuthError';
 
 /**
  * useAuthPopup Hook for Nyle Travel
@@ -33,7 +37,9 @@ export const useAuthPopup = () => {
     const popupFeatures = `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`;
 
     // The URL the popup should land on after successful authentication
-    const popupCallbackUrl = `${window.location.origin}/auth/popup-callback`;
+    const flow = options.flow || 'signin';
+    const callbackSearch = new URLSearchParams({ flow });
+    const popupCallbackUrl = `${window.location.origin}/auth/popup-callback?${callbackSearch.toString()}`;
 
     // Navigate the popup to our /auth/google-popup page which:
     //   1. Fetches the NextAuth CSRF token
@@ -42,7 +48,6 @@ export const useAuthPopup = () => {
     // We cannot POST directly from the main window because the redirect would
     // hijack the main page. Opening this intermediary page in the popup is the
     // only reliable cross-browser approach.
-    const flow = options.flow || 'signin';
     const signinUrl = `/auth/google-popup?callbackUrl=${encodeURIComponent(popupCallbackUrl)}&flow=${flow}`;
 
     // Open the popup synchronously (before any async work) to avoid popup blockers
@@ -89,6 +94,21 @@ export const useAuthPopup = () => {
           toast.error('Signed in, but could not complete session setup. Please refresh.');
         } finally {
           setIsAuthenticating(false);
+        }
+      } else if (
+        event.data?.type === 'AUTH_ERROR' &&
+        event.data?.source === 'next-auth-popup'
+      ) {
+        window.removeEventListener('message', messageHandler);
+        clearInterval(checkClosed);
+        popup.close();
+        setIsAuthenticating(false);
+
+        if (flow === 'signin') {
+          toast.error(GOOGLE_ACCOUNT_NOT_FOUND_MESSAGE);
+          window.location.href = buildGoogleAccountNotFoundUrl('/login');
+        } else {
+          toast.error('Google authentication failed. Please try again.');
         }
       }
     };
