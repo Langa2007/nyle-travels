@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { getSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
+import { getPostAuthRedirect } from '@/lib/authRedirect';
 
 /**
  * useAuthPopup Hook for Nyle Travel
@@ -81,7 +82,7 @@ export const useAuthPopup = () => {
           if (options.onSuccess) {
             await options.onSuccess(session);
           } else {
-            window.location.href = '/';
+            window.location.href = getPostAuthRedirect(options.redirectTo);
           }
         } catch (callbackError) {
           console.error('[useAuthPopup] onSuccess handler error:', callbackError);

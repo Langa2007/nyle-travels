@@ -6,6 +6,7 @@ import { FiMail, FiPhone, FiShield, FiUser } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import Loader from '@/components/ui/Loader';
 import { useAuth } from '@/hooks/useAuth';
+import { getUserDisplayName } from '@/lib/userDisplay';
 
 export default function DashboardProfilePage() {
   const { user, loading, updateProfile } = useAuth();
@@ -77,7 +78,7 @@ export default function DashboardProfilePage() {
               <FiUser size={28} />
             </div>
             <div>
-              <h2 className="font-serif text-2xl font-bold text-gray-900">{user.first_name} {user.last_name}</h2>
+              <h2 className="font-serif text-2xl font-bold text-gray-900">{getUserDisplayName(user)}</h2>
               <p className="mt-1 flex items-center gap-2 text-sm text-gray-600"><FiMail /> {user.email}</p>
             </div>
           </div>

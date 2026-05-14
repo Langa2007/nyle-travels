@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
+  const login = async (email, password, options = {}) => {
     try {
       const response = await authAPI.login({ email, password });
       const { token, refreshToken, user } = response.data;
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
       toast.success('Welcome back!');
       
-      router.push('/dashboard');
+      router.push(options.redirectTo || '/');
       return { success: true };
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');

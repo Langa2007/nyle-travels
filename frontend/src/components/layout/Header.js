@@ -18,6 +18,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import Button from '@/components/ui/Button';
+import { getUserInitials } from '@/lib/userDisplay';
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -43,6 +44,7 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const userInitials = getUserInitials(user);
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
 
@@ -154,7 +156,7 @@ export default function Header() {
                 <div className="relative group">
                   <button className="flex items-center space-x-2">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center text-white font-medium text-sm">
-                      {user.firstName?.[0]}{user.lastName?.[0]}
+                      {userInitials}
                     </div>
                   </button>
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">

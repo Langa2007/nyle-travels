@@ -10,13 +10,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAuthPopup } from '@/hooks/useAuthPopup';
 import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
+import { getPostAuthRedirect } from '@/lib/authRedirect';
 
 function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const redirectTo = getPostAuthRedirect(searchParams.get('callbackUrl'));
   const { login: manualLogin } = useAuth();
   const { signInWithPopup, isAuthenticating } = useAuthPopup();
 
@@ -25,7 +26,7 @@ function LoginContent() {
     setLoading(true);
     
     try {
-      const result = await manualLogin(email, password);
+      const result = await manualLogin(email, password, { redirectTo });
       
       if (result.success) {
         // If successful, the hook handles the redirect
@@ -117,8 +118,9 @@ function LoginContent() {
                 className="py-4 rounded-2xl border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 shadow-sm font-semibold transition-all duration-300 flex items-center justify-center gap-3"
                 onClick={() => signInWithPopup('google', {
                   flow: 'signin',
+                  redirectTo,
                   onSuccess: () => {
-                    window.location.href = '/';
+                    window.location.href = redirectTo;
                   }
                 })}
               >
@@ -131,7 +133,7 @@ function LoginContent() {
                   text="signin_with"
                   className="w-full"
                   onSuccess={() => {
-                    window.location.href = '/';
+                    window.location.href = redirectTo;
                   }}
                 />
               </div>

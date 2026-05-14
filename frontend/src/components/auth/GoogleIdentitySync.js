@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { getSession, signIn, useSession } from 'next-auth/react';
 import Cookies from 'js-cookie';
+import { getPostAuthRedirect } from '@/lib/authRedirect';
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
@@ -70,7 +71,7 @@ export default function GoogleIdentitySync({
         if (onSuccessRef.current) {
           await onSuccessRef.current(session);
         } else {
-          window.location.reload();
+          window.location.href = getPostAuthRedirect(window.location.pathname + window.location.search + window.location.hash);
         }
       } catch (error) {
         console.error('[Nyle Travel] Google popup sign-in error:', error);

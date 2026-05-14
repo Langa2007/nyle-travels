@@ -24,6 +24,7 @@ import {
   getFeaturedHotels,
   getHotelImage,
 } from '@/lib/hotelCatalog';
+import { getUserInitials } from '@/lib/userDisplay';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -126,6 +127,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const userInitials = getUserInitials(user);
   const { wishlistCount } = useWishlist();
   const { cartCount } = useCart();
   
@@ -440,7 +442,7 @@ export default function Navbar() {
                 <div className="relative group">
                   <button className="flex items-center space-x-2">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center text-white font-semibold">
-                      {user.first_name?.[0]}{user.last_name?.[0]}
+                      {userInitials}
                     </div>
                     <FiChevronDown className={`${isScrolled ? 'text-gray-700' : 'text-white'}`} />
                   </button>
@@ -630,7 +632,7 @@ export default function Navbar() {
                     <div className="flex items-center space-x-4">
                       <Link href="/dashboard" className="flex items-center space-x-2" onClick={() => setIsOpen(false)}>
                         <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center text-white font-semibold">
-                          {user.first_name?.[0]}{user.last_name?.[0]}
+                          {userInitials}
                         </div>
                       </Link>
                       <button onClick={logout} className="text-sm font-bold uppercase tracking-widest text-red-500">Sign Out</button>

@@ -21,9 +21,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Loader from '@/components/ui/Loader';
 import Button from '@/components/ui/Button';
+import { getUserDisplayName, getUserInitials } from '@/lib/userDisplay';
 
 export default function UserDashboard() {
   const { user, loading: authLoading, logout } = useAuth();
+  const userInitials = getUserInitials(user);
+  const userDisplayName = getUserDisplayName(user);
   const [bookings, setBookings] = useState([]);
   const [stats, setStats] = useState({
     totalBookings: 0,
@@ -84,15 +87,11 @@ export default function UserDashboard() {
             </button>
             <div className="flex items-center space-x-3 pl-6 border-l border-gray-100">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-gray-900">{user.first_name} {user.last_name}</p>
+                <p className="text-sm font-bold text-gray-900">{userDisplayName}</p>
                 <p className="text-xs text-primary-600 font-medium uppercase tracking-widest">Inner Circle Member</p>
               </div>
               <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold border-2 border-white shadow-sm overflow-hidden">
-                {user.image ? (
-                  <Image src={user.image} alt={user.first_name} fill className="object-cover" />
-                ) : (
-                  user.first_name[0]
-                )}
+                {userInitials}
               </div>
               <button 
                 onClick={logout}
@@ -135,7 +134,7 @@ export default function UserDashboard() {
                 transition={{ delay: 0.1 }}
                 className="text-5xl lg:text-7xl font-serif font-bold leading-tight"
               >
-                Welcome home,<br />{user.first_name}.
+                Welcome home,<br />{user.first_name || user.name || 'Traveler'}.
               </motion.h1>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
