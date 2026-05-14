@@ -143,7 +143,16 @@ export const newsletterAPI = {
 };
 
 export const contactAPI = {
-  submitContact: (data) => api.post('/contacts', data),
+  submitContact: async (data) => {
+    try {
+      return await api.post('/contacts', data);
+    } catch (error) {
+      if (error.response?.status === 404) {
+        return api.post('/contact', data);
+      }
+      throw error;
+    }
+  },
 };
 
 export const reportAPI = {

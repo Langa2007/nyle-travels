@@ -112,6 +112,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/contact', contactRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/reports', reportRoutes);
 

@@ -60,18 +60,11 @@ export default function GoogleOneTap() {
         client_id: GOOGLE_CLIENT_ID,
         callback: handleCredentialResponse,
         itp_support: true,
+        use_fedcm_for_prompt: true,
         cancel_on_tap_outside: true,
       });
 
-      window.google.accounts.id.prompt((notification) => {
-        if (notification.isNotDisplayed()) {
-          console.log('[Nyle Travel] One Tap not displayed:', notification.getNotDisplayedReason());
-        } else if (notification.isSkippedMoment()) {
-          console.log('[Nyle Travel] One Tap skipped:', notification.getSkippedReason());
-        } else if (notification.isDismissedMoment()) {
-          console.log('[Nyle Travel] One Tap dismissed:', notification.getDismissedReason());
-        }
-      });
+      window.google.accounts.id.prompt();
     };
 
     if (window.google) {
@@ -84,8 +77,15 @@ export default function GoogleOneTap() {
           initializeOneTap();
         }
       }, 100);
-      return () => clearInterval(interval);
+      return () => {
+        clearInterval(interval);
+        window.google?.accounts?.id?.cancel();
+      };
     }
+
+    return () => {
+      window.google?.accounts?.id?.cancel();
+    };
   }, [status]);
 
   return null; // This component doesn't render anything visible

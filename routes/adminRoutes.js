@@ -30,7 +30,9 @@ router.post('/payments/:paymentId/refund', adminController.processRefund);
 router.get('/reports/generate', adminController.generateReport);
 
 router.get('/contacts', contactController.getContacts);
+router.get('/contact', contactController.getContacts);
 router.patch('/contacts/:id/status', contactController.updateContactStatus);
+router.patch('/contact/:id/status', contactController.updateContactStatus);
 
 router.get('/reports/user', reportController.getReports);
 router.patch('/reports/user/:id/status', reportController.updateReportStatus);

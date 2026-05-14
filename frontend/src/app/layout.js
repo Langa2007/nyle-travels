@@ -16,6 +16,8 @@ import SessionSync from '@/components/auth/SessionSync';
 import GoogleOneTap from '@/components/auth/GoogleOneTap';
 import { Analytics } from '@vercel/analytics/react';
 
+const shouldRenderAnalytics = process.env.NODE_ENV === 'production';
+
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -132,7 +134,7 @@ export default function RootLayout({ children }) {
                   </main>
                   <Footer />
                   <Toast />
-                  <Analytics />
+                  {shouldRenderAnalytics && <Analytics />}
                 </WishlistProvider>
               </CartProvider>
             </AuthProvider>
