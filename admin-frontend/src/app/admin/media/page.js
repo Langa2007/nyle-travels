@@ -82,7 +82,7 @@ export default function MediaManagement() {
     if (section === 'hero_sections') {
       Object.assign(newItem, { title: '', subtitle: '', description: '', image: '' });
     } else if (section === 'exclusive_offers_sections') {
-      Object.assign(newItem, { title: '', description: '', discount: 0, code: '', image: '', type: '' });
+      Object.assign(newItem, { title: '', description: '', discount: 0, code: '', image: '', type: '', duration_days: 30 });
     } else if (section === 'partners_section') {
       Object.assign(newItem, { name: '', logo: '' });
     } else if (section === 'testimonials_section') {
@@ -107,7 +107,17 @@ export default function MediaManagement() {
       setSettings({ ...settings, [section]: { ...settings[section], [field]: value } });
     } else {
       const newItems = [...settings[section]];
-      newItems[index] = { ...newItems[index], [field]: value };
+      let updatedItem = { ...newItems[index], [field]: value };
+      
+      // Auto-calculate validUntil if duration_days is changed
+      if (section === 'exclusive_offers_sections' && field === 'duration_days') {
+        const days = parseInt(value) || 0;
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + days);
+        updatedItem.validUntil = expiryDate.toISOString();
+      }
+      
+      newItems[index] = updatedItem;
       setSettings({ ...settings, [section]: newItems });
     }
   };
@@ -407,6 +417,7 @@ export default function MediaManagement() {
                 { name: 'title', label: 'Deal Headline', fullWidth: false },
                 { name: 'code', label: 'Access Code', fullWidth: false },
                 { name: 'discount', label: 'Reduction %', type: 'number', fullWidth: false },
+                { name: 'duration_days', label: 'Days Active', type: 'number', fullWidth: false },
                 { name: 'description', label: 'Offer Particulars', type: 'textarea', fullWidth: true },
               ])
             )}
