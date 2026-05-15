@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import BasicStaticPage from '@/components/ui/BasicStaticPage';
 import { motion } from 'framer-motion';
+import Cookies from 'js-cookie';
 import { FiCheck, FiShield, FiBarChart2, FiSettings, FiTarget } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -15,14 +16,12 @@ export default function CookiesPage() {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem('cookie_consent');
-    if (saved) {
-      try {
-        setPreferences(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to parse cookie preferences');
-      }
-    }
+    setPreferences({
+      essential: true,
+      functional: Cookies.get('nyle_functional_cookies') === 'true',
+      analytical: Cookies.get('nyle_analytical_cookies') === 'true',
+      marketing: Cookies.get('nyle_marketing_cookies') === 'true'
+    });
   }, []);
 
   const handleToggle = (type) => {
@@ -34,11 +33,18 @@ export default function CookiesPage() {
   };
 
   const handleSave = () => {
-    const data = {
-      ...preferences,
-      timestamp: new Date().toISOString()
-    };
-    localStorage.setItem('cookie_consent', JSON.stringify(data));
+    const expires = 365;
+    Cookies.set('nyle_cookie_consent', 'accepted', { expires });
+    
+    if (preferences.functional) Cookies.set('nyle_functional_cookies', 'true', { expires });
+    else Cookies.remove('nyle_functional_cookies');
+    
+    if (preferences.analytical) Cookies.set('nyle_analytical_cookies', 'true', { expires });
+    else Cookies.remove('nyle_analytical_cookies');
+    
+    if (preferences.marketing) Cookies.set('nyle_marketing_cookies', 'true', { expires });
+    else Cookies.remove('nyle_marketing_cookies');
+
     toast.success('Your preferences have been saved');
   };
 

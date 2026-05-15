@@ -125,7 +125,7 @@ export default function BlogPage() {
                   <span className="text-gray-700 font-medium">{featuredPost.author}</span>
                 </div>
                 <Link href={`/blog/${featuredPost.slug}`}>
-                  <Button variant="primary" size="lg">Read Full Story</Button>
+                  <Button variant="primary" size="lg">Explore the Full Story</Button>
                 </Link>
               </div>
             </motion.div>
@@ -187,7 +187,7 @@ export default function BlogPage() {
                       <span className="text-xs text-gray-600 font-medium">{post.author}</span>
                     </div>
                     <Link href={`/blog/${post.slug}`} className="text-primary-600 font-semibold text-sm inline-flex items-center group/btn transition-colors">
-                      Read More
+                      Explore Full Journey
                       <FiChevronRight className="ml-1 group-hover/btn:ml-2 transition-all" />
                     </Link>
                   </div>

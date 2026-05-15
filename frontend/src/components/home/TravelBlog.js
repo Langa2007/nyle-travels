@@ -145,9 +145,9 @@ export default function TravelBlog() {
                     {post.excerpt}
                   </p>
 
-                  {/* Read More */}
+                  {/* Continue Journey */}
                   <div className="flex items-center text-primary-600 font-medium group-hover:translate-x-2 transition-transform">
-                    Read More
+                    Continue the Journey
                     <FiChevronRight className="ml-1" />
                   </div>
                 </div>

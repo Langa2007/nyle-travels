@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import Cookies from 'js-cookie';
 import { FiX, FiInfo } from 'react-icons/fi';
 
 export default function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const consent = localStorage.getItem('cookie_consent');
+    const consent = Cookies.get('nyle_cookie_consent');
     if (!consent) {
       const timer = setTimeout(() => {
         setIsVisible(true);
@@ -19,26 +20,20 @@ export default function CookieBanner() {
   }, []);
 
   const handleAcceptAll = () => {
-    const preferences = {
-      essential: true,
-      functional: true,
-      analytical: true,
-      marketing: true,
-      timestamp: new Date().toISOString()
-    };
-    localStorage.setItem('cookie_consent', JSON.stringify(preferences));
+    const expires = 365; // 1 year
+    Cookies.set('nyle_cookie_consent', 'accepted', { expires });
+    Cookies.set('nyle_functional_cookies', 'true', { expires });
+    Cookies.set('nyle_analytical_cookies', 'true', { expires });
+    Cookies.set('nyle_marketing_cookies', 'true', { expires });
     setIsVisible(false);
   };
 
   const handleRejectAll = () => {
-    const preferences = {
-      essential: true,
-      functional: false,
-      analytical: false,
-      marketing: false,
-      timestamp: new Date().toISOString()
-    };
-    localStorage.setItem('cookie_consent', JSON.stringify(preferences));
+    const expires = 365;
+    Cookies.set('nyle_cookie_consent', 'rejected', { expires });
+    Cookies.remove('nyle_functional_cookies');
+    Cookies.remove('nyle_analytical_cookies');
+    Cookies.remove('nyle_marketing_cookies');
     setIsVisible(false);
   };
 

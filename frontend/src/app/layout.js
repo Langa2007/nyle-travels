@@ -15,6 +15,7 @@ import CookieBanner from '@/components/layout/CookieBanner';
 import LoadingBar from '@/components/ui/LoadingBar';
 import SessionSync from '@/components/auth/SessionSync';
 import GoogleOneTap from '@/components/auth/GoogleOneTap';
+import CookieConsentWrapper from '@/components/auth/CookieConsentWrapper';
 import { Analytics } from '@vercel/analytics/react';
 
 const shouldRenderAnalytics = process.env.NODE_ENV === 'production';
@@ -136,7 +137,11 @@ export default function RootLayout({ children }) {
                   <Footer />
                   <Toast />
                   <CookieBanner />
-                  {shouldRenderAnalytics && <Analytics />}
+                  {shouldRenderAnalytics && (
+                    <CookieConsentWrapper>
+                      <Analytics />
+                    </CookieConsentWrapper>
+                  )}
                 </WishlistProvider>
               </CartProvider>
             </AuthProvider>
