@@ -14,10 +14,10 @@ const GOOGLE_CLIENT_ID =
   '766373716111-naoh8vma3on54nnhtlolhr2orae6q14v.apps.googleusercontent.com';
 
 async function waitForSession() {
-  for (let attempt = 0; attempt < 5; attempt += 1) {
+  for (let attempt = 0; attempt < 15; attempt += 1) {
     const session = await getSession();
     if (session?.user) return session;
-    await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
+    await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)));
   }
   return null;
 }
@@ -36,6 +36,11 @@ export default function GoogleOneTap() {
     }
 
     const handleCredentialResponse = async (response) => {
+      // Immediately remove the One Tap UI
+      if (window.google) {
+        window.google.accounts.id.cancel();
+      }
+      
       try {
         const result = await signIn('google-id-token', {
           id_token: response.credential,
@@ -58,7 +63,9 @@ export default function GoogleOneTap() {
           Cookies.set('token', session.accessToken, { expires: 7 });
         }
 
-        window.location.href = getPostAuthRedirect(window.location.pathname + window.location.search + window.location.hash);
+        // Hard redirect to clear any state and ensure user sees they are logged in
+        const destination = getPostAuthRedirect(window.location.pathname + window.location.search + window.location.hash);
+        window.location.replace(destination);
       } catch (error) {
         console.error('[Nyle Travel] One Tap error:', error);
       }

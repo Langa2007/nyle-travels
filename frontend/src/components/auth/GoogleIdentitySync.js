@@ -14,14 +14,14 @@ const GOOGLE_CLIENT_ID =
   '766373716111-naoh8vma3on54nnhtlolhr2orae6q14v.apps.googleusercontent.com';
 
 async function waitForSession() {
-  for (let attempt = 0; attempt < 5; attempt += 1) {
+  for (let attempt = 0; attempt < 15; attempt += 1) {
     const session = await getSession();
 
     if (session?.user) {
       return session;
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
+    await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)));
   }
 
   return null;
@@ -80,7 +80,8 @@ export default function GoogleIdentitySync({
         if (onSuccessRef.current) {
           await onSuccessRef.current(session);
         } else {
-          window.location.href = getPostAuthRedirect(window.location.pathname + window.location.search + window.location.hash);
+          const destination = getPostAuthRedirect(window.location.pathname + window.location.search + window.location.hash);
+          window.location.replace(destination);
         }
       } catch (error) {
         console.error('[Nyle Travel] Google popup sign-in error:', error);

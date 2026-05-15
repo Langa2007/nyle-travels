@@ -61,7 +61,7 @@ export const useAuthPopup = () => {
 
     // Poll for a fresh session after the popup signals AUTH_SUCCESS
     const getFreshSession = async () => {
-      for (let attempt = 0; attempt < 8; attempt += 1) {
+      for (let attempt = 0; attempt < 15; attempt += 1) {
         const session = await getSession();
         if (session?.user) return session;
         await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)));
@@ -84,10 +84,17 @@ export const useAuthPopup = () => {
 
         try {
           const session = await getFreshSession();
+          
+          // Explicitly close the popup on success
+          if (popup && !popup.closed) {
+            popup.close();
+          }
+
           if (options.onSuccess) {
             await options.onSuccess(session);
           } else {
-            window.location.href = getPostAuthRedirect(options.redirectTo);
+            const destination = getPostAuthRedirect(options.redirectTo);
+            window.location.replace(destination);
           }
         } catch (callbackError) {
           console.error('[useAuthPopup] onSuccess handler error:', callbackError);
