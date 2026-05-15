@@ -97,12 +97,79 @@ const defaultBlogPosts = [
     author: 'Sipho Ndlovu',
     readTime: '6 min read',
     slug: 'birdwatching-lake-nakuru',
+  },
+  {
+    id: 9,
+    title: 'Nairobi\'s Thriving Art Scene: A Local Guide',
+    excerpt: 'From contemporary galleries to vibrant street art, discover the creative heartbeat of Kenya\'s capital city.',
+    image: 'https://picsum.photos/seed/nyle_blog9/800/600',
+    date: 'January 30, 2024',
+    category: 'Culture',
+    author: 'David Otieno',
+    readTime: '8 min read',
+    slug: 'nairobi-art-scene',
+  },
+  {
+    id: 10,
+    title: 'The Serengeti from Above: Hot Air Balloon Safaris',
+    excerpt: 'Experience the magic of the African savannah at sunrise from the silence of a hot air balloon.',
+    image: 'https://picsum.photos/seed/nyle_blog10/800/600',
+    date: 'January 25, 2024',
+    category: 'Adventure',
+    author: 'Elena Rossi',
+    readTime: '10 min read',
+    slug: 'serengeti-balloon-safari',
+  },
+  {
+    id: 11,
+    title: 'Mount Kenya Trekking: Routes and Tips',
+    excerpt: 'A comprehensive guide for those looking to conquer Africa\'s second-highest peak. Which route is right for you?',
+    image: 'https://picsum.photos/seed/nyle_blog11/800/600',
+    date: 'January 20, 2024',
+    category: 'Adventure',
+    author: 'Mwangi Kamau',
+    readTime: '14 min read',
+    slug: 'mount-kenya-trekking',
+  },
+  {
+    id: 12,
+    title: 'Zanzibar\'s Hidden Beaches: Beyond the Resorts',
+    excerpt: 'Escape the crowds and find your own piece of paradise in the lesser-known corners of the Spice Island.',
+    image: 'https://picsum.photos/seed/nyle_blog12/800/600',
+    date: 'January 15, 2024',
+    category: 'Travel Guide',
+    author: 'Amara Okafor',
+    readTime: '9 min read',
+    slug: 'zanzibar-hidden-beaches',
+  },
+  {
+    id: 13,
+    title: 'Eco-Tourism in Rwanda: The Gorilla Encounter',
+    excerpt: 'How Rwanda became a world leader in sustainable tourism and what to expect on a gorilla trekking expedition.',
+    image: 'https://picsum.photos/seed/nyle_blog13/800/600',
+    date: 'January 10, 2024',
+    category: 'Sustainability',
+    author: 'Thomas Wright',
+    readTime: '12 min read',
+    slug: 'rwanda-gorilla-trekking',
+  },
+  {
+    id: 14,
+    title: 'Sailing the Lamu Archipelago by Dhow',
+    excerpt: 'Step back in time and experience the Swahili coast as it has been for centuries, on a traditional wooden sailing dhow.',
+    image: 'https://picsum.photos/seed/nyle_blog14/800/600',
+    date: 'January 5, 2024',
+    category: 'Culture',
+    author: 'Faith Njeri',
+    readTime: '7 min read',
+    slug: 'lamu-dhow-sailing',
   }
 ];
 
 export default function BlogPage() {
   const [posts, setPosts] = useState(defaultBlogPosts);
   const [loading, setLoading] = useState(true);
+  const [visiblePosts, setVisiblePosts] = useState(6);
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -126,7 +193,12 @@ export default function BlogPage() {
   }, []);
 
   const featuredPost = posts[0];
-  const remainingPosts = posts.slice(1);
+  const remainingPosts = posts.slice(1, visiblePosts + 1);
+  const hasMore = visiblePosts < posts.length - 1;
+
+  const handleLoadMore = () => {
+    setVisiblePosts(prev => prev + 3);
+  };
 
   return (
     <div className="bg-white min-h-screen">
@@ -257,11 +329,18 @@ export default function BlogPage() {
             </div>
           )}
 
-          <div className="mt-24 text-center">
-            <Button variant="outline" size="xl" className="!px-12 hover:bg-primary-600 hover:text-white">
-              Discover More Stories
-            </Button>
-          </div>
+          {hasMore && (
+            <div className="mt-24 text-center">
+              <Button 
+                variant="outline" 
+                size="xl" 
+                className="!px-12 hover:bg-primary-600 hover:text-white transition-all transform hover:scale-105"
+                onClick={handleLoadMore}
+              >
+                Discover More Stories
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 

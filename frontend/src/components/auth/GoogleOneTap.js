@@ -65,38 +65,53 @@ export default function GoogleOneTap() {
     };
 
     const initializeOneTap = () => {
-      if (!window.google) return;
+      if (!window.google || initializedRef.current) return;
       
-      initializedRef.current = true;
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleCredentialResponse,
-        itp_support: true,
-        use_fedcm_for_prompt: true,
-        cancel_on_tap_outside: true,
-      });
+      try {
+        initializedRef.current = true;
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleCredentialResponse,
+          itp_support: true,
+          use_fedcm_for_prompt: true,
+          cancel_on_tap_outside: true,
+        });
 
-      window.google.accounts.id.prompt();
+        window.google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed()) {
+            console.log('[Nyle Travel] One Tap not displayed:', notification.getNotDisplayedReason());
+          } else if (notification.isSkippedMoment()) {
+            console.log('[Nyle Travel] One Tap skipped:', notification.getSkippedReason());
+          } else if (notification.isDismissedMoment()) {
+            console.log('[Nyle Travel] One Tap dismissed:', notification.getDismissedReason());
+          }
+        });
+      } catch (err) {
+        console.warn('[Nyle Travel] Google GSI initialization failed (likely blocked by client):', err.message);
+      }
     };
 
     if (window.google) {
       initializeOneTap();
     } else {
-      // Wait for the script to load if it's not ready yet
       const interval = setInterval(() => {
         if (window.google) {
           clearInterval(interval);
           initializeOneTap();
         }
-      }, 100);
+      }, 500);
       return () => {
         clearInterval(interval);
-        window.google?.accounts?.id?.cancel();
+        if (initializedRef.current) {
+          window.google?.accounts?.id?.cancel();
+        }
       };
     }
 
     return () => {
-      window.google?.accounts?.id?.cancel();
+      if (initializedRef.current) {
+        window.google?.accounts?.id?.cancel();
+      }
     };
   }, [status]);
 
