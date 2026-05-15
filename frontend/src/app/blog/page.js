@@ -17,7 +17,7 @@ const defaultBlogPosts = [
     image: 'https://picsum.photos/seed/nyle_blog1/1200/800',
     date: 'March 15, 2024',
     category: 'Safari Guide',
-    author: 'Sarah Mitchell',
+    author: 'Faith Njeri',
     readTime: '12 min read',
     slug: 'great-migration-guide',
   },
@@ -28,7 +28,7 @@ const defaultBlogPosts = [
     image: 'https://picsum.photos/seed/nyle_blog2/800/600',
     date: 'March 10, 2024',
     category: 'Hotels',
-    author: 'James Wilson',
+    author: 'David Otieno',
     readTime: '8 min read',
     slug: 'luxury-diani-resorts',
   },
@@ -39,10 +39,65 @@ const defaultBlogPosts = [
     image: 'https://picsum.photos/seed/nyle_blog3/800/600',
     date: 'March 5, 2024',
     category: 'Sustainability',
-    author: 'David Chen',
+    author: 'Mwangi Kamau',
     readTime: '10 min read',
     slug: 'sustainable-luxury-travel',
   },
+  {
+    id: 4,
+    title: 'Hidden Gems of the Northern Frontier',
+    excerpt: 'Explore the rugged beauty and unique cultures of Kenya\'s northern regions. A journey off the beaten path for the truly adventurous traveler.',
+    image: 'https://picsum.photos/seed/nyle_blog4/800/600',
+    date: 'February 28, 2024',
+    category: 'Adventure',
+    author: 'Amara Okafor',
+    readTime: '15 min read',
+    slug: 'northern-frontier-gems',
+  },
+  {
+    id: 5,
+    title: 'The Art of Slow Travel in the Serengeti',
+    excerpt: 'Why taking your time in the vast plains of the Serengeti leads to more meaningful wildlife encounters and a deeper connection with nature.',
+    image: 'https://picsum.photos/seed/nyle_blog5/800/600',
+    date: 'February 20, 2024',
+    category: 'Safari',
+    author: 'Thomas Wright',
+    readTime: '9 min read',
+    slug: 'slow-travel-serengeti',
+  },
+  {
+    id: 6,
+    title: 'Taste of East Africa: A Culinary Journey',
+    excerpt: 'From street food in Nairobi to fine dining in Zanzibar, discover the rich flavors and traditions that make East African cuisine so unique.',
+    image: 'https://picsum.photos/seed/nyle_blog6/800/600',
+    date: 'February 15, 2024',
+    category: 'Cuisine',
+    author: 'Faith Njeri',
+    readTime: '7 min read',
+    slug: 'culinary-journey-east-africa',
+  },
+  {
+    id: 7,
+    title: 'Luxury Rail Journeys: The African Experience',
+    excerpt: 'Relive the golden age of travel on board Africa\'s most luxurious trains. A slow and sophisticated way to see the continent\'s changing landscapes.',
+    image: 'https://picsum.photos/seed/nyle_blog7/800/600',
+    date: 'February 10, 2024',
+    category: 'Travel Style',
+    author: 'Elena Rossi',
+    readTime: '11 min read',
+    slug: 'luxury-rail-africa',
+  },
+  {
+    id: 8,
+    title: 'Birdwatching in Lake Nakuru: A Beginner\'s Guide',
+    excerpt: 'With over 400 species of birds, Lake Nakuru is a paradise for birders. Learn how to spot and identify the most iconic species.',
+    image: 'https://picsum.photos/seed/nyle_blog8/800/600',
+    date: 'February 5, 2024',
+    category: 'Wildlife',
+    author: 'Sipho Ndlovu',
+    readTime: '6 min read',
+    slug: 'birdwatching-lake-nakuru',
+  }
 ];
 
 export default function BlogPage() {
@@ -210,28 +265,6 @@ export default function BlogPage() {
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="py-24 bg-gray-900">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary-600 to-secondary-600 p-12 md:p-20 rounded-[50px] shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-            <div className="relative z-10 text-center text-white">
-              <h2 className="text-4xl font-serif mb-6 leading-tight">Stay Inspired</h2>
-              <p className="text-white/80 text-lg mb-10 max-w-xl mx-auto">
-                Join our exclusive travel community and receive the latest African stories, guides, and exclusive offers directly in your inbox.
-              </p>
-              <form className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
-                <input
-                  type="email"
-                  placeholder="Your luxury email address"
-                  className="flex-grow px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white placeholder-white/60 outline-none focus:bg-white/20 transition-all"
-                />
-                <Button variant="outlineWhite" size="lg" className="whitespace-nowrap">Subscribe Now</Button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
