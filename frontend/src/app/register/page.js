@@ -10,14 +10,6 @@ import { useAuthPopup } from '@/hooks/useAuthPopup';
 import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
 import toast from 'react-hot-toast';
-import { getPostAuthRedirect } from '@/lib/authRedirect';
-
-function getRegisterRedirect() {
-  if (typeof window === 'undefined') return '/';
-
-  const searchParams = new URLSearchParams(window.location.search);
-  return getPostAuthRedirect(searchParams.get('callbackUrl'));
-}
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -49,7 +41,7 @@ export default function RegisterPage() {
 
       if (result.success) {
         toast.success('Registration successful! Please check your email.');
-        window.location.href = getRegisterRedirect();
+        window.location.replace('/');
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -188,9 +180,8 @@ export default function RegisterPage() {
                 className="py-4 rounded-2xl border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 shadow-sm font-semibold transition-all duration-300 flex items-center justify-center gap-3"
                 onClick={() => signInWithPopup('google', {
                   flow: 'signup',
-                  redirectTo: getRegisterRedirect(),
                   onSuccess: () => {
-                    window.location.href = getRegisterRedirect();
+                    window.location.replace('/');
                   }
                 })}
               >
@@ -203,7 +194,7 @@ export default function RegisterPage() {
                   text="signup_with"
                   className="w-full"
                   onSuccess={() => {
-                    window.location.href = getRegisterRedirect();
+                    window.location.replace('/');
                   }}
                 />
               </div>

@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { getSession, signIn, useSession } from 'next-auth/react';
 import Cookies from 'js-cookie';
-import { getPostAuthRedirect } from '@/lib/authRedirect';
 import {
   buildGoogleAccountNotFoundUrl,
   isGoogleAccountNotFoundError,
@@ -24,10 +24,18 @@ async function waitForSession() {
 
 export default function GoogleOneTap() {
   const { status } = useSession();
+  const pathname = usePathname();
   const initializedRef = useRef(false);
 
   useEffect(() => {
+    const isAuthPage =
+      pathname === '/login' ||
+      pathname === '/register' ||
+      pathname?.startsWith('/auth/');
+
     if (
+      isAuthPage ||
+      status === 'loading' ||
       status === 'authenticated' ||
       typeof window === 'undefined' ||
       initializedRef.current
@@ -63,9 +71,7 @@ export default function GoogleOneTap() {
           Cookies.set('token', session.accessToken, { expires: 7 });
         }
 
-        // Hard redirect to clear any state and ensure user sees they are logged in
-        const destination = getPostAuthRedirect(window.location.pathname + window.location.search + window.location.hash);
-        window.location.replace(destination);
+        window.location.replace('/');
       } catch (error) {
         console.error('[Nyle Travel] One Tap error:', error);
       }
@@ -84,15 +90,7 @@ export default function GoogleOneTap() {
           cancel_on_tap_outside: true,
         });
 
-        window.google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed()) {
-            console.log('[Nyle Travel] One Tap not displayed:', notification.getNotDisplayedReason());
-          } else if (notification.isSkippedMoment()) {
-            console.log('[Nyle Travel] One Tap skipped:', notification.getSkippedReason());
-          } else if (notification.isDismissedMoment()) {
-            console.log('[Nyle Travel] One Tap dismissed:', notification.getDismissedReason());
-          }
-        });
+        window.google.accounts.id.prompt();
       } catch (err) {
         console.warn('[Nyle Travel] Google GSI initialization failed (likely blocked by client):', err.message);
       }
@@ -120,7 +118,7 @@ export default function GoogleOneTap() {
         window.google?.accounts?.id?.cancel();
       }
     };
-  }, [status]);
+  }, [pathname, status]);
 
   return null; // This component doesn't render anything visible
 }

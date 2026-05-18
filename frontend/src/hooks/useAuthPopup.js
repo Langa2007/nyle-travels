@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react';
 import { getSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
-import { getPostAuthRedirect } from '@/lib/authRedirect';
 import {
   buildGoogleAccountNotFoundUrl,
   GOOGLE_ACCOUNT_NOT_FOUND_MESSAGE,
@@ -93,8 +92,7 @@ export const useAuthPopup = () => {
           if (options.onSuccess) {
             await options.onSuccess(session);
           } else {
-            const destination = getPostAuthRedirect(options.redirectTo);
-            window.location.replace(destination);
+            window.location.replace('/');
           }
         } catch (callbackError) {
           console.error('[useAuthPopup] onSuccess handler error:', callbackError);

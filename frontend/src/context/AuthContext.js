@@ -2,6 +2,7 @@
 
 import { createContext, useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 import Cookies from 'js-cookie';
 import { authAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -25,11 +26,16 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         const response = await authAPI.getMe();
         setUser(response.data.data.user);
+      } else {
+        setUser(null);
+        localStorage.removeItem('user');
       }
     } catch (error) {
       console.error('Auth check failed:', error);
       Cookies.remove('token');
       Cookies.remove('refreshToken');
+      localStorage.removeItem('user');
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -73,6 +79,8 @@ export const AuthProvider = ({ children }) => {
     } finally {
       Cookies.remove('token');
       Cookies.remove('refreshToken');
+      localStorage.removeItem('user');
+      await signOut({ redirect: false });
       setUser(null);
       toast.success('Logged out successfully');
       router.push('/');
