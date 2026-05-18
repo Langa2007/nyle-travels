@@ -14,7 +14,6 @@ import Toast from '@/components/ui/Toast';
 import CookieBanner from '@/components/layout/CookieBanner';
 import LoadingBar from '@/components/ui/LoadingBar';
 import SessionSync from '@/components/auth/SessionSync';
-import GoogleOneTap from '@/components/auth/GoogleOneTap';
 import CookieConsentWrapper from '@/components/auth/CookieConsentWrapper';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -124,7 +123,6 @@ export default function RootLayout({ children }) {
           <NextAuthProvider>
             <AuthProvider>
               <SessionSync />
-              <GoogleOneTap />
               <CartProvider>
                 <WishlistProvider>
                   <Suspense fallback={null}>

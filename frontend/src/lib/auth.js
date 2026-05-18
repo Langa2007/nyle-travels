@@ -4,6 +4,22 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 
+const DEFAULT_GOOGLE_CLIENT_ID =
+  "766373716111-naoh8vma3on54nnhtlolhr2orae6q14v.apps.googleusercontent.com";
+
+const GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  process.env.GOOGLE_CLIENT_ID ||
+  DEFAULT_GOOGLE_CLIENT_ID;
+
+const ALLOWED_GOOGLE_CLIENT_IDS = new Set(
+  [
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    DEFAULT_GOOGLE_CLIENT_ID,
+  ].filter(Boolean)
+);
+
 function splitGoogleName(googleUser) {
   const fallback = (googleUser.name || googleUser.email?.split("@")[0] || "").trim();
   const [firstFromName = "", ...lastFromName] = fallback.split(/\s+/);
@@ -88,7 +104,7 @@ export const authOptions = {
   },
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientId: GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
     CredentialsProvider({
@@ -141,8 +157,11 @@ export const authOptions = {
 
           const googleUser = await response.json();
 
-          if (googleUser.aud !== process.env.GOOGLE_CLIENT_ID) {
-            console.error("[AUTH] Google token audience mismatch");
+          if (!ALLOWED_GOOGLE_CLIENT_IDS.has(googleUser.aud)) {
+            console.error("[AUTH] Google token audience mismatch", {
+              expected: Array.from(ALLOWED_GOOGLE_CLIENT_IDS),
+              received: googleUser.aud,
+            });
             return null;
           }
 
