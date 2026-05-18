@@ -4,9 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiPhone, FiChevronRight } from 'react-icons/fi';
-import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '@/hooks/useAuth';
-import { useAuthPopup } from '@/hooks/useAuthPopup';
 import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
 import toast from 'react-hot-toast';
@@ -22,7 +20,6 @@ export default function RegisterPage() {
   });
   const [loading, setLoading] = useState(false);
   const { register: manualRegister } = useAuth();
-  const { signInWithPopup, isAuthenticating } = useAuthPopup();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -173,21 +170,6 @@ export default function RegisterPage() {
             </div>
 
             <div className="w-full space-y-4">
-              <Button
-                variant="outline"
-                fullWidth
-                loading={isAuthenticating}
-                className="py-4 rounded-2xl border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 shadow-sm font-semibold transition-all duration-300 flex items-center justify-center gap-3"
-                onClick={() => signInWithPopup('google', {
-                  flow: 'signup',
-                  onSuccess: () => {
-                    window.location.replace('/');
-                  }
-                })}
-              >
-                <FcGoogle size={24} /> Sign Up with Google
-              </Button>
-
               <div className="w-full">
                 <GoogleIdentitySync
                   context="signup"

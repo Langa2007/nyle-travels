@@ -1,35 +1,18 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiChevronRight } from 'react-icons/fi';
-import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '@/hooks/useAuth';
-import { useAuthPopup } from '@/hooks/useAuthPopup';
 import GoogleIdentitySync from '@/components/auth/GoogleIdentitySync';
 import Button from '@/components/ui/Button';
-import {
-  GOOGLE_ACCOUNT_NOT_FOUND,
-  GOOGLE_ACCOUNT_NOT_FOUND_MESSAGE,
-} from '@/lib/googleAuthError';
-import toast from 'react-hot-toast';
 
 function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const searchParams = useSearchParams();
-  const googleAccountNotFound = searchParams.get('authError') === GOOGLE_ACCOUNT_NOT_FOUND;
   const { login: manualLogin } = useAuth();
-  const { signInWithPopup, isAuthenticating } = useAuthPopup();
-
-  useEffect(() => {
-    if (searchParams.get('authError') === GOOGLE_ACCOUNT_NOT_FOUND) {
-      toast.error(GOOGLE_ACCOUNT_NOT_FOUND_MESSAGE);
-    }
-  }, [searchParams]);
 
   const handleManualLogin = async (e) => {
     e.preventDefault();
@@ -121,31 +104,6 @@ function LoginContent() {
             </div>
 
             <div className="w-full space-y-4">
-              {googleAccountNotFound && (
-                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                  {GOOGLE_ACCOUNT_NOT_FOUND_MESSAGE}{' '}
-                  <Link href="/register" className="font-bold underline underline-offset-4">
-                    Proceed to sign up
-                  </Link>
-                  .
-                </div>
-              )}
-
-              <Button
-                variant="outline"
-                fullWidth
-                loading={isAuthenticating}
-                className="py-4 rounded-2xl border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 shadow-sm font-semibold transition-all duration-300 flex items-center justify-center gap-3"
-                onClick={() => signInWithPopup('google', {
-                  flow: 'signin',
-                  onSuccess: () => {
-                    window.location.replace('/');
-                  }
-                })}
-              >
-                <FcGoogle size={24} /> Sign In with Google
-              </Button>
-
               <div className="w-full flex justify-center">
                 <GoogleIdentitySync
                   context="signin"

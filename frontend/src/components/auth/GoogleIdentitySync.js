@@ -3,10 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { getSession, signIn, useSession } from 'next-auth/react';
 import Cookies from 'js-cookie';
-import {
-  buildGoogleAccountNotFoundUrl,
-  isGoogleAccountNotFoundError,
-} from '@/lib/googleAuthError';
+import toast from 'react-hot-toast';
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
@@ -57,16 +54,10 @@ export default function GoogleIdentitySync({
       try {
         const result = await signIn('google-id-token', {
           id_token: response.credential,
-          flow: context,
           redirect: false,
         });
 
         if (result?.error) {
-          if (context === 'signin' && isGoogleAccountNotFoundError(result.error)) {
-            window.location.href = buildGoogleAccountNotFoundUrl('/login');
-            return;
-          }
-
           throw new Error(result.error);
         }
 
@@ -83,7 +74,12 @@ export default function GoogleIdentitySync({
         }
       } catch (error) {
         console.error('[Nyle Travel] Google popup sign-in error:', error);
-        onErrorRef.current?.(error.message || 'Google sign-in failed. Please try again.');
+        const message = error.message || 'Google sign-in failed. Please try again.';
+        if (onErrorRef.current) {
+          onErrorRef.current(message);
+        } else {
+          toast.error(message);
+        }
       }
     };
 

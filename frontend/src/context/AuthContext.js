@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         setUser(null);
         localStorage.removeItem('user');
+        await signOut({ redirect: false });
       }
     } catch (error) {
       console.error('Auth check failed:', error);

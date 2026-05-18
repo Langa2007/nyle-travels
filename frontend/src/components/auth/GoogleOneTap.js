@@ -4,10 +4,6 @@ import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { getSession, signIn, useSession } from 'next-auth/react';
 import Cookies from 'js-cookie';
-import {
-  buildGoogleAccountNotFoundUrl,
-  isGoogleAccountNotFoundError,
-} from '@/lib/googleAuthError';
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
@@ -52,16 +48,10 @@ export default function GoogleOneTap() {
       try {
         const result = await signIn('google-id-token', {
           id_token: response.credential,
-          flow: 'signin',
           redirect: false,
         });
 
         if (result?.error) {
-          if (isGoogleAccountNotFoundError(result.error)) {
-            window.location.href = buildGoogleAccountNotFoundUrl('/login');
-            return;
-          }
-
           throw new Error(result.error);
         }
 
