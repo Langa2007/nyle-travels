@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSearch, FiMapPin, FiCalendar, FiUsers } from 'react-icons/fi';
+import { FiSearch, FiMapPin, FiCalendar, FiUsers, FiHome } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import DatePicker from '@/components/common/DatePicker';
 import { defaultHeroSlides, normalizeHeroSlides } from '@/data/heroSlides';
 import { fetchSettings } from '@/utils/settings';
 import { destinationsAPI } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import useHotelCatalog from '@/hooks/useHotelCatalog';
 
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -25,6 +26,11 @@ export default function Hero() {
   const [heroSlides, setHeroSlides] = useState(defaultHeroSlides);
   const [destinations, setDestinations] = useState([]);
   const [bestTimeToVisit, setBestTimeToVisit] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const { hotels } = useHotelCatalog([], { allowSeedFallback: false });
 
   useEffect(() => {
     const loadData = async () => {
@@ -58,6 +64,70 @@ export default function Hero() {
     }, 30000);
     return () => clearInterval(timer);
   }, [heroSlides.length]);
+
+  // Consolidate destinations and hotels into searchable list
+  const searchableItems = [
+    ...destinations.map(d => ({
+      id: `dest-${d.id || d.slug}`,
+      name: d.name,
+      slug: d.slug,
+      type: 'destination',
+      subtitle: `${d.region ? d.region + ', ' : ''}${d.country || 'Kenya'}`,
+      bestTimeToVisit: d.best_time_to_visit || d.bestTimeToVisit || ''
+    })),
+    ...(hotels || []).map(h => ({
+      id: `hotel-${h.slug}`,
+      name: h.name,
+      slug: h.slug,
+      type: 'hotel',
+      subtitle: `Hotel in ${h.destination || 'Kenya'}`,
+      bestTimeToVisit: ''
+    }))
+  ];
+
+  const getFilteredItems = () => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return [];
+
+    // Filter by name or subtitle (case-insensitive)
+    const filtered = searchableItems.filter(item => 
+      item.name.toLowerCase().includes(query) ||
+      item.subtitle.toLowerCase().includes(query)
+    );
+
+    // Sort items: items whose names start with the query appear first
+    return filtered.sort((a, b) => {
+      const aStarts = a.name.toLowerCase().startsWith(query);
+      const bStarts = b.name.toLowerCase().startsWith(query);
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  };
+
+  const filteredItems = getFilteredItems();
+
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    setIsDropdownOpen(true);
+    
+    // Clear selection if query changes
+    if (selectedItem && val !== selectedItem.name) {
+      setSelectedItem(null);
+      setBestTimeToVisit('');
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.search-dropdown-container')) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
@@ -117,29 +187,71 @@ export default function Hero() {
           >
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="relative">
-                  <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" />
-                  <select
-                    className="w-full pl-10 pr-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 appearance-none cursor-pointer"
-                    value={searchParams.destination}
-                    onChange={(e) => {
-                      const destValue = e.target.value;
-                      setSearchParams({ ...searchParams, destination: destValue });
-                      const selectedDest = destinations.find(d => d.slug === destValue);
-                      if (selectedDest && selectedDest.best_time_to_visit) {
-                        setBestTimeToVisit(selectedDest.best_time_to_visit);
-                      } else {
-                        setBestTimeToVisit('');
-                      }
-                    }}
-                  >
-                    <option value="" className="text-gray-900">Select Destination</option>
-                    {Array.isArray(destinations) && destinations.map(dest => (
-                      <option key={dest.id} value={dest.slug} className="text-gray-900">
-                        {dest.name}
-                      </option>
-                    ))}
-                  </select>
+                <div className="relative search-dropdown-container">
+                  <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 z-10" />
+                  <input
+                    type="text"
+                    placeholder="Type destination or hotel..."
+                    className="w-full pl-10 pr-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 cursor-text"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    onFocus={() => setIsDropdownOpen(true)}
+                  />
+                  {isDropdownOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white text-gray-900 rounded-xl shadow-2xl border border-gray-100 max-h-72 overflow-y-auto z-50 p-2 scrollbar-thin">
+                      {searchQuery.trim() === '' ? (
+                        <div className="p-4 text-center text-gray-400 text-sm italic">
+                          Type to search destinations or hotels...
+                        </div>
+                      ) : filteredItems.length > 0 ? (
+                        filteredItems.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors hover:bg-[#f7f3ea] active:bg-[#ede8db]"
+                            onClick={() => {
+                              setSelectedItem(item);
+                              setSearchQuery(item.name);
+                              setIsDropdownOpen(false);
+                              if (item.type === 'destination' && item.bestTimeToVisit) {
+                                setBestTimeToVisit(item.bestTimeToVisit);
+                              } else {
+                                setBestTimeToVisit('');
+                              }
+                            }}
+                          >
+                            <div className={`p-2 rounded-xl shrink-0 ${
+                              item.type === 'destination' 
+                                ? 'bg-emerald-50 text-emerald-600' 
+                                : 'bg-amber-50 text-amber-600'
+                            }`}>
+                              {item.type === 'destination' ? (
+                                <FiMapPin className="w-4 h-4" />
+                              ) : (
+                                <FiHome className="w-4 h-4" />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-sm text-gray-900 truncate">{item.name}</p>
+                              <p className="text-xs text-gray-400 truncate">{item.subtitle}</p>
+                            </div>
+                            <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
+                              item.type === 'destination'
+                                ? 'bg-emerald-50/50 text-emerald-700 border-emerald-200/50'
+                                : 'bg-amber-50/50 text-amber-700 border-amber-200/50'
+                            }`}>
+                              {item.type}
+                            </span>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="p-5 text-center text-gray-500 text-sm">
+                          <p className="font-medium text-gray-700 mb-1">Sorry, no matching destination or hotel found.</p>
+                          <p className="text-xs text-gray-400">Please try looking for something else!</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="relative w-full z-50">
@@ -211,11 +323,35 @@ export default function Hero() {
                   size="lg"
                   className="w-full group relative overflow-hidden"
                   onClick={() => {
-                    const query = new URLSearchParams();
-                    if (searchParams.destination) query.append('dest', searchParams.destination);
-                    if (searchParams.date) query.append('date', searchParams.date.toISOString());
-                    if (searchParams.guests) query.append('guests', searchParams.guests.toString());
-                    router.push(`/search?${query.toString()}`);
+                    let activeItem = selectedItem;
+
+                    // If no item is selected but there is query text, try to find a match
+                    if (!activeItem && searchQuery.trim() !== '') {
+                      const matches = getFilteredItems();
+                      if (matches.length > 0) {
+                        activeItem = matches[0];
+                        setSelectedItem(activeItem);
+                        setSearchQuery(activeItem.name);
+                        if (activeItem.type === 'destination' && activeItem.bestTimeToVisit) {
+                          setBestTimeToVisit(activeItem.bestTimeToVisit);
+                        }
+                      }
+                    }
+
+                    if (!activeItem) {
+                      alert("Please type and select a destination or hotel!");
+                      return;
+                    }
+
+                    const dateStr = searchParams.date ? `date=${encodeURIComponent(searchParams.date.toISOString())}` : '';
+                    
+                    if (activeItem.type === 'destination') {
+                      const route = dateStr ? `/destinations?${dateStr}#${activeItem.slug}` : `/destinations#${activeItem.slug}`;
+                      router.push(route);
+                    } else if (activeItem.type === 'hotel') {
+                      const route = dateStr ? `/hotels/${activeItem.slug}?${dateStr}` : `/hotels/${activeItem.slug}`;
+                      router.push(route);
+                    }
                   }}
                 >
                   <span className="relative z-10 flex items-center justify-center">
