@@ -43,10 +43,17 @@ export default function Hero() {
         const normalized = normalizeHeroSlides(settingsData);
         console.log('[HERO] Normalized slides:', normalized);
         setHeroSlides(normalized);
-        if (destinationsData && destinationsData.data && destinationsData.data.data) {
-          setDestinations(destinationsData.data.data);
-        } else if (destinationsData && destinationsData.data) {
-          setDestinations(destinationsData.data);
+        if (destinationsData && destinationsData.data) {
+          const rawData = destinationsData.data;
+          if (rawData.data && Array.isArray(rawData.data.destinations)) {
+            setDestinations(rawData.data.destinations);
+          } else if (rawData.data && Array.isArray(rawData.data)) {
+            setDestinations(rawData.data);
+          } else if (Array.isArray(rawData)) {
+            setDestinations(rawData);
+          } else if (rawData.destinations && Array.isArray(rawData.destinations)) {
+            setDestinations(rawData.destinations);
+          }
         }
       } catch (error) {
         console.error('[HERO] Failed to load data:', error);
@@ -67,7 +74,7 @@ export default function Hero() {
 
   // Consolidate destinations and hotels into searchable list
   const searchableItems = [
-    ...destinations.map(d => ({
+    ...(Array.isArray(destinations) ? destinations : []).map(d => ({
       id: `dest-${d.id || d.slug}`,
       name: d.name,
       slug: d.slug,
@@ -75,7 +82,7 @@ export default function Hero() {
       subtitle: `${d.region ? d.region + ', ' : ''}${d.country || 'Kenya'}`,
       bestTimeToVisit: d.best_time_to_visit || d.bestTimeToVisit || ''
     })),
-    ...(hotels || []).map(h => ({
+    ...(Array.isArray(hotels) ? hotels : []).map(h => ({
       id: `hotel-${h.slug}`,
       name: h.name,
       slug: h.slug,
