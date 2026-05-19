@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { getSession, signIn, useSession } from 'next-auth/react';
 import Cookies from 'js-cookie';
+import { createAuthTrace, reportAuthDiagnostic } from '@/lib/authDiagnostics';
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
@@ -40,6 +41,14 @@ export default function GoogleOneTap() {
     }
 
     const handleCredentialResponse = async (response) => {
+      const trace = createAuthTrace('google-one-tap');
+
+      reportAuthDiagnostic(trace, 'credential_received', {
+        hasCredential: Boolean(response?.credential),
+        credentialLength: response?.credential?.length,
+        selectBy: response?.select_by,
+      });
+
       // Immediately remove the One Tap UI
       if (window.google) {
         window.google.accounts.id.cancel();
@@ -48,7 +57,15 @@ export default function GoogleOneTap() {
       try {
         const result = await signIn('google-id-token', {
           id_token: response.credential,
+          trace_id: trace.traceId,
           redirect: false,
+        });
+
+        reportAuthDiagnostic(trace, 'nextauth_signin_result', {
+          ok: result?.ok,
+          status: result?.status,
+          error: result?.error,
+          url: result?.url,
         });
 
         if (result?.error) {
@@ -56,6 +73,12 @@ export default function GoogleOneTap() {
         }
 
         const session = await waitForSession();
+
+        reportAuthDiagnostic(trace, 'session_wait_result', {
+          hasSession: Boolean(session?.user),
+          hasAccessToken: Boolean(session?.accessToken),
+          userEmail: session?.user?.email,
+        });
         
         if (session?.accessToken) {
           Cookies.set('token', session.accessToken, { expires: 7 });
@@ -63,6 +86,7 @@ export default function GoogleOneTap() {
 
         window.location.replace('/');
       } catch (error) {
+        reportAuthDiagnostic(trace, 'google_signin_failed', { error });
         console.error('[Nyle Travel] One Tap error:', error);
       }
     };
@@ -82,6 +106,8 @@ export default function GoogleOneTap() {
 
         window.google.accounts.id.prompt();
       } catch (err) {
+        const trace = createAuthTrace('google-one-tap-init');
+        reportAuthDiagnostic(trace, 'google_gsi_initialization_failed', { error: err });
         console.warn('[Nyle Travel] Google GSI initialization failed (likely blocked by client):', err.message);
       }
     };

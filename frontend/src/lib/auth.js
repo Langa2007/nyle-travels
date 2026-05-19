@@ -20,6 +20,107 @@ const ALLOWED_GOOGLE_CLIENT_IDS = new Set(
   ].filter(Boolean)
 );
 
+function createServerTraceId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function maskEmail(email) {
+  if (!email || typeof email !== "string") return undefined;
+
+  const [name, domain] = email.split("@");
+  if (!domain) return "[invalid-email]";
+
+  const visible = name.slice(0, 2);
+  return `${visible}${"*".repeat(Math.max(name.length - visible.length, 1))}@${domain}`;
+}
+
+function safeError(error) {
+  if (!error) return undefined;
+
+  if (typeof error === "object" && !(error instanceof Error)) {
+    return sanitizeForAuthLog(error);
+  }
+
+  return {
+    name: error.name,
+    message: error.message || String(error),
+    code: error.code,
+    meta: error.meta,
+  };
+}
+
+function sanitizeForAuthLog(input) {
+  if (!input || typeof input !== "object") return input;
+
+  if (Array.isArray(input)) {
+    return input.map((item) => sanitizeForAuthLog(item));
+  }
+
+  return Object.fromEntries(
+    Object.entries(input).map(([key, value]) => {
+      const normalizedKey = key.toLowerCase();
+
+      if (
+        normalizedKey.includes("token") ||
+        normalizedKey.includes("credential") ||
+        normalizedKey.includes("secret") ||
+        normalizedKey.includes("password")
+      ) {
+        return [key, "[redacted]"];
+      }
+
+      if (normalizedKey.includes("email") && typeof value === "string") {
+        return [key, maskEmail(value)];
+      }
+
+      if (value && typeof value === "object") {
+        return [key, sanitizeForAuthLog(value)];
+      }
+
+      return [key, value];
+    })
+  );
+}
+
+function authLog(stage, details = {}) {
+  console.info("[AUTH_DIAGNOSTIC_SERVER]", {
+    stage,
+    at: new Date().toISOString(),
+    ...sanitizeForAuthLog(details),
+  });
+}
+
+function authWarn(stage, details = {}) {
+  console.warn("[AUTH_DIAGNOSTIC_SERVER]", {
+    stage,
+    at: new Date().toISOString(),
+    ...sanitizeForAuthLog(details),
+  });
+}
+
+function authError(stage, error, details = {}) {
+  console.error("[AUTH_DIAGNOSTIC_SERVER]", {
+    stage,
+    at: new Date().toISOString(),
+    ...sanitizeForAuthLog(details),
+    error: safeError(error),
+  });
+}
+
+function summarizeGoogleUser(googleUser) {
+  if (!googleUser) return null;
+
+  return {
+    subPresent: Boolean(googleUser.sub),
+    aud: googleUser.aud,
+    email: maskEmail(googleUser.email),
+    emailVerified: googleUser.email_verified,
+    hostedDomain: googleUser.hd,
+    expiresAt: googleUser.exp,
+    issuedAt: googleUser.iat,
+  };
+}
+
 function splitGoogleName(googleUser) {
   const fallback = (googleUser.name || googleUser.email?.split("@")[0] || "").trim();
   const [firstFromName = "", ...lastFromName] = fallback.split(/\s+/);
@@ -30,18 +131,31 @@ function splitGoogleName(googleUser) {
   };
 }
 
-async function findOrCreateGoogleUser(googleUser) {
-  if (!prisma || !googleUser?.email) return null;
+async function findOrCreateGoogleUser(googleUser, traceId) {
+  if (!prisma) {
+    authWarn("google_user_prisma_unavailable", { traceId });
+    return null;
+  }
+
+  if (!googleUser?.email) {
+    authWarn("google_user_missing_email", { traceId, googleUser: summarizeGoogleUser(googleUser) });
+    return null;
+  }
 
   const { firstName, lastName } = splitGoogleName(googleUser);
   const displayName = googleUser.name || [firstName, lastName].filter(Boolean).join(" ");
+
+  authLog("google_user_lookup_started", {
+    traceId,
+    email: maskEmail(googleUser.email),
+  });
 
   const existingUser = await prisma.user.findUnique({
     where: { email: googleUser.email },
   });
 
   if (!existingUser) {
-    return prisma.user.create({
+    const createdUser = await prisma.user.create({
       data: {
         email: googleUser.email,
         name: displayName,
@@ -52,9 +166,17 @@ async function findOrCreateGoogleUser(googleUser) {
         role: "user",
       },
     });
+
+    authLog("google_user_created", {
+      traceId,
+      userId: createdUser.id,
+      email: maskEmail(createdUser.email),
+    });
+
+    return createdUser;
   }
 
-  return prisma.user.update({
+  const updatedUser = await prisma.user.update({
     where: { id: existingUser.id },
     data: {
       emailVerified: existingUser.emailVerified || new Date(),
@@ -64,10 +186,26 @@ async function findOrCreateGoogleUser(googleUser) {
       last_name: existingUser.last_name || lastName,
     },
   });
+
+  authLog("google_user_updated", {
+    traceId,
+    userId: updatedUser.id,
+    email: maskEmail(updatedUser.email),
+  });
+
+  return updatedUser;
 }
 
-async function linkGoogleAccount(userId, googleId, accountData = {}) {
-  if (!prisma || !userId || !googleId) return;
+async function linkGoogleAccount(userId, googleId, accountData = {}, traceId) {
+  if (!prisma || !userId || !googleId) {
+    authWarn("google_account_link_skipped", {
+      traceId,
+      hasPrisma: Boolean(prisma),
+      hasUserId: Boolean(userId),
+      hasGoogleId: Boolean(googleId),
+    });
+    return;
+  }
 
   const existingAccount = await prisma.account.findFirst({
     where: {
@@ -76,7 +214,14 @@ async function linkGoogleAccount(userId, googleId, accountData = {}) {
     },
   });
 
-  if (existingAccount) return;
+  if (existingAccount) {
+    authLog("google_account_link_exists", {
+      traceId,
+      userId,
+      accountId: existingAccount.id,
+    });
+    return;
+  }
 
   await prisma.account.create({
     data: {
@@ -93,6 +238,8 @@ async function linkGoogleAccount(userId, googleId, accountData = {}) {
       session_state: accountData.session_state,
     },
   });
+
+  authLog("google_account_link_created", { traceId, userId });
 }
 
 export const authOptions = {
@@ -141,9 +288,24 @@ export const authOptions = {
       name: "Google ID Token",
       credentials: {
         id_token: { label: "ID Token", type: "text" },
+        trace_id: { label: "Trace ID", type: "text" },
       },
       async authorize(credentials) {
-        if (!credentials?.id_token) return null;
+        const traceId = credentials?.trace_id || createServerTraceId();
+
+        authLog("google_id_token_authorize_started", {
+          traceId,
+          hasToken: Boolean(credentials?.id_token),
+          allowedAudiences: Array.from(ALLOWED_GOOGLE_CLIENT_IDS),
+          hasDatabaseUrl: Boolean(process.env.DATABASE_URL || process.env.DATABASE_URL_NEON),
+          hasNextAuthSecret: Boolean(process.env.NEXTAUTH_SECRET),
+          hasJwtSecret: Boolean(process.env.JWT_SECRET),
+        });
+
+        if (!credentials?.id_token) {
+          authWarn("google_id_token_missing", { traceId });
+          return null;
+        }
 
         try {
           const response = await fetch(
@@ -151,25 +313,53 @@ export const authOptions = {
           );
 
           if (!response.ok) {
-            console.error("[AUTH] Google token verification failed");
+            let verificationBody = "";
+            try {
+              verificationBody = await response.text();
+            } catch (_) {}
+
+            authWarn("google_token_verification_failed", {
+              traceId,
+              status: response.status,
+              statusText: response.statusText,
+              response: verificationBody.slice(0, 300),
+            });
             return null;
           }
 
           const googleUser = await response.json();
 
+          authLog("google_token_verified", {
+            traceId,
+            googleUser: summarizeGoogleUser(googleUser),
+          });
+
           if (!ALLOWED_GOOGLE_CLIENT_IDS.has(googleUser.aud)) {
-            console.error("[AUTH] Google token audience mismatch", {
+            authWarn("google_token_audience_mismatch", {
+              traceId,
               expected: Array.from(ALLOWED_GOOGLE_CLIENT_IDS),
               received: googleUser.aud,
             });
             return null;
           }
 
-          const user = await findOrCreateGoogleUser(googleUser);
-          if (!user) return null;
+          const user = await findOrCreateGoogleUser(googleUser, traceId);
+          if (!user) {
+            authWarn("google_user_resolution_failed", {
+              traceId,
+              googleUser: summarizeGoogleUser(googleUser),
+            });
+            return null;
+          }
 
           await linkGoogleAccount(user.id, googleUser.sub, {
             id_token: credentials.id_token,
+          }, traceId);
+
+          authLog("google_id_token_authorize_succeeded", {
+            traceId,
+            userId: user.id,
+            email: maskEmail(user.email),
           });
 
           return {
@@ -181,7 +371,7 @@ export const authOptions = {
             emailVerified: user.emailVerified,
           };
         } catch (error) {
-          console.error("[AUTH] google-id-token authorize error:", error);
+          authError("google_id_token_authorize_error", error, { traceId });
           return null;
         }
       },
@@ -189,8 +379,15 @@ export const authOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
+      authLog("sign_in_callback_started", {
+        provider: account?.provider,
+        userId: user?.id,
+        email: maskEmail(user?.email),
+      });
+
       if (account?.provider === "google") {
         try {
+          const traceId = createServerTraceId();
           const googleUser = {
             email: user.email,
             name: user.name,
@@ -198,14 +395,17 @@ export const authOptions = {
             given_name: profile?.given_name,
             family_name: profile?.family_name,
           };
-          const dbUser = await findOrCreateGoogleUser(googleUser);
+          const dbUser = await findOrCreateGoogleUser(googleUser, traceId);
           if (dbUser) {
             user.id = dbUser.id;
             user.role = "user";
-            await linkGoogleAccount(dbUser.id, account.providerAccountId, account);
+            await linkGoogleAccount(dbUser.id, account.providerAccountId, account, traceId);
           }
         } catch (error) {
-          console.error("[AUTH] Google account linking error:", error);
+          authError("google_oauth_account_linking_error", error, {
+            provider: account?.provider,
+            email: maskEmail(user?.email),
+          });
           return false;
         }
       }
@@ -251,6 +451,17 @@ export const authOptions = {
       }
 
       return token;
+    },
+  },
+  logger: {
+    error(code, metadata) {
+      authError("nextauth_logger_error", metadata, { code });
+    },
+    warn(code) {
+      authWarn("nextauth_logger_warn", { code });
+    },
+    debug(code, metadata) {
+      authLog("nextauth_logger_debug", { code, metadata });
     },
   },
   pages: {

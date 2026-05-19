@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { getSession, signIn, useSession } from 'next-auth/react';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
+import { createAuthTrace, reportAuthDiagnostic } from '@/lib/authDiagnostics';
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
@@ -51,10 +52,26 @@ export default function GoogleIdentitySync({
     }
 
     const handleCredentialResponse = async (response) => {
+      const trace = createAuthTrace(`google-button-${context}`);
+
+      reportAuthDiagnostic(trace, 'credential_received', {
+        hasCredential: Boolean(response?.credential),
+        credentialLength: response?.credential?.length,
+        selectBy: response?.select_by,
+      });
+
       try {
         const result = await signIn('google-id-token', {
           id_token: response.credential,
+          trace_id: trace.traceId,
           redirect: false,
+        });
+
+        reportAuthDiagnostic(trace, 'nextauth_signin_result', {
+          ok: result?.ok,
+          status: result?.status,
+          error: result?.error,
+          url: result?.url,
         });
 
         if (result?.error) {
@@ -62,6 +79,12 @@ export default function GoogleIdentitySync({
         }
 
         const session = await waitForSession();
+
+        reportAuthDiagnostic(trace, 'session_wait_result', {
+          hasSession: Boolean(session?.user),
+          hasAccessToken: Boolean(session?.accessToken),
+          userEmail: session?.user?.email,
+        });
         
         if (session?.accessToken) {
           Cookies.set('token', session.accessToken, { expires: 7 });
@@ -73,6 +96,7 @@ export default function GoogleIdentitySync({
           window.location.replace('/');
         }
       } catch (error) {
+        reportAuthDiagnostic(trace, 'google_signin_failed', { error });
         console.error('[Nyle Travel] Google popup sign-in error:', error);
         const message = error.message || 'Google sign-in failed. Please try again.';
         if (onErrorRef.current) {
