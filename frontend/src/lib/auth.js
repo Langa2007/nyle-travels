@@ -1,16 +1,9 @@
-import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 
 const DEFAULT_GOOGLE_CLIENT_ID =
   "766373716111-naoh8vma3on54nnhtlolhr2orae6q14v.apps.googleusercontent.com";
-
-const GOOGLE_CLIENT_ID =
-  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
-  process.env.GOOGLE_CLIENT_ID ||
-  DEFAULT_GOOGLE_CLIENT_ID;
 
 const ALLOWED_GOOGLE_CLIENT_IDS = new Set(
   [
@@ -131,6 +124,21 @@ function splitGoogleName(googleUser) {
   };
 }
 
+function fullName(user) {
+  return [user?.first_name, user?.last_name].filter(Boolean).join(" ").trim();
+}
+
+const AUTH_USER_SELECT = {
+  id: true,
+  email: true,
+  password_hash: true,
+  first_name: true,
+  last_name: true,
+  image: true,
+  role: true,
+  emailVerified: true,
+};
+
 async function findOrCreateGoogleUser(googleUser, traceId) {
   if (!prisma) {
     authWarn("google_user_prisma_unavailable", { traceId });
@@ -152,19 +160,20 @@ async function findOrCreateGoogleUser(googleUser, traceId) {
 
   const existingUser = await prisma.user.findUnique({
     where: { email: googleUser.email },
+    select: AUTH_USER_SELECT,
   });
 
   if (!existingUser) {
     const createdUser = await prisma.user.create({
       data: {
         email: googleUser.email,
-        name: displayName,
         first_name: firstName,
         last_name: lastName,
         image: googleUser.picture,
-        emailVerified: new Date(),
+        emailVerified: true,
         role: "user",
       },
+      select: AUTH_USER_SELECT,
     });
 
     authLog("google_user_created", {
@@ -173,18 +182,19 @@ async function findOrCreateGoogleUser(googleUser, traceId) {
       email: maskEmail(createdUser.email),
     });
 
-    return createdUser;
+    return { ...createdUser, name: displayName };
   }
 
+  const existingDisplayName = fullName(existingUser) || displayName;
   const updatedUser = await prisma.user.update({
     where: { id: existingUser.id },
     data: {
-      emailVerified: existingUser.emailVerified || new Date(),
+      emailVerified: existingUser.emailVerified || true,
       image: googleUser.picture || existingUser.image,
-      name: googleUser.name || existingUser.name,
       first_name: existingUser.first_name || firstName,
       last_name: existingUser.last_name || lastName,
     },
+    select: AUTH_USER_SELECT,
   });
 
   authLog("google_user_updated", {
@@ -193,67 +203,19 @@ async function findOrCreateGoogleUser(googleUser, traceId) {
     email: maskEmail(updatedUser.email),
   });
 
-  return updatedUser;
+  return { ...updatedUser, name: existingDisplayName };
 }
 
-async function linkGoogleAccount(userId, googleId, accountData = {}, traceId) {
-  if (!prisma || !userId || !googleId) {
-    authWarn("google_account_link_skipped", {
-      traceId,
-      hasPrisma: Boolean(prisma),
-      hasUserId: Boolean(userId),
-      hasGoogleId: Boolean(googleId),
-    });
-    return;
-  }
-
-  const existingAccount = await prisma.account.findFirst({
-    where: {
-      provider: "google",
-      providerAccountId: googleId,
-    },
+async function linkGoogleAccount(userId, googleId, _accountData = {}, traceId) {
+  authLog("google_account_link_skipped_no_accounts_table", {
+    traceId,
+    hasUserId: Boolean(userId),
+    hasGoogleId: Boolean(googleId),
   });
-
-  if (existingAccount) {
-    authLog("google_account_link_exists", {
-      traceId,
-      userId,
-      accountId: existingAccount.id,
-    });
-    return;
-  }
-
-  await prisma.account.create({
-    data: {
-      userId,
-      type: accountData.type || "oauth",
-      provider: "google",
-      providerAccountId: googleId,
-      access_token: accountData.access_token,
-      refresh_token: accountData.refresh_token,
-      expires_at: accountData.expires_at,
-      token_type: accountData.token_type,
-      scope: accountData.scope,
-      id_token: accountData.id_token,
-      session_state: accountData.session_state,
-    },
-  });
-
-  authLog("google_account_link_created", { traceId, userId });
 }
 
 export const authOptions = {
-  get adapter() {
-    if (process.env.NEXT_PHASE === "phase-production-build" || !prisma) {
-      return undefined;
-    }
-    return PrismaAdapter(prisma);
-  },
   providers: [
-    GoogleProvider({
-      clientId: GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -266,6 +228,7 @@ export const authOptions = {
         const bcrypt = await import("bcryptjs");
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
+          select: AUTH_USER_SELECT,
         });
 
         if (!user || !user.password_hash) return null;
@@ -276,7 +239,7 @@ export const authOptions = {
         return {
           id: user.id,
           email: user.email,
-          name: user.name || `${user.first_name} ${user.last_name}`.trim(),
+          name: fullName(user),
           image: user.image,
           role: user.role || "user",
           emailVerified: user.emailVerified,
@@ -365,7 +328,7 @@ export const authOptions = {
           return {
             id: user.id,
             email: user.email,
-            name: googleUser.name || user.name,
+            name: googleUser.name || fullName(user),
             image: googleUser.picture || user.image,
             role: "user",
             emailVerified: user.emailVerified,
