@@ -190,11 +190,11 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="max-w-4xl mx-auto relative z-30"
+            className="max-w-5xl mx-auto relative z-30"
           >
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="relative search-dropdown-container">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <div className="relative search-dropdown-container md:col-span-5">
                   <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 z-10" />
                   <input
                     type="text"
@@ -261,7 +261,7 @@ export default function Hero() {
                   )}
                 </div>
 
-                <div className="relative w-full z-50">
+                <div className="relative w-full z-50 md:col-span-3">
                   <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 z-10" />
                   <DatePicker
                     selected={searchParams.date}
@@ -312,7 +312,7 @@ export default function Hero() {
                   />
                 </div>
 
-                <div className="relative">
+                <div className="relative md:col-span-2">
                   <FiUsers className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" />
                   <input
                     type="number"
@@ -328,7 +328,7 @@ export default function Hero() {
                 <Button
                   variant="primary"
                   size="lg"
-                  className="w-full group relative overflow-hidden"
+                  className="w-full group relative overflow-hidden md:col-span-2"
                   onClick={() => {
                     let activeItem = selectedItem;
 
