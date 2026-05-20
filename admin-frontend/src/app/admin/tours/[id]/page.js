@@ -44,6 +44,7 @@ export default function TourEditorPage() {
     highlights: [],
     included_items: [],
     excluded_items: [],
+    gallery_images: [],
     is_featured: false,
     is_active: true
   });
@@ -89,7 +90,7 @@ export default function TourEditorPage() {
   };
 
   const addListItem = (field) => {
-    setFormData(prev => ({ ...prev, [field]: [...prev[field], ''] }));
+    setFormData(prev => ({ ...prev, [field]: [...(prev[field] || []), ''] }));
   };
 
   const removeListItem = (field, index) => {
@@ -397,6 +398,53 @@ export default function TourEditorPage() {
             >
               <FiPlus /> <span>Append Sequence Day</span>
             </button>
+          </motion.div>
+        )}
+
+        {activeTab === 'media' && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }} 
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-8"
+          >
+            <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+              <label className="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-4">Featured Image URL</label>
+              <input 
+                type="text" name="featured_image" value={formData.featured_image || ''} onChange={handleInputChange}
+                className="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-4 focus:ring-primary-500/10 transition-all mb-4"
+                placeholder="https://example.com/image.jpg"
+              />
+              {formData.featured_image && (
+                <div className="mt-4 rounded-2xl overflow-hidden h-48 relative border border-gray-100">
+                  <img src={formData.featured_image} alt="Featured" className="w-full h-full object-cover" />
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+              <label className="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-4">Gallery Images (URLs)</label>
+              <div className="space-y-4">
+                {(formData.gallery_images || []).map((img, i) => (
+                  <div key={i} className="flex items-center space-x-3">
+                    <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                      {img ? <img src={img} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-400"><FiImage /></div>}
+                    </div>
+                    <input 
+                      type="text" value={img} onChange={(e) => handleListUpdate('gallery_images', i, e.target.value)}
+                      className="flex-1 bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-medium"
+                      placeholder="https://example.com/gallery-image.jpg"
+                    />
+                    <button onClick={() => removeListItem('gallery_images', i)} className="p-3 text-gray-300 hover:text-red-500 transition-colors"><FiTrash2 /></button>
+                  </div>
+                ))}
+                <button 
+                  onClick={() => addListItem('gallery_images')}
+                  className="w-full py-4 border-2 border-dashed border-gray-100 rounded-xl text-xs font-bold text-gray-400 hover:border-primary-100 hover:text-primary-500 transition-all flex items-center justify-center space-x-2 mt-4"
+                >
+                  <FiPlus /> <span>Add Gallery Image</span>
+                </button>
+              </div>
+            </div>
           </motion.div>
         )}
       </div>
