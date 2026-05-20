@@ -43,7 +43,7 @@ export const getDashboardStats = catchAsync(async (req, res, next) => {
       COALESCE(SUM(total_amount), 0) as revenue
     FROM bookings
     WHERE created_at >= NOW() - INTERVAL '12 months'
-    GROUP BY DATE_TRUNC('month')
+    GROUP BY DATE_TRUNC('month', created_at)
     ORDER BY month DESC
   `);
 
