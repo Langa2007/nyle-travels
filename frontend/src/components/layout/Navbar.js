@@ -123,7 +123,6 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState(null);
-  const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
@@ -397,17 +396,7 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center space-x-3">
               <div className={`flex items-center p-1 rounded-full transition-all duration-500 ${
                 isScrolled ? 'bg-gray-100' : 'bg-white/10 backdrop-blur-sm'
-              }`}>
-                <button
-                  onClick={() => setSearchOpen(!searchOpen)}
-                  className={`p-2.5 rounded-full transition-all duration-300 hover:scale-110 ${
-                    isScrolled ? 'text-gray-700 hover:bg-white hover:shadow-sm' : 'text-white hover:bg-white/20'
-                  }`}
-                >
-                  <FiSearch size={18} />
-                </button>
-
-                <Link
+              }`}>                <Link
                   href="/wishlist"
                   className={`p-2.5 rounded-full transition-all duration-300 hover:scale-110 relative ${
                     isScrolled ? 'text-gray-700 hover:bg-white hover:shadow-sm' : 'text-white hover:bg-white/20'
@@ -491,52 +480,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      <AnimatePresence>
-        {searchOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40"
-            onClick={() => setSearchOpen(false)}
-          >
-            <motion.div
-              initial={{ y: -100 }}
-              animate={{ y: 0 }}
-              exit={{ y: -100 }}
-              className="bg-white p-8"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="container mx-auto">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search for destinations or hotels..."
-                    className="w-full py-4 pr-12 text-lg border-b-2 border-gray-200 focus:border-primary-500 outline-none"
-                    autoFocus
-                  />
-                  <FiSearch className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 text-2xl" />
-                </div>
-                <div className="mt-8">
-                  <h3 className="text-sm font-semibold text-gray-500 mb-4">POPULAR SEARCHES</h3>
-                  <div className="flex flex-wrap gap-3">
-                    {['Maasai Mara', 'Diani Beach', 'Luxury Safari', 'Beach Resort', 'Honeymoon'].map((term) => (
-                      <Link
-                        key={term}
-                        href={`/search?q=${term}`}
-                        className="px-4 py-2 bg-gray-100 rounded-full text-sm hover:bg-primary-500 hover:text-white transition-colors"
-                        onClick={() => setSearchOpen(false)}
-                      >
-                        {term}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {isOpen && (
