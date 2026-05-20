@@ -137,8 +137,9 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section className="relative h-screen w-full z-40">
       {/* Background Slides */}
+      <div className="absolute inset-0 overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentSlide}
@@ -162,6 +163,7 @@ export default function Hero() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/50" />
         </motion.div>
       </AnimatePresence>
+      </div>
 
       {/* Content */}
       <div className="relative h-full flex items-center justify-center">
@@ -194,7 +196,7 @@ export default function Hero() {
           >
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                <div className="relative search-dropdown-container md:col-span-5">
+                <div className="relative search-dropdown-container md:col-span-6">
                   <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 z-10" />
                   <input
                     type="text"
@@ -312,7 +314,7 @@ export default function Hero() {
                   />
                 </div>
 
-                <div className="relative md:col-span-2">
+                <div className="relative md:col-span-1">
                   <FiUsers className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" />
                   <input
                     type="number"

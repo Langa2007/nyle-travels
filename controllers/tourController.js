@@ -18,7 +18,8 @@ export const getAllTours = async (req, res, next) => {
       page = 1,
       limit = 12,
       sort = 'created_at',
-      order = 'DESC'
+      order = 'DESC',
+      type = 'tour'
     } = req.query;
 
     const filters = {
@@ -29,7 +30,8 @@ export const getAllTours = async (req, res, next) => {
       min_duration: minDuration,
       max_duration: maxDuration,
       is_featured: isFeatured === 'true',
-      search
+      search,
+      type: type === 'all' ? undefined : type
     };
 
     const pagination = {

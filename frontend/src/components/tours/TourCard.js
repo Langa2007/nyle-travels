@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { FiClock, FiUsers, FiStar, FiChevronRight } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 
-export default function TourCard({ tour }) {
+export default function TourCard({ tour, basePath = '/tours' }) {
   const {
     name,
     slug,
@@ -17,8 +17,11 @@ export default function TourCard({ tour }) {
     base_price,
     average_rating,
     review_count,
-    destination_name
+    destination_name,
+    type
   } = tour;
+  
+  const isSafari = type === 'safari' || basePath.includes('safaris');
 
   return (
     <motion.div
@@ -40,10 +43,14 @@ export default function TourCard({ tour }) {
         {/* Overlays */}
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
         
-        {/* Badges */}
-        <div className="absolute top-6 left-6 flex space-x-2">
+        <div className="absolute top-6 left-6 flex flex-col space-y-2">
+          {isSafari && (
+            <div className="px-4 py-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-lg">
+              Safari Experience
+            </div>
+          )}
           {difficulty_level && (
-            <div className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] font-bold uppercase tracking-wider">
+            <div className="px-4 py-1.5 w-fit rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] font-bold uppercase tracking-wider">
               {difficulty_level}
             </div>
           )}
@@ -69,7 +76,7 @@ export default function TourCard({ tour }) {
           </div>
         </div>
 
-        <Link href={`/tours/${slug}`}>
+        <Link href={`${basePath}/${slug}`}>
           <h3 className="text-xl font-serif font-bold text-gray-900 mb-6 group-hover:text-primary-600 transition-colors leading-tight">
             {name}
           </h3>
@@ -95,12 +102,16 @@ export default function TourCard({ tour }) {
           
           <div className="w-px h-8 bg-gray-100" />
           
-          <Link href={`/tours/${slug}`}>
+          <Link href={`${basePath}/${slug}`}>
             <motion.div 
               whileHover={{ x: 5 }}
-              className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white shadow-lg shadow-primary-500/30"
+              className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all ${
+                isSafari 
+                  ? 'bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white'
+                  : 'bg-primary-50 text-primary-500 hover:bg-primary-500 hover:text-white'
+              }`}
             >
-              <FiChevronRight size={20} />
+              <FiChevronRight size={18} />
             </motion.div>
           </Link>
         </div>

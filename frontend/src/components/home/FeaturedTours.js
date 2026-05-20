@@ -8,7 +8,7 @@ import { FiClock, FiUsers, FiMapPin, FiStar, FiHeart } from 'react-icons/fi';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import Button from '@/components/ui/Button';
-import { fetchSettings } from '@/utils/settings';
+import { toursAPI } from '@/lib/api';
 import 'swiper/css/pagination';
 
 const defaultTours = [
@@ -117,19 +117,14 @@ export default function FeaturedTours() {
   useEffect(() => {
     const loadTours = async () => {
       try {
-        const data = await fetchSettings('safaris');
+        const response = await toursAPI.getAll({ type: 'safari', limit: 8 });
+        const data = response?.data?.data?.tours || [];
+        
         if (data && Array.isArray(data) && data.length > 0) {
-          const nextTours = data.map((item, index) => ({
-            ...defaultTours[index % defaultTours.length],
-            ...item,
-            id: item.id || defaultTours[index % defaultTours.length].id,
-            image: item.image || ''
-          }));
-
-          if (nextTours.some((item) => item.image)) {
-            setTours(nextTours);
-          }
+          setTours(data);
         }
+      } catch (err) {
+        console.error('Failed to load safaris:', err);
       } finally {
         setIsLoading(false);
       }
@@ -177,9 +172,9 @@ export default function FeaturedTours() {
             >
               {/* Image */}
               <div className="relative h-64 overflow-hidden">
-                {!isLoading && tour.image ? (
+                {!isLoading && (tour.image || tour.featured_image) ? (
                   <Image
-                    src={tour.image}
+                    src={tour.image || tour.featured_image}
                     alt={tour.name}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-700"
@@ -192,7 +187,7 @@ export default function FeaturedTours() {
                 {/* Badge */}
                 <div className="absolute top-4 left-4">
                   <span className="px-3 py-1 bg-primary-500 text-white text-xs font-semibold rounded-full">
-                    {tour.badge}
+                    {tour.badge || 'Popular'}
                   </span>
                 </div>
 
@@ -221,17 +216,17 @@ export default function FeaturedTours() {
               <div className="p-6">
                 <div className="flex items-center text-sm text-gray-500 mb-2">
                   <FiMapPin className="w-4 h-4 mr-1" />
-                  <span>{tour.destination}</span>
+                  <span>{tour.destination_name || tour.destination}</span>
                   <div className="mx-2">•</div>
                   <FiClock className="w-4 h-4 mr-1" />
-                  <span>{tour.duration}</span>
+                  <span>{tour.duration_days ? `${tour.duration_days} Days` : tour.duration}</span>
                   <div className="mx-2">•</div>
                   <FiUsers className="w-4 h-4 mr-1" />
-                  <span>Max {tour.maxGroupSize}</span>
+                  <span>Max {tour.max_group_size || tour.maxGroupSize || 8}</span>
                 </div>
 
                 <h3 className="text-xl font-semibold mb-3 group-hover:text-primary-600 transition-colors">
-                  <Link href={`/tours/${tour.slug}`}>
+                  <Link href={`/safaris/${tour.slug}`}>
                     {tour.name}
                   </Link>
                 </h3>
@@ -240,8 +235,8 @@ export default function FeaturedTours() {
                 <ul className="space-y-2 mb-4">
                   {Array.isArray(tour.highlights) && tour.highlights.slice(0, 2).map((highlight, index) => (
                     <li key={index} className="text-sm text-gray-600 flex items-center">
-                      <span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2" />
-                      {highlight}
+                      <span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2 shrink-0" />
+                      <span className="truncate">{highlight}</span>
                     </li>
                   ))}
                 </ul>
@@ -249,14 +244,14 @@ export default function FeaturedTours() {
                 {/* Rating */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <div className="flex items-center">
-                    <div className="flex items-center">
-                      <FiStar className="w-5 h-5 text-yellow-400 fill-current" />
-                      <span className="ml-1 font-semibold">{tour.rating}</span>
+                    <FiStar className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                    <div className="ml-2 flex items-baseline">
+                      <span className="font-semibold">{tour.average_rating || tour.rating || '4.9'}</span>
                     </div>
                     <span className="mx-2 text-gray-300">|</span>
-                    <span className="text-sm text-gray-500">{tour.reviewCount} reviews</span>
+                    <span className="text-sm text-gray-500">{tour.review_count || tour.reviewCount || 10} reviews</span>
                   </div>
-                  <Link href={`/tours/${tour.slug}`}>
+                  <Link href={`/safaris/${tour.slug}`}>
                     <Button variant="outline" size="sm">
                       View Details
                     </Button>

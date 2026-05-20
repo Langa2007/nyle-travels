@@ -12,7 +12,7 @@ export const TourPackage = {
       base_price, price_currency, discount_percentage, featured_image,
       gallery_images, video_url, cancellation_policy, terms_conditions,
       min_age, max_age, health_requirements, meta_title, meta_description,
-      meta_keywords
+      meta_keywords, type
     } = tourData;
 
     const result = await query(
@@ -25,10 +25,10 @@ export const TourPackage = {
         base_price, price_currency, discount_percentage, featured_image,
         gallery_images, video_url, cancellation_policy, terms_conditions,
         min_age, max_age, health_requirements, meta_title, meta_description,
-        meta_keywords
+        meta_keywords, type
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
                 $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
-                $29, $30, $31, $32, $33, $34, $35, $36)
+                $29, $30, $31, $32, $33, $34, $35, $36, $37)
       RETURNING *`,
       [destination_id, name, slug, package_code, duration_days, duration_nights,
        difficulty_level, group_size_min, group_size_max, private_tour_available,
@@ -38,7 +38,7 @@ export const TourPackage = {
        base_price, price_currency, discount_percentage, featured_image,
        gallery_images, video_url, cancellation_policy, terms_conditions,
        min_age, max_age, health_requirements, meta_title, meta_description,
-       meta_keywords]
+       meta_keywords, type]
     );
 
     return result.rows[0];
@@ -54,7 +54,8 @@ export const TourPackage = {
       min_duration,
       max_duration,
       is_featured,
-      search
+      search,
+      type
     } = filters;
 
     const { limit = 20, offset = 0, sort_by = 'created_at', sort_order = 'DESC' } = pagination;
@@ -108,6 +109,12 @@ export const TourPackage = {
     if (search) {
       whereClause.push(`(tp.name ILIKE $${paramIndex} OR tp.short_description ILIKE $${paramIndex})`);
       values.push(`%${search}%`);
+      paramIndex++;
+    }
+
+    if (type) {
+      whereClause.push(`tp.type = $${paramIndex}`);
+      values.push(type);
       paramIndex++;
     }
 
@@ -197,7 +204,7 @@ export const TourPackage = {
       'cultural_rating', 'wildlife_rating', 'adventure_rating', 'luxury_rating',
       'cancellation_policy', 'terms_conditions', 'min_age', 'max_age',
       'health_requirements', 'is_featured', 'is_active', 'meta_title',
-      'meta_description', 'meta_keywords'
+      'meta_description', 'meta_keywords', 'type'
     ];
 
     const setClause = [];

@@ -45,6 +45,7 @@ const menuItems = [
       { href: '/admin/subscribers', label: 'Subscribers', icon: FiMail },
       { href: '/admin/bookings', label: 'Bookings', icon: FiCalendar },
       { href: '/admin/tours', label: 'Tours', icon: FiMap },
+      { href: '/admin/safaris', label: 'Safaris', icon: FiCompass },
       { href: '/admin/hotels', label: 'Hotels', icon: FiMap },
       { href: '/admin/destinations', label: 'Destinations', icon: FiStar },
       { href: '/admin/inquiries', label: 'Contact Inquiries', icon: FiMessageCircle },

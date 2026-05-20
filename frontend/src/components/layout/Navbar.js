@@ -111,6 +111,7 @@ const navLinks = [
       },
     ],
   },
+  { href: '/safaris', label: 'Safaris' },
   { href: '/destinations', label: 'Destinations' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
@@ -274,7 +275,7 @@ export default function Navbar() {
                         
                         <motion.div 
                           className={`relative z-10 grid gap-10 ${
-                            link.label === 'Hotels' ? 'grid-cols-[repeat(4,minmax(0,1fr))_1.5fr]' : 'grid-cols-4'
+                            link.label === 'Hotels' ? 'grid-cols-4' : 'grid-cols-4'
                           }`}
                           variants={{
                             hidden: { opacity: 0 },
@@ -313,78 +314,7 @@ export default function Navbar() {
                             </motion.div>
                           ))}
 
-                          {link.label === 'Hotels' && (
-                            <motion.div 
-                              variants={{
-                                hidden: { opacity: 0, scale: 0.95 },
-                                show: { opacity: 1, scale: 1 }
-                              }}
-                              className="rounded-[2rem] bg-gray-950 p-6 text-white shadow-2xl relative overflow-hidden"
-                            >
-                              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/20 rounded-full blur-2xl -mr-16 -mt-16" />
-                              
-                              <p className="relative z-10 text-[10px] uppercase tracking-[0.3em] font-bold text-primary-400">
-                                Smart Finder
-                              </p>
-                              <h3 className="relative z-10 mt-3 text-xl font-serif font-bold italic">Curate your perfect stay</h3>
-                              
-                              <form 
-                                onSubmit={handleHotelFinderSubmit} 
-                                className="relative z-10 mt-6 space-y-3"
-                              >
-                                <div>
-                                  <input
-                                    type="text"
-                                    value={hotelFinder.search}
-                                    onChange={(event) => updateHotelFinder('search', event.target.value)}
-                                    placeholder="Where to?"
-                                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all font-medium"
-                                  />
-                                </div>
-                                <div className="grid grid-cols-1 gap-3">
-                                  <select
-                                    value={hotelFinder.type}
-                                    onChange={(event) => updateHotelFinder('type', event.target.value)}
-                                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all font-medium appearance-none"
-                                  >
-                                    <option value="" className="text-gray-900">All Styles</option>
-                                    {hotelTypeOptions.map((type) => (
-                                      <option key={type} value={type} className="text-gray-900 uppercase tracking-tighter">
-                                        {type}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                                <Button type="submit" variant="primary" fullWidth className="!rounded-2xl !py-3 font-bold uppercase tracking-widest text-xs">
-                                  Search Hotels
-                                </Button>
-                              </form>
-                              
-                              <div className="relative z-10 mt-6 space-y-3 pt-6 border-t border-white/10">
-                                <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-2">Editor's Choice</p>
-                                {Array.isArray(featuredHotels) && featuredHotels.slice(0, 2).map((hotel) => (
-                                  <button
-                                    key={hotel.slug}
-                                    type="button"
-                                    onClick={() => goToHotelSearch({ destination: hotel.destination, search: hotel.name })}
-                                    className="flex w-full items-center gap-3 rounded-2xl bg-white/5 p-2 text-left transition-all hover:bg-white/10 group/item"
-                                  >
-                                    <div className="relative h-12 w-12 overflow-hidden rounded-xl">
-                                      <Image src={getHotelImage(hotel)} alt={hotel.name} fill className="object-cover transition-transform duration-500 group-hover/item:scale-110" />
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                      <p className="truncate text-xs font-bold text-white">{hotel.name}</p>
-                                      <p className="mt-0.5 flex items-center text-[10px] text-white/50 font-medium">
-                                        <FiMapPin className="mr-1" />
-                                        {hotel.destination}
-                                      </p>
-                                    </div>
-                                    <FiChevronDown className="text-white/30 -rotate-90" size={14} />
-                                  </button>
-                                ))}
-                              </div>
-                            </motion.div>
-                          )}
+
                         </motion.div>
                       </motion.div>
                     )}
