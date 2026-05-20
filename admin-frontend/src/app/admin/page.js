@@ -257,8 +257,8 @@ export default function AdminDashboard() {
           <div className="mt-6 pt-6 border-t border-gray-200">
             <h4 className="text-sm font-bold text-gray-700 mb-3">Quick Actions</h4>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" href="/admin/users/new">
-                Add User
+              <Button variant="outline" size="sm" href="/admin/users">
+                Manage Users
               </Button>
               <Button variant="outline" size="sm" href="/admin/tours/new">
                 New Tour

@@ -80,12 +80,12 @@ function HotelsPageContent() {
           <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
             <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Featured</p>
             <p className="mt-2 text-3xl font-serif text-primary-600">{featuredCount}</p>
-            <p className="mt-2 text-sm text-gray-500">signature stays surfaced in the navbar and homepage</p>
+            <p className="mt-2 text-sm text-gray-500">Hand-picked stays across Kenya</p>
           </div>
           <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
             <p className="text-sm uppercase tracking-[0.2em] text-gray-500">Status</p>
             <p className="mt-2 text-3xl font-serif text-gray-900">{loading ? 'Syncing' : 'Ready'}</p>
-            <p className="mt-2 text-sm text-gray-500">admin hotel updates appear here after the catalog loads</p>
+            <p className="mt-2 text-sm text-gray-500">Nice Luxurious hotels at your fingertips</p>
           </div>
         </div>
 

@@ -118,7 +118,7 @@ export default function AdminUsers() {
             <FiDownload className="mr-2" />
             Export
           </Button>
-          <Button variant="primary" href="/admin/users/new">
+          <Button variant="primary" href="#" onClick={(e) => {e.preventDefault(); toast('User creation coming soon!');}}>
             <FiPlus className="mr-2" />
             Add User
           </Button>
@@ -291,7 +291,7 @@ export default function AdminUsers() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-2">
-                        <Link href={`/admin/users/${user.id}`}>
+                        <Link href={`#`} onClick={(e) => {e.preventDefault(); toast('User details coming soon!');}}>
                           <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                             <FiEye className="w-5 h-5 text-gray-600" />
                           </button>

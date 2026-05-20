@@ -23,13 +23,13 @@ export const getDashboardStats = catchAsync(async (req, res, next) => {
     
     // Recent activity
     query(`
-      (SELECT 'booking' as type, id, booking_number as reference, created_at 
+      (SELECT 'booking'::text as type, id::text, booking_number::text as reference, created_at 
        FROM bookings ORDER BY created_at DESC LIMIT 5)
       UNION ALL
-      (SELECT 'user' as type, id, email as reference, created_at 
+      (SELECT 'user'::text as type, id::text, email::text as reference, created_at 
        FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 5)
       UNION ALL
-      (SELECT 'payment' as type, id, reference_number as reference, created_at 
+      (SELECT 'payment'::text as type, id::text, reference_number::text as reference, created_at 
        FROM payments ORDER BY created_at DESC LIMIT 5)
       ORDER BY created_at DESC LIMIT 10
     `)

@@ -190,9 +190,9 @@ export default function AdminToursPage() {
                     </td>
                     <td className="px-8 py-6 border-b border-gray-100 text-right">
                       <div className="flex items-center justify-end space-x-2">
-                        <Link href={`/tours/${tour.slug}`} target="_blank" className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-primary-500 transition-colors">
+                        <a href={process.env.NEXT_PUBLIC_FRONTEND_URL ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/tours/${tour.slug}` : `http://localhost:3000/tours/${tour.slug}`} target="_blank" rel="noreferrer" className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-primary-500 transition-colors">
                           <FiEye size={18} />
-                        </Link>
+                        </a>
                         <Link href={`/admin/tours/${tour.id}`} className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-primary-500 transition-colors">
                           <FiEdit2 size={18} />
                         </Link>
