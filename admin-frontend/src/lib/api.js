@@ -73,4 +73,11 @@ export const destinationsAPI = {
   getOne: (id) => api.get(`/destinations/${id}`),
 };
 
+// Media API
+export const mediaAPI = {
+  upload: (formData) => api.post('/admin/settings/media', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+};
+
 export default api;

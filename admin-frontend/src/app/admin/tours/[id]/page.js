@@ -15,7 +15,7 @@ import {
   FiCheck,
   FiAlertCircle
 } from 'react-icons/fi';
-import { toursAPI, destinationsAPI } from '@/lib/api';
+import { toursAPI, destinationsAPI, mediaAPI } from '@/lib/api';
 import Button from '@/components/ui/Button';
 
 export default function TourEditorPage() {
@@ -110,6 +110,33 @@ export default function TourEditorPage() {
       meals_included: [],
       activities: []
     }]);
+  };
+
+  const handleImageUpload = async (e, field, index = null) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setSaving(true);
+      const fd = new FormData();
+      fd.append('media', file);
+      
+      const res = await mediaAPI.upload(fd);
+      const url = res.data.data.url;
+      
+      if (field === 'featured_image') {
+        setFormData(prev => ({ ...prev, featured_image: url }));
+      } else if (field === 'gallery_images' && index !== null) {
+        handleListUpdate('gallery_images', index, url);
+      }
+    } catch (err) {
+      console.error('Upload failed', err);
+      alert('Failed to upload image');
+    } finally {
+      setSaving(false);
+      // Reset input value so same file can be selected again
+      e.target.value = null;
+    }
   };
 
   const saveTour = async () => {
@@ -409,11 +436,24 @@ export default function TourEditorPage() {
           >
             <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
               <label className="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-4">Featured Image URL</label>
-              <input 
-                type="text" name="featured_image" value={formData.featured_image || ''} onChange={handleInputChange}
-                className="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-4 focus:ring-primary-500/10 transition-all mb-4"
-                placeholder="https://example.com/image.jpg"
-              />
+              <div className="flex items-center space-x-3 mb-4">
+                <input 
+                  type="text" name="featured_image" value={formData.featured_image || ''} onChange={handleInputChange}
+                  className="flex-1 bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-4 focus:ring-primary-500/10 transition-all"
+                  placeholder="https://example.com/image.jpg"
+                />
+                <div className="relative">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => handleImageUpload(e, 'featured_image')}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <button type="button" className="px-6 py-4 rounded-2xl bg-primary-50 text-primary-600 font-bold text-sm whitespace-nowrap hover:bg-primary-100 transition-colors">
+                    Upload File
+                  </button>
+                </div>
+              </div>
               {formData.featured_image && (
                 <div className="mt-4 rounded-2xl overflow-hidden h-48 relative border border-gray-100">
                   <img src={formData.featured_image} alt="Featured" className="w-full h-full object-cover" />
@@ -429,11 +469,24 @@ export default function TourEditorPage() {
                     <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
                       {img ? <img src={img} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-400"><FiImage /></div>}
                     </div>
-                    <input 
-                      type="text" value={img} onChange={(e) => handleListUpdate('gallery_images', i, e.target.value)}
-                      className="flex-1 bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-medium"
-                      placeholder="https://example.com/gallery-image.jpg"
-                    />
+                    <div className="flex-1 flex items-center space-x-3">
+                      <input 
+                        type="text" value={img} onChange={(e) => handleListUpdate('gallery_images', i, e.target.value)}
+                        className="flex-1 bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-medium"
+                        placeholder="https://example.com/gallery-image.jpg"
+                      />
+                      <div className="relative shrink-0">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={(e) => handleImageUpload(e, 'gallery_images', i)}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <button type="button" className="px-4 py-3 rounded-xl bg-primary-50 text-primary-600 font-bold text-sm whitespace-nowrap hover:bg-primary-100 transition-colors">
+                          Upload
+                        </button>
+                      </div>
+                    </div>
                     <button onClick={() => removeListItem('gallery_images', i)} className="p-3 text-gray-300 hover:text-red-500 transition-colors"><FiTrash2 /></button>
                   </div>
                 ))}
