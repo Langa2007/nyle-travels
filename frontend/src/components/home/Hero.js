@@ -190,7 +190,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="max-w-4xl mx-auto"
+            className="max-w-4xl mx-auto relative z-30"
           >
             <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
