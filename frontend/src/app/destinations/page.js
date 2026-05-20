@@ -107,7 +107,7 @@ export default function DestinationsPage() {
     <div className="min-h-screen bg-[#faf8f2]">
       <StaticPageHeader
         title="Destinations"
-        subtitle="Explore the full destination catalog and jump straight from the navbar into the places that matter most."
+        subtitle="Explore the full destination catalog curated just for you to explore magical Kenya ."
         bgImage={headerImage}
       />
 
