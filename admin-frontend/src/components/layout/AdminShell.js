@@ -23,6 +23,7 @@ import {
   FiFileText,
   FiShield,
   FiPackage,
+  FiCompass,
   FiCreditCard,
   FiMessageCircle,
   FiTrendingUp

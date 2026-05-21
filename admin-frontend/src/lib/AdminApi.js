@@ -3,8 +3,11 @@ import api from './api';
 
 export const adminAPI = {
   // Dashboard
-  getDashboardStats: (timeframe) => 
-    api.get('/admin/dashboard/stats', { params: { timeframe } }),
+  getDashboardStats: (timeframe) => {
+    const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+    const baseUrl = isDev ? 'http://localhost:3000/api' : 'https://nyle-travels-frontend.vercel.app/api';
+    return axios.get(`${baseUrl}/admin/dashboard/stats`, { params: { timeframe } });
+  },
   
   getAnalytics: () => 
     api.get('/admin/analytics'),
