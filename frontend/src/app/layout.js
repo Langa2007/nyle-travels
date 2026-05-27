@@ -8,6 +8,7 @@ import { NextAuthProvider } from '@/context/NextAuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { LanguageProvider } from '@/context/LanguageContext';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Toast from '@/components/ui/Toast';
@@ -125,21 +126,23 @@ export default function RootLayout({ children }) {
               <SessionSync />
               <CartProvider>
                 <WishlistProvider>
-                  <Suspense fallback={null}>
-                    <LoadingBar />
-                  </Suspense>
-                  <Navbar />
-                  <main className="min-h-screen">
-                    {children}
-                  </main>
-                  <Footer />
-                  <Toast />
-                  <CookieBanner />
-                  {shouldRenderAnalytics && (
-                    <CookieConsentWrapper>
-                      <Analytics />
-                    </CookieConsentWrapper>
-                  )}
+                  <LanguageProvider>
+                    <Suspense fallback={null}>
+                      <LoadingBar />
+                    </Suspense>
+                    <Navbar />
+                    <main className="min-h-screen">
+                      {children}
+                    </main>
+                    <Footer />
+                    <Toast />
+                    <CookieBanner />
+                    {shouldRenderAnalytics && (
+                      <CookieConsentWrapper>
+                        <Analytics />
+                      </CookieConsentWrapper>
+                    )}
+                  </LanguageProvider>
                 </WishlistProvider>
               </CartProvider>
             </AuthProvider>

@@ -16,23 +16,24 @@ import {
 } from 'react-icons/fi';
 import { FaTripadvisor } from 'react-icons/fa';
 import Newsletter from '@/components/home/Newsletter';
+import { useTranslation } from '@/hooks/useTranslation';
 
-const footerLinks = {
+const getFooterLinks = (t) => ({
   company: [
-    { label: 'About Us', href: '/about' },
-    { label: 'Careers', href: '/careers' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Press', href: '/press' },
-    { label: 'Sustainability', href: '/sustainability' },
+    { label: t('footer.aboutUs'), href: '/about' },
+    { label: t('footer.careers'), href: '/careers' },
+    { label: t('footer.blog'), href: '/blog' },
+    { label: t('footer.press'), href: '/press' },
+    { label: t('footer.sustainability'), href: '/sustainability' },
   ],
   support: [
-    { label: 'Contact Us', href: '/contact' },
-    { label: 'Report an Issue', href: '/report' },
-    { label: 'FAQs', href: '/faqs' },
-    { label: 'Booking Guide', href: '/guide' },
-    { label: 'Travel Insurance', href: '/insurance' },
-    { label: 'Terms & Conditions', href: '/terms' },
-    { label: 'Privacy Policy', href: '/privacy' },
+    { label: t('footer.contactUs'), href: '/contact' },
+    { label: t('footer.reportIssue'), href: '/report' },
+    { label: t('footer.faqs'), href: '/faqs' },
+    { label: t('footer.bookingGuide'), href: '/guide' },
+    { label: t('footer.travelInsurance'), href: '/insurance' },
+    { label: t('footer.terms'), href: '/terms' },
+    { label: t('footer.privacy'), href: '/privacy' },
   ],
   destinations: [
     { label: 'Maasai Mara', href: '/destinations#maasai-mara' },
@@ -43,14 +44,14 @@ const footerLinks = {
     { label: 'Samburu', href: '/destinations#samburu' },
   ],
   tours: [
-    { label: 'Safari Adventures', href: '/tours?type=safari' },
-    { label: 'Beach Holidays', href: '/tours?type=beach' },
-    { label: 'Mountain Climbing', href: '/tours?type=mountain' },
-    { label: 'Cultural Tours', href: '/tours?type=cultural' },
-    { label: 'Honeymoon Packages', href: '/tours?type=honeymoon' },
-    { label: 'Family Safaris', href: '/tours?type=family' },
+    { label: t('footer.safariAdventures'), href: '/tours?type=safari' },
+    { label: t('footer.beachHolidays'), href: '/tours?type=beach' },
+    { label: t('footer.mountainClimbing'), href: '/tours?type=mountain' },
+    { label: t('footer.culturalTours'), href: '/tours?type=cultural' },
+    { label: t('footer.honeymoonPackages'), href: '/tours?type=honeymoon' },
+    { label: t('footer.familySafaris'), href: '/tours?type=family' },
   ],
-};
+});
 
 const socialLinks = [
   { icon: FiFacebook, href: 'https://facebook.com/nyletravel', label: 'Facebook' },
@@ -80,6 +81,9 @@ const awards = [
 ];
 
 export default function Footer() {
+  const { t } = useTranslation();
+  const footerLinks = getFooterLinks(t);
+
   return (
     <footer className="relative bg-gray-900 text-white overflow-hidden">
       {/* Decorative Background */}
@@ -164,7 +168,7 @@ export default function Footer() {
             {/* Company */}
             <div>
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                Company
+                {t('footer.company')}
               </h3>
               <ul className="space-y-2">
                 {footerLinks.company.map((link) => (
@@ -184,7 +188,7 @@ export default function Footer() {
             {/* Support */}
             <div>
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                Support
+                {t('footer.support')}
               </h3>
               <ul className="space-y-2">
                 {footerLinks.support.map((link) => (
@@ -204,7 +208,7 @@ export default function Footer() {
             {/* Destinations */}
             <div>
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                Top Destinations
+                {t('footer.topDestinations')}
               </h3>
               <ul className="space-y-2">
                 {footerLinks.destinations.map((link) => (
@@ -224,7 +228,7 @@ export default function Footer() {
             {/* Tours */}
             <div>
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                Popular Tours
+                {t('footer.popularTours')}
               </h3>
               <ul className="space-y-2">
                 {footerLinks.tours.map((link) => (
@@ -245,7 +249,7 @@ export default function Footer() {
           {/* Awards Column */}
           <div className="lg:col-span-1">
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-              Awards & Recognition
+              {t('footer.awards')}
             </h3>
             <div className="space-y-4">
               {awards.map((award) => (
@@ -269,7 +273,7 @@ export default function Footer() {
             {/* Trust Badges */}
             <div className="mt-6 pt-6 border-t border-gray-800">
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                Secure Payments
+                {t('footer.securePayments')}
               </h3>
               <div className="flex space-x-2">
                 <div className="w-12 h-8 bg-gray-800 rounded flex items-center justify-center text-xs text-gray-400">
@@ -293,20 +297,20 @@ export default function Footer() {
         <div className="relative mt-16 pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-gray-500">
-              © {new Date().getFullYear()} Nyle Travel & Tours. All rights reserved.
+              © {new Date().getFullYear()} Nyle Travel & Tours. {t('footer.allRightsReserved')}
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link href="/terms" className="text-sm text-gray-500 hover:text-primary-400 transition-colors">
-                Terms
+                {t('footer.terms')}
               </Link>
               <Link href="/privacy" className="text-sm text-gray-500 hover:text-primary-400 transition-colors">
-                Privacy
+                {t('footer.privacy')}
               </Link>
               <Link href="/cookies" className="text-sm text-gray-500 hover:text-primary-400 transition-colors">
-                Cookies
+                {t('footer.cookies')}
               </Link>
               <Link href="/sitemap" className="text-sm text-gray-500 hover:text-primary-400 transition-colors">
-                Sitemap
+                {t('footer.sitemap')}
               </Link>
             </div>
           </div>

@@ -25,43 +25,45 @@ import {
   getHotelImage,
 } from '@/lib/hotelCatalog';
 import { getUserInitials } from '@/lib/userDisplay';
+import { useTranslation } from '@/hooks/useTranslation';
+import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 
-const navLinks = [
-  { href: '/', label: 'Home' },
+const getNavLinks = (t) => [
+  { href: '/', label: t('nav.home') },
   {
     href: '/hotels',
-    label: 'Hotels',
+    label: t('nav.hotels'),
     megaMenu: [
       {
-        title: 'By Category',
+        title: t('nav.byCategory'),
         links: [
-          { href: '/hotels?type=luxury', label: 'Luxury Resorts' },
-          { href: '/hotels?type=boutique', label: 'Boutique Hotels' },
-          { href: '/hotels?type=beach', label: 'Beach Resorts' },
-          { href: '/hotels?type=safari', label: 'Safari Lodges' },
-          { href: '/hotels?type=wellness', label: 'Wellness Retreats' },
+          { href: '/hotels?type=luxury', label: t('nav.luxuryResorts') },
+          { href: '/hotels?type=boutique', label: t('nav.boutiqueHotels') },
+          { href: '/hotels?type=beach', label: t('nav.beachResorts') },
+          { href: '/hotels?type=safari', label: t('nav.safariLodges') },
+          { href: '/hotels?type=wellness', label: t('nav.wellnessRetreats') },
         ],
       },
       {
-        title: 'By Rating',
+        title: t('nav.byRating'),
         links: [
-          { href: '/hotels?rating=5', label: '5 Star' },
-          { href: '/hotels?rating=4', label: '4 Star & Up' },
-          { href: '/hotels?rating=3', label: '3 Star & Up' },
+          { href: '/hotels?rating=5', label: t('nav.fiveStar') },
+          { href: '/hotels?rating=4', label: t('nav.fourStarUp') },
+          { href: '/hotels?rating=3', label: t('nav.threeStarUp') },
         ],
       },
       {
-        title: 'Amenities',
+        title: t('nav.amenities'),
         links: [
-          { href: '/hotels?amenity=spa', label: 'Spa & Wellness' },
-          { href: '/hotels?amenity=pool', label: 'Infinity Pools' },
-          { href: '/hotels?amenity=fine-dining', label: 'Fine Dining' },
-          { href: '/hotels?amenity=game-drives', label: 'Game Drives' },
-          { href: '/hotels?amenity=beach-access', label: 'Beach Access' },
+          { href: '/hotels?amenity=spa', label: t('nav.spaWellness') },
+          { href: '/hotels?amenity=pool', label: t('nav.infinityPools') },
+          { href: '/hotels?amenity=fine-dining', label: t('nav.fineDining') },
+          { href: '/hotels?amenity=game-drives', label: t('nav.gameDrives') },
+          { href: '/hotels?amenity=beach-access', label: t('nav.beachAccess') },
         ],
       },
       {
-        title: 'Popular Destinations',
+        title: t('nav.popularDestinations'),
         links: [
           { href: '/hotels?destination=Maasai%20Mara', label: 'Maasai Mara' },
           { href: '/hotels?destination=Diani%20Beach', label: 'Diani Beach' },
@@ -74,35 +76,35 @@ const navLinks = [
   },
   {
     href: '/tours',
-    label: 'Tours',
+    label: t('nav.tours'),
     megaMenu: [
       {
-        title: 'By Style',
+        title: t('nav.byStyle'),
         links: [
-          { href: '/tours?difficulty=easy', label: 'Family Expeditions' },
-          { href: '/tours?difficulty=moderate', label: 'Cultural Discoveries' },
-          { href: '/tours?difficulty=challenging', label: 'Wilderness Treks' },
-          { href: '/tours?difficulty=difficult', label: 'Extreme Adventures' },
+          { href: '/tours?difficulty=easy', label: t('nav.familyExpeditions') },
+          { href: '/tours?difficulty=moderate', label: t('nav.culturalDiscoveries') },
+          { href: '/tours?difficulty=challenging', label: t('nav.wildernessTreks') },
+          { href: '/tours?difficulty=difficult', label: t('nav.extremeAdventures') },
         ],
       },
       {
-        title: 'By Duration',
+        title: t('nav.byDuration'),
         links: [
-          { href: '/tours?minDuration=1&maxDuration=5', label: 'Quick Escapes' },
-          { href: '/tours?minDuration=6&maxDuration=10', label: 'Standard Voyages' },
-          { href: '/tours?minDuration=11', label: 'Grand Expeditions' },
+          { href: '/tours?minDuration=1&maxDuration=5', label: t('nav.quickEscapes') },
+          { href: '/tours?minDuration=6&maxDuration=10', label: t('nav.standardVoyages') },
+          { href: '/tours?minDuration=11', label: t('nav.grandExpeditions') },
         ],
       },
       {
-        title: 'Specialty',
+        title: t('nav.specialty'),
         links: [
-          { href: '/tours?isFeatured=true', label: 'Signature Series' },
-          { href: '/tours?sort=views_count', label: 'Trending Journeys' },
-          { href: '/tours?sort=base_price&order=ASC', label: 'Value Collections' },
+          { href: '/tours?isFeatured=true', label: t('nav.signatureSeries') },
+          { href: '/tours?sort=views_count', label: t('nav.trendingJourneys') },
+          { href: '/tours?sort=base_price&order=ASC', label: t('nav.valueCollections') },
         ],
       },
       {
-        title: 'Top Regions',
+        title: t('nav.topRegions'),
         links: [
           { href: '/tours?destination=maasai-mara', label: 'The Mara' },
           { href: '/tours?destination=diani-beach', label: 'Coastal Luxury' },
@@ -111,16 +113,18 @@ const navLinks = [
       },
     ],
   },
-  { href: '/safaris', label: 'Safaris' },
-  { href: '/destinations', label: 'Destinations' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/safaris', label: t('nav.safaris') },
+  { href: '/destinations', label: t('nav.destinations') },
+  { href: '/about', label: t('nav.about') },
+  { href: '/contact', label: t('nav.contact') },
 ];
-
 const hotelTypeOptions = ['luxury', 'boutique', 'beach', 'safari', 'wellness', 'city'];
 const hotelAmenityOptions = ['spa', 'pool', 'fine-dining', 'beach-access', 'game-drives'];
 
 export default function Navbar() {
+  const { t } = useTranslation();
+  const navLinks = getNavLinks(t);
+  
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState(null);
@@ -324,6 +328,7 @@ export default function Navbar() {
             </div>
 
             <div className="hidden lg:flex items-center space-x-3">
+              <LanguageSwitcher isScrolled={isScrolled} />
               <div className={`flex items-center p-1 rounded-full transition-all duration-500 ${
                 isScrolled ? 'bg-gray-100' : 'bg-white/10 backdrop-blur-sm'
               }`}>                <Link
@@ -368,20 +373,20 @@ export default function Navbar() {
 
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
                     <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Dashboard
+                      {t('nav.dashboard')}
                     </Link>
                     <Link href="/dashboard/bookings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      My Bookings
+                      {t('nav.myBookings')}
                     </Link>
                     <Link href="/dashboard/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Profile
+                      {t('nav.profile')}
                     </Link>
                     <hr className="my-2" />
                     <button
                       onClick={logout}
                       className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                     >
-                      Logout
+                      {t('nav.signOut')}
                     </button>
                   </div>
                 </div>
@@ -392,7 +397,7 @@ export default function Navbar() {
                     size="sm"
                     className="!px-6"
                   >
-                    Sign In
+                    {t('nav.signIn')}
                   </Button>
                 </Link>
               )}
@@ -425,7 +430,7 @@ export default function Navbar() {
               exit={{ opacity: 0, scale: 1.1 }}
               className="flex flex-col h-full bg-white/95 backdrop-blur-xl p-8"
             >
-              <div className="flex justify-between items-center mb-12">
+              <div className="flex justify-between items-center mb-6">
                 <Link href="/" onClick={() => setIsOpen(false)} className="group">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-600 p-[2px]">
@@ -436,12 +441,15 @@ export default function Navbar() {
                     <span className="font-serif text-2xl font-bold tracking-tight">Nyle Travel</span>
                   </div>
                 </Link>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100/80 text-gray-900 border border-black/5"
-                >
-                  <FiX size={24} />
-                </button>
+                <div className="flex items-center space-x-4">
+                  <LanguageSwitcher isScrolled={true} />
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100/80 text-gray-900 border border-black/5"
+                  >
+                    <FiX size={24} />
+                  </button>
+                </div>
               </div>
 
               <nav className="flex-1 space-y-1 overflow-y-auto">
@@ -508,15 +516,15 @@ export default function Navbar() {
                           {userInitials}
                         </div>
                       </Link>
-                      <button onClick={logout} className="text-sm font-bold uppercase tracking-widest text-red-500">Sign Out</button>
+                      <button onClick={logout} className="text-sm font-bold uppercase tracking-widest text-red-500">{t('nav.signOut')}</button>
                     </div>
                   ) : (
-                    <Link href="/login" className="text-sm font-bold uppercase tracking-widest text-primary-500" onClick={() => setIsOpen(false)}>Sign In</Link>
+                    <Link href="/login" className="text-sm font-bold uppercase tracking-widest text-primary-500" onClick={() => setIsOpen(false)}>{t('nav.signIn')}</Link>
                   )}
                 </div>
                 
                 <Button variant="primary" fullWidth className="!rounded-2xl !py-5 text-sm uppercase tracking-[0.2em] font-bold">
-                  Book a Consult
+                  {t('nav.bookConsult')}
                 </Button>
               </div>
             </motion.div>

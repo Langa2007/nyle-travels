@@ -12,8 +12,10 @@ import { fetchSettings } from '@/utils/settings';
 import { destinationsAPI } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import useHotelCatalog from '@/hooks/useHotelCatalog';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function Hero() {
+  const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchParams, setSearchParams] = useState({
@@ -200,7 +202,7 @@ export default function Hero() {
                   <FiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 z-10" />
                   <input
                     type="text"
-                    placeholder="Type destination or hotel..."
+                    placeholder={t('hero.searchPlaceholder')}
                     className="w-full pl-10 pr-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 cursor-text"
                     value={searchQuery}
                     onChange={handleSearchChange}
@@ -255,8 +257,8 @@ export default function Hero() {
                         ))
                       ) : (
                         <div className="p-5 text-center text-gray-500 text-sm">
-                          <p className="font-medium text-gray-700 mb-1">Sorry, no matching destination or hotel found.</p>
-                          <p className="text-xs text-gray-400">Please try looking for something else!</p>
+                          <p className="font-medium text-gray-700 mb-1">{t('hero.noMatchTitle')}</p>
+                          <p className="text-xs text-gray-400">{t('hero.noMatchSubtitle')}</p>
                         </div>
                       )}
                     </div>
@@ -322,7 +324,7 @@ export default function Hero() {
                     max="20"
                     value={searchParams.guests}
                     onChange={(e) => setSearchParams({ ...searchParams, guests: parseInt(e.target.value) })}
-                    placeholder="Guests"
+                    placeholder={t('hero.guests')}
                     className="w-full pl-10 pr-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50"
                   />
                 </div>
@@ -364,7 +366,7 @@ export default function Hero() {
                   }}
                 >
                   <span className="relative z-10 flex items-center justify-center">
-                    Search
+                    {t('hero.search')}
                     <FiSearch className="ml-2 group-hover:translate-x-1 transition-transform" />
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-secondary-600 opacity-0 group-hover:opacity-100 transition-opacity" />

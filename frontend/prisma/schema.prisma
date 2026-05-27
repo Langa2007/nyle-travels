@@ -340,3 +340,16 @@ model user_activity {
   created_at DateTime @default(now())
   users      User?    @relation(fields: [user_id], references: [id])
 }
+
+model content_translations {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  entity_type String   @db.VarChar(50)
+  entity_id   String   @db.Uuid
+  field_name  String   @db.VarChar(100)
+  language    String   @db.VarChar(10)
+  content     String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+
+  @@unique([entity_type, entity_id, field_name, language])
+}
