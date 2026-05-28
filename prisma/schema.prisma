@@ -41,6 +41,8 @@ model User {
   bookings                Booking[]
   reviews                 Review[]
   payments                Payment[]
+  travel_funds            TravelFund[]
+  travel_fund_contributions TravelFundContribution[]
   admin_logs              AdminLog[]
   user_activities         UserActivity[]
 
@@ -248,6 +250,7 @@ model Booking {
   tour_package                TourPackage? @relation(fields: [tour_package_id], references: [id])
   payments                    Payment[]
   participants                BookingParticipant[]
+  travel_funds                TravelFund[]
 
   @@map("bookings")
 }
@@ -289,6 +292,64 @@ model Payment {
   user                User? @relation(fields: [user_id], references: [id])
 
   @@map("payments")
+}
+
+// Installment and group payment funds
+model TravelFund {
+  id                          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  fund_number                 String   @unique @db.VarChar(50)
+  user_id                     String?  @db.Uuid
+  booking_id                  String?  @db.Uuid
+  title                       String   @db.VarChar(255)
+  mode                        String   @default("installment_plan") @db.VarChar(50)
+  status                      String   @default("draft") @db.VarChar(50)
+  target_amount               Decimal  @db.Decimal(12, 2)
+  collected_amount            Decimal  @default(0) @db.Decimal(12, 2)
+  refundable_amount           Decimal  @default(0) @db.Decimal(12, 2)
+  nyle_commission_pending     Decimal  @default(0) @db.Decimal(12, 2)
+  supplier_payable_pending    Decimal  @default(0) @db.Decimal(12, 2)
+  currency                    String   @default("KES") @db.VarChar(3)
+  participant_count           Int      @default(1)
+  paid_participant_count      Int      @default(0)
+  due_date                    DateTime? @db.Date
+  custody_provider            String?  @db.VarChar(100)
+  custody_account_reference   String?  @db.VarChar(100)
+  custody_status              String   @default("provider_placeholder") @db.VarChar(50)
+  share_token                 String?  @unique @db.VarChar(100)
+  metadata                    Json?    @default("{}") @db.JsonB
+  created_at                  DateTime @default(now())
+  updated_at                  DateTime @default(now()) @updatedAt
+
+  user                        User?    @relation(fields: [user_id], references: [id])
+  booking                     Booking? @relation(fields: [booking_id], references: [id])
+  contributions               TravelFundContribution[]
+
+  @@map("travel_funds")
+}
+
+model TravelFundContribution {
+  id                         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  travel_fund_id             String   @db.Uuid
+  user_id                    String?  @db.Uuid
+  contributor_name           String?  @db.VarChar(255)
+  contributor_phone          String?  @db.VarChar(50)
+  amount                     Decimal  @db.Decimal(12, 2)
+  currency                   String   @default("KES") @db.VarChar(3)
+  payment_method             String   @default("mpesa_stk") @db.VarChar(50)
+  payment_provider           String?  @db.VarChar(100)
+  provider_transaction_id    String?  @unique @db.VarChar(255)
+  status                     String   @default("pending") @db.VarChar(50)
+  customer_liability_amount  Decimal  @default(0) @db.Decimal(12, 2)
+  nyle_revenue_recognized    Decimal  @default(0) @db.Decimal(12, 2)
+  metadata                   Json?    @default("{}") @db.JsonB
+  paid_at                    DateTime?
+  created_at                 DateTime @default(now())
+  updated_at                 DateTime @default(now()) @updatedAt
+
+  travel_fund                TravelFund @relation(fields: [travel_fund_id], references: [id], onDelete: Cascade)
+  user                       User?      @relation(fields: [user_id], references: [id])
+
+  @@map("travel_fund_contributions")
 }
 
 // Reviews table

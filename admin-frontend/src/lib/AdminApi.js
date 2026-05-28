@@ -62,6 +62,12 @@ export const adminAPI = {
   processRefund: (paymentId, data) => 
     api.post(`/admin/payments/${paymentId}/refund`, data),
 
+  getTravelFunds: (params) =>
+    api.get('/admin/travel-funds', { params }),
+
+  reconcileTravelFund: (fundId, data) =>
+    api.patch(`/admin/travel-funds/${fundId}/reconcile`, data),
+
   // Reports
   generateReport: (params) => 
     api.get('/admin/reports/generate', { 

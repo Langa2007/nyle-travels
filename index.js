@@ -23,6 +23,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import newsletterRoutes from './routes/newsletterRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
+import travelFundRoutes from './routes/travelFundRoutes.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -115,6 +116,7 @@ app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/travel-funds', travelFundRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

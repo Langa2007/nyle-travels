@@ -137,6 +137,13 @@ export const paymentsAPI = {
   retry: (paymentId) => api.post(`/payments/${paymentId}/retry`),
 };
 
+export const travelFundsAPI = {
+  getCustodyConfig: () => api.get('/travel-funds/custody-config'),
+  getMine: () => api.get('/travel-funds'),
+  create: (data) => api.post('/travel-funds', data),
+  contribute: (fundId, data) => api.post(`/travel-funds/${fundId}/contributions`, data),
+};
+
 // Reviews API
 export const newsletterAPI = {
   subscribe: (email) => api.post('/newsletter/subscribe', { email })

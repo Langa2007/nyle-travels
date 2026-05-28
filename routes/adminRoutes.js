@@ -6,6 +6,7 @@ import * as adminController from '../controllers/adminController.js';
 import * as settingsController from '../controllers/settingsController.js';
 import * as contactController from '../controllers/contactController.js';
 import * as reportController from '../controllers/reportController.js';
+import { getAdminTravelFunds, reconcileTravelFund } from '../controllers/travelFundController.js';
 
 const router = Router();
 
@@ -26,6 +27,8 @@ router.patch('/bookings/:bookingId/status', adminController.updateBookingStatus)
 
 router.get('/payments', adminController.getAllPayments);
 router.post('/payments/:paymentId/refund', adminController.processRefund);
+router.get('/travel-funds', getAdminTravelFunds);
+router.patch('/travel-funds/:fundId/reconcile', reconcileTravelFund);
 
 router.get('/reports/generate', adminController.generateReport);
 

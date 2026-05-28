@@ -33,6 +33,7 @@ const navItems = [
     megaMenu: true,
   },
   { label: 'Destinations', href: '/destinations' },
+  { label: 'Pay Plan', href: '/travel-fund' },
   { label: 'Blog', href: '/blog' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },

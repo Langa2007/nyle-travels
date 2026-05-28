@@ -26,6 +26,7 @@ import {
   FiCompass,
   FiCreditCard,
   FiMessageCircle,
+  FiRepeat,
   FiTrendingUp
 } from 'react-icons/fi';
 import { useAuth } from '@/hooks/useAuth';
@@ -56,6 +57,7 @@ const menuItems = [
     section: 'Financial',
     items: [
       { href: '/admin/payments', label: 'Payments', icon: FiCreditCard },
+      { href: '/admin/travel-funds', label: 'Travel Funds', icon: FiRepeat },
       { href: '/admin/reports', label: 'Reports', icon: FiFileText },
     ]
   },

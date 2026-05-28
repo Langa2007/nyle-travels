@@ -249,6 +249,53 @@ CREATE TABLE payments (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Travel funds for installments and group payment pools
+CREATE TABLE travel_funds (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    fund_number VARCHAR(50) UNIQUE NOT NULL,
+    user_id UUID REFERENCES users(id),
+    booking_id UUID REFERENCES bookings(id),
+    title VARCHAR(255) NOT NULL,
+    mode VARCHAR(50) DEFAULT 'installment_plan' CHECK (mode IN ('full_payment', 'installment_plan', 'group_pool')),
+    status VARCHAR(50) DEFAULT 'draft' CHECK (status IN ('draft', 'collecting', 'threshold_met', 'confirmed', 'refunding', 'cancelled', 'completed')),
+    target_amount DECIMAL(12, 2) NOT NULL,
+    collected_amount DECIMAL(12, 2) DEFAULT 0,
+    refundable_amount DECIMAL(12, 2) DEFAULT 0,
+    nyle_commission_pending DECIMAL(12, 2) DEFAULT 0,
+    supplier_payable_pending DECIMAL(12, 2) DEFAULT 0,
+    currency VARCHAR(3) DEFAULT 'KES',
+    participant_count INTEGER DEFAULT 1,
+    paid_participant_count INTEGER DEFAULT 0,
+    due_date DATE,
+    custody_provider VARCHAR(100),
+    custody_account_reference VARCHAR(100),
+    custody_status VARCHAR(50) DEFAULT 'provider_placeholder',
+    share_token VARCHAR(100) UNIQUE,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE travel_fund_contributions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    travel_fund_id UUID REFERENCES travel_funds(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id),
+    contributor_name VARCHAR(255),
+    contributor_phone VARCHAR(50),
+    amount DECIMAL(12, 2) NOT NULL,
+    currency VARCHAR(3) DEFAULT 'KES',
+    payment_method VARCHAR(50) DEFAULT 'mpesa_stk',
+    payment_provider VARCHAR(100),
+    provider_transaction_id VARCHAR(255) UNIQUE,
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'initiated', 'success', 'failed', 'refunded', 'provider_placeholder')),
+    customer_liability_amount DECIMAL(12, 2) DEFAULT 0,
+    nyle_revenue_recognized DECIMAL(12, 2) DEFAULT 0,
+    metadata JSONB DEFAULT '{}',
+    paid_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Reviews and ratings
 CREATE TABLE reviews (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -351,6 +398,10 @@ CREATE INDEX idx_bookings_dates ON bookings(start_date, end_date);
 CREATE INDEX idx_reviews_tour ON reviews(tour_package_id);
 CREATE INDEX idx_reviews_user ON reviews(user_id);
 CREATE INDEX idx_payments_booking ON payments(booking_id);
+CREATE INDEX idx_travel_funds_user ON travel_funds(user_id);
+CREATE INDEX idx_travel_funds_booking ON travel_funds(booking_id);
+CREATE INDEX idx_travel_funds_status ON travel_funds(status);
+CREATE INDEX idx_travel_fund_contributions_fund ON travel_fund_contributions(travel_fund_id);
 CREATE INDEX idx_tour_availability_dates ON tour_availability(start_date, end_date);
 CREATE INDEX idx_destinations_slug ON destinations(slug);
 CREATE INDEX idx_destinations_country ON destinations(country);
@@ -373,6 +424,8 @@ CREATE TRIGGER update_hotels_updated_at BEFORE UPDATE ON hotels FOR EACH ROW EXE
 CREATE TRIGGER update_tour_availability_updated_at BEFORE UPDATE ON tour_availability FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_bookings_updated_at BEFORE UPDATE ON bookings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_payments_updated_at BEFORE UPDATE ON payments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_travel_funds_updated_at BEFORE UPDATE ON travel_funds FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_travel_fund_contributions_updated_at BEFORE UPDATE ON travel_fund_contributions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_guides_updated_at BEFORE UPDATE ON guides FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_guide_assignments_updated_at BEFORE UPDATE ON guide_assignments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

@@ -31,6 +31,7 @@ const getFooterLinks = (t) => ({
     { label: t('footer.reportIssue'), href: '/report' },
     { label: t('footer.faqs'), href: '/faqs' },
     { label: t('footer.bookingGuide'), href: '/guide' },
+    { label: 'Lipa Pole Pole', href: '/travel-fund' },
     { label: t('footer.travelInsurance'), href: '/insurance' },
     { label: t('footer.terms'), href: '/terms' },
     { label: t('footer.privacy'), href: '/privacy' },
