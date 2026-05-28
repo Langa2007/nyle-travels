@@ -89,8 +89,8 @@ export const hotelsAPI = {
 // Tours API
 export const toursAPI = {
   // Public
-  getAll: (params) => axios.get('/api/tours', { params }),
-  getOne: (slug) => axios.get(`/api/tours/${slug}`),
+  getAll: (params) => api.get('/tours', { params }),
+  getOne: (slug) => api.get(`/tours/${slug}`),
   getFeatured: () => api.get('/tours/featured'),
   
   // Admin
