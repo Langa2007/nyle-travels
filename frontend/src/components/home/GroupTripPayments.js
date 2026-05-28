@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FiArrowRight, FiCheckCircle, FiShield, FiSmartphone, FiUsers } from 'react-icons/fi';
+import { FiArrowRight, FiCheckCircle, FiCreditCard, FiShield, FiSmartphone, FiUsers } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 
 const benefits = [
@@ -23,6 +23,13 @@ const benefits = [
   },
 ];
 
+const flow = [
+  { label: 'Pick a trip', icon: FiCheckCircle },
+  { label: 'Choose solo or group', icon: FiUsers },
+  { label: 'Split equally', icon: FiCreditCard },
+  { label: 'Track securely', icon: FiShield },
+];
+
 export default function GroupTripPayments() {
   return (
     <section className="relative bg-white py-20">
@@ -41,9 +48,26 @@ export default function GroupTripPayments() {
               Travel together, pay together, without chasing anyone.
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-600">
-              Nyle Travel now supports group trips with secure installment payments. Create a trip fund, share the link
-              on WhatsApp, and let each member contribute the same agreed amount through M-Pesa-friendly payment flows.
+              Nyle Travel now supports group trips with secure installment payments. Open any tour, safari, destination,
+              or hotel, choose solo or group, then let the cart build the right payment flow. For groups, every member is
+              assigned the same contribution amount before the trip fund is shared.
             </p>
+            <div className="mt-7 grid gap-3 sm:grid-cols-4">
+              {flow.map((step, index) => {
+                const Icon = step.icon;
+                return (
+                  <div key={step.label} className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+                    <div className="flex items-center gap-2 text-sm font-bold text-gray-900">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-50 text-xs text-primary-700">
+                        {index + 1}
+                      </span>
+                      <Icon className="text-primary-600" />
+                    </div>
+                    <p className="mt-2 text-xs font-semibold text-gray-600">{step.label}</p>
+                  </div>
+                );
+              })}
+            </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/travel-fund">
                 <Button icon={FiArrowRight} iconPosition="right">
@@ -102,6 +126,9 @@ export default function GroupTripPayments() {
                   <span>KES 100,000 goal</span>
                 </div>
               </div>
+              <p className="mt-4 text-center text-xs font-semibold uppercase tracking-widest text-gray-500">
+                Same amount per member, one shared payment trail
+              </p>
             </div>
           </motion.div>
         </div>

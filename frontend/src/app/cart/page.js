@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -40,14 +40,25 @@ function itemPrice(item) {
 }
 
 function TravelFundCheckout({ cart, total }) {
-  const [mode, setMode] = useState('installment_plan');
+  const hasGroupBooking = cart.some((item) => item.bookingMode === 'group_pool' || item.bookingPlan?.bookingMode === 'group_pool');
+  const firstPlan = cart.find((item) => item.bookingPlan)?.bookingPlan;
+  const preferredMode = hasGroupBooking ? 'group_pool' : firstPlan?.paymentModeHint || 'full_payment';
+  const [mode, setMode] = useState(preferredMode);
   const [phone, setPhone] = useState('');
-  const [participants, setParticipants] = useState(Math.max(2, cart.reduce((sum, item) => sum + item.quantity, 0)));
+  const [participants, setParticipants] = useState(Math.max(2, firstPlan?.travellerCount || cart.reduce((sum, item) => sum + item.quantity, 0)));
   const [depositPercent, setDepositPercent] = useState(30);
   const [months, setMonths] = useState(4);
-  const [dueDate, setDueDate] = useState('');
+  const [dueDate, setDueDate] = useState(firstPlan?.paymentDeadline || '');
   const [loading, setLoading] = useState(false);
   const [createdFund, setCreatedFund] = useState(null);
+
+  useEffect(() => {
+    if (hasGroupBooking) {
+      setMode('group_pool');
+      setParticipants(Math.max(2, firstPlan?.travellerCount || participants));
+      if (firstPlan?.paymentDeadline) setDueDate(firstPlan.paymentDeadline);
+    }
+  }, [hasGroupBooking, firstPlan?.travellerCount, firstPlan?.paymentDeadline, participants]);
 
   const depositAmount = useMemo(() => Math.round((total * depositPercent) / 100), [depositPercent, total]);
   const monthlyAmount = useMemo(() => {
@@ -68,9 +79,12 @@ function TravelFundCheckout({ cart, total }) {
         mode,
         phone,
         total_amount: total,
-        deposit_amount: depositAmount,
+        deposit_amount: mode === 'full_payment' ? total : depositAmount,
+        initial_amount: mode === 'full_payment' ? total : depositAmount,
         participants,
         due_date: dueDate || null,
+        share_policy: hasGroupBooking ? 'equal_split_locked' : 'solo_or_installment',
+        equal_contribution_amount: mode === 'group_pool' ? perPerson : null,
         cart_items: cart.map((item) => ({
           id: item.id,
           type: item.type,
@@ -120,14 +134,16 @@ function TravelFundCheckout({ cart, total }) {
         ].map((option) => {
           const Icon = option.icon;
           const active = mode === option.key;
+          const disabled = hasGroupBooking && option.key !== 'group_pool';
           return (
             <button
               key={option.key}
               type="button"
-              onClick={() => setMode(option.key)}
+              onClick={() => !disabled && setMode(option.key)}
+              disabled={disabled}
               className={`flex min-h-20 items-center gap-3 rounded-xl border p-4 text-left transition ${
                 active ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-gray-200 text-gray-700 hover:border-primary-200'
-              }`}
+              } ${disabled ? 'cursor-not-allowed opacity-40' : ''}`}
             >
               <Icon className="h-5 w-5 flex-shrink-0" />
               <span className="text-sm font-bold">{option.label}</span>
@@ -182,7 +198,8 @@ function TravelFundCheckout({ cart, total }) {
                 if (mode === 'group_pool') setParticipants(value);
                 else setMonths(value);
               }}
-              className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
+              disabled={hasGroupBooking && mode === 'group_pool'}
+              className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 disabled:bg-gray-100 disabled:text-gray-500"
             />
           </label>
         </div>
@@ -202,6 +219,13 @@ function TravelFundCheckout({ cart, total }) {
           <p className="mt-1 font-bold text-gray-900">{formatCurrency(0)}</p>
         </div>
       </div>
+
+      {hasGroupBooking && (
+        <div className="mt-4 rounded-xl border border-primary-100 bg-primary-50 p-4 text-sm leading-6 text-primary-900">
+          This cart started as a group booking. Nyle will create one shared travel fund, lock the equal member amount at
+          {` ${formatCurrency(perPerson)} `}each, and track who has contributed before confirming supplier reservations.
+        </div>
+      )}
 
       {createdFund && (
         <div className="mt-6 rounded-xl border border-green-100 bg-green-50 p-4 text-sm text-green-900">
@@ -280,6 +304,7 @@ export default function CartPage() {
               <section className="space-y-4">
                 {cart.map((item) => {
                   const price = itemPrice(item);
+                  const isGroupItem = item.bookingMode === 'group_pool' || item.bookingPlan?.bookingMode === 'group_pool';
                   return (
                     <article key={`${item.type}-${item.id}`} className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm sm:flex-row">
                       <div className="relative h-48 sm:h-auto sm:w-56 sm:flex-shrink-0">
@@ -290,17 +315,44 @@ export default function CartPage() {
                           <div className="text-xs font-bold uppercase tracking-widest text-primary-600">{item.type || 'tour'}</div>
                           <h2 className="mt-1 font-serif text-2xl font-bold text-gray-900">{itemTitle(item)}</h2>
                           <p className="mt-2 text-sm text-gray-600">{formatCurrency(price)} each</p>
+                          {item.bookingPlan && (
+                            <div className="mt-3 rounded-xl bg-gray-50 p-3 text-sm text-gray-700">
+                              <p className="font-bold text-gray-900">
+                                {item.bookingMode === 'group_pool' ? 'Group pool booking' : 'Solo booking'}
+                              </p>
+                              <p className="mt-1">
+                                {item.bookingMode === 'group_pool'
+                                  ? `Equal split: ${formatCurrency(item.bookingPlan.equalContributionAmount)} per member for ${item.bookingPlan.travellerCount} members.`
+                                  : `${item.bookingPlan.travellerCount} traveller(s). Pay in full or create an installment plan.`}
+                              </p>
+                            </div>
+                          )}
                         </div>
                         <div className="flex flex-wrap items-center justify-between gap-4">
                           <div className="flex items-center rounded-xl border border-gray-200">
-                            <button className="p-3 text-gray-600 hover:text-primary-600" onClick={() => updateQuantity(item.id, item.type, item.quantity - 1)} aria-label="Decrease quantity">
+                            <button
+                              className="p-3 text-gray-600 hover:text-primary-600 disabled:cursor-not-allowed disabled:opacity-40"
+                              onClick={() => updateQuantity(item.id, item.type, item.quantity - 1)}
+                              aria-label="Decrease quantity"
+                              disabled={isGroupItem}
+                            >
                               <FiMinus />
                             </button>
                             <span className="min-w-10 text-center font-semibold">{item.quantity}</span>
-                            <button className="p-3 text-gray-600 hover:text-primary-600" onClick={() => updateQuantity(item.id, item.type, item.quantity + 1)} aria-label="Increase quantity">
+                            <button
+                              className="p-3 text-gray-600 hover:text-primary-600 disabled:cursor-not-allowed disabled:opacity-40"
+                              onClick={() => updateQuantity(item.id, item.type, item.quantity + 1)}
+                              aria-label="Increase quantity"
+                              disabled={isGroupItem}
+                            >
                               <FiPlus />
                             </button>
                           </div>
+                          {isGroupItem && (
+                            <span className="text-xs font-semibold text-primary-700">
+                              Members are locked for equal split
+                            </span>
+                          )}
                           <Button variant="ghost" size="sm" icon={FiTrash2} onClick={() => removeFromCart(item.id, item.type)}>
                             Remove
                           </Button>

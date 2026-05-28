@@ -9,12 +9,14 @@ import TourHero from '@/components/tours/TourHero';
 import TourItinerary from '@/components/tours/TourItinerary';
 import TourCard from '@/components/tours/TourCard';
 import Button from '@/components/ui/Button';
+import BookingIntentModal from '@/components/booking/BookingIntentModal';
 
 export default function SafariDetailPage() {
   const { slug } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   useEffect(() => {
     const fetchTour = async () => {
@@ -60,6 +62,12 @@ export default function SafariDetailPage() {
     <main className="bg-[#fafbfc]">
       
       <TourHero tour={tour} />
+      <BookingIntentModal
+        open={bookingOpen}
+        onClose={() => setBookingOpen(false)}
+        item={tour}
+        itemType="safari"
+      />
 
       <div className="container mx-auto px-6 py-20">
         <div className="flex flex-col lg:flex-row gap-20">
@@ -160,10 +168,14 @@ export default function SafariDetailPage() {
                   <div className="flex items-center justify-between p-6 rounded-2xl bg-primary-50/50 border border-primary-50">
                     <div>
                       <p className="text-[10px] uppercase font-bold text-primary-600 tracking-widest mb-1">Total Voyage Cost</p>
-                      <p className="text-2xl font-serif font-bold text-gray-900">${tour.base_price}</p>
+                      <p className="text-2xl font-serif font-bold text-gray-900">KES {Number(tour.base_price || 0).toLocaleString('en-KE')}</p>
                     </div>
-                    <button className="px-6 py-3 rounded-xl bg-primary-500 text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary-500/30">
-                      Inquire
+                    <button
+                      type="button"
+                      onClick={() => setBookingOpen(true)}
+                      className="px-6 py-3 rounded-xl bg-primary-500 text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary-500/30"
+                    >
+                      Book Now
                     </button>
                   </div>
                   

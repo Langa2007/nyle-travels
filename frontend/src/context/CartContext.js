@@ -33,20 +33,31 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('cart', JSON.stringify(newCart));
   };
 
-  const addToCart = (item, type = 'tour') => {
+  const addToCart = (item, type = 'tour', options = {}) => {
     const newCart = [...cart];
+    const desiredQuantity = Number(options.quantity || item.quantity || 1);
     const existingItem = newCart.find(
       (i) => i.id === item.id && i.type === type
     );
 
     if (existingItem) {
-      existingItem.quantity += 1;
-      toast.success('Item quantity updated in cart');
+      existingItem.quantity = desiredQuantity;
+      Object.assign(existingItem, {
+        ...item,
+        type,
+        quantity: desiredQuantity,
+        bookingMode: options.bookingMode || item.bookingMode || existingItem.bookingMode,
+        bookingPlan: options.bookingPlan || item.bookingPlan || existingItem.bookingPlan,
+        updatedAt: new Date().toISOString(),
+      });
+      toast.success('Booking details updated in cart');
     } else {
       newCart.push({
         ...item,
         type,
-        quantity: 1,
+        quantity: desiredQuantity,
+        bookingMode: options.bookingMode || item.bookingMode || 'solo',
+        bookingPlan: options.bookingPlan || item.bookingPlan || null,
         addedAt: new Date().toISOString(),
       });
       toast.success('Item added to cart');

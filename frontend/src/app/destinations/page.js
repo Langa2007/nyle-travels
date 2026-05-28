@@ -6,6 +6,8 @@ import StaticPageHeader from '@/components/ui/StaticPageHeader';
 import { fetchAllSettings } from '@/utils/settings';
 import { destinations as seedDestinations } from '@/app/destination';
 import { FiMapPin, FiSearch, FiStar } from 'react-icons/fi';
+import Button from '@/components/ui/Button';
+import BookingIntentModal from '@/components/booking/BookingIntentModal';
 
 const SETTINGS_KEY = 'destinations_catalog';
 
@@ -57,6 +59,7 @@ export default function DestinationsPage() {
   const [search, setSearch] = useState('');
   const [regionFilter, setRegionFilter] = useState('all');
   const [featuredOnly, setFeaturedOnly] = useState(false);
+  const [bookingDestination, setBookingDestination] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -105,6 +108,12 @@ export default function DestinationsPage() {
 
   return (
     <div className="min-h-screen bg-[#faf8f2]">
+      <BookingIntentModal
+        open={Boolean(bookingDestination)}
+        onClose={() => setBookingDestination(null)}
+        item={bookingDestination}
+        itemType="destination"
+      />
       <StaticPageHeader
         title="Destinations"
         subtitle="Explore the full destination catalog curated just for you to explore magical Kenya ."
@@ -271,6 +280,23 @@ export default function DestinationsPage() {
                     ))}
                   </div>
                 )}
+
+                <div className="flex flex-col gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Group friendly</p>
+                    <p className="mt-1 text-sm text-gray-600">Build a solo or group payment plan for this destination.</p>
+                  </div>
+                  <Button
+                    variant="primary"
+                    onClick={() => setBookingDestination({
+                      ...destination,
+                      image: destination.image,
+                      estimated_price: 15000,
+                    })}
+                  >
+                    Book Now
+                  </Button>
+                </div>
               </div>
             </article>
           ))}

@@ -17,6 +17,7 @@ import {
   FiStar,
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
+import BookingIntentModal from '@/components/booking/BookingIntentModal';
 import useHotelCatalog from '@/hooks/useHotelCatalog';
 import { getHotelImage, slugifyHotelValue } from '@/lib/hotelCatalog';
 
@@ -26,6 +27,7 @@ export default function HotelDetailClient({ slug, initialHotel }) {
   const router = useRouter();
   const [hotel, setHotel] = useState(initialHotel);
   const [notFound, setNotFound] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   const { hotels: adminHotels, loading: adminLoading, error: adminError } = useHotelCatalog([], {
     allowSeedFallback: false,
@@ -97,6 +99,16 @@ export default function HotelDetailClient({ slug, initialHotel }) {
 
   return (
     <div className="min-h-screen bg-[#faf8f2] pb-24">
+      <BookingIntentModal
+        open={bookingOpen}
+        onClose={() => setBookingOpen(false)}
+        item={{
+          ...hotel,
+          price: hotel.price || hotel.price_per_night,
+          image: heroSrc,
+        }}
+        itemType="hotel"
+      />
       <div className="bg-white sticky top-0 z-40 border-b border-gray-100 shadow-sm">
         <div className="container mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
           <Link
@@ -315,7 +327,7 @@ export default function HotelDetailClient({ slug, initialHotel }) {
                 <Button
                   variant="primary"
                   className="w-full justify-center py-4 text-base font-semibold shadow-lg shadow-primary-500/20 hover:shadow-primary-500/40 transition-all"
-                  onClick={() => router.push('/contact')}
+                  onClick={() => setBookingOpen(true)}
                 >
                   Book Now
                 </Button>

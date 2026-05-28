@@ -102,6 +102,8 @@ const buildFundResponse = (payload, user) => {
     custody_account_name: providerConfig.custodyAccountName,
     custody_account_reference: providerConfig.custodyAccountReference,
     custody_status: providerIsConfigured ? 'ready_for_provider_collection' : 'provider_placeholder',
+    share_policy: payload.share_policy || (payload.mode === 'group_pool' ? 'equal_split_locked' : 'solo_or_installment'),
+    equal_contribution_amount: payload.equal_contribution_amount || null,
     revenue_policy: 'Customer contributions remain a liability until the trip is confirmed and supplier obligations are accepted.',
     share_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/travel-fund/${fundNumber}?token=${shareToken}`,
     provider: {
