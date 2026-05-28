@@ -14,6 +14,7 @@ import VideoShowcase from '@/components/home/VideoShowcase';
 import ExclusiveOffers from '@/components/home/ExclusiveOffers';
 import TravelBlog from '@/components/home/TravelBlog';
 import Partners from '@/components/home/Partners';
+import GroupTripPayments from '@/components/home/GroupTripPayments';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -41,6 +42,9 @@ export default function Home() {
           <Stats />
         </div>
       </section>
+
+      {/* Group Trip Payments */}
+      <GroupTripPayments />
 
       {/* Why Choose Us */}
       <motion.section 
