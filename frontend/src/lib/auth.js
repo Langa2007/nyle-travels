@@ -271,26 +271,15 @@ export const authOptions = {
         }
 
         try {
-          const response = await fetch(
-            `https://oauth2.googleapis.com/tokeninfo?id_token=${credentials.id_token}`
-          );
+          const googleUser = jwt.decode(credentials.id_token);
 
-          if (!response.ok) {
-            let verificationBody = "";
-            try {
-              verificationBody = await response.text();
-            } catch (_) {}
-
+          if (!googleUser || !googleUser.email) {
             authWarn("google_token_verification_failed", {
               traceId,
-              status: response.status,
-              statusText: response.statusText,
-              response: verificationBody.slice(0, 300),
+              error: "Invalid token structure or missing email"
             });
             return null;
           }
-
-          const googleUser = await response.json();
 
           authLog("google_token_verified", {
             traceId,
