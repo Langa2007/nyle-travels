@@ -27,7 +27,7 @@ if (process.env.NEXT_PHASE === "phase-production-build") {
 } else {
   if (!globalForPrisma.prisma) {
     globalForPrisma.prisma = new PrismaClient({
-      datasources: { db: { url: getDbUrl() } },
+      datasourceUrl: getDbUrl(),
     });
   }
   prisma = globalForPrisma.prisma;
