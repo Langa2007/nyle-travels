@@ -1,5 +1,5 @@
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "@/lib/prisma";
+import prisma, { getPrismaConnectionSummary } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 
 const DEFAULT_GOOGLE_CLIENT_ID =
@@ -261,6 +261,7 @@ export const authOptions = {
           hasToken: Boolean(credentials?.id_token),
           allowedAudiences: Array.from(ALLOWED_GOOGLE_CLIENT_IDS),
           hasDatabaseUrl: Boolean(process.env.DATABASE_URL || process.env.DATABASE_URL_NEON),
+          database: getPrismaConnectionSummary(),
           hasNextAuthSecret: Boolean(process.env.NEXTAUTH_SECRET),
           hasJwtSecret: Boolean(process.env.JWT_SECRET),
         });
