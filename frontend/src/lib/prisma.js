@@ -1,7 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { Pool, neonConfig } from "@neondatabase/serverless";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import ws from "ws";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis;
 
@@ -84,11 +82,9 @@ if (process.env.NEXT_PHASE === "phase-production-build") {
   prisma = null;
 } else {
   if (!globalForPrisma.prisma) {
-    neonConfig.webSocketConstructor = ws;
-
     const connectionString = getDbUrl();
-    const pool = new Pool({ connectionString });
-    const adapter = new PrismaNeon(pool);
+    process.env.DATABASE_URL = connectionString;
+    const adapter = new PrismaPg(connectionString);
 
     globalForPrisma.prisma = new PrismaClient({ adapter });
   }
