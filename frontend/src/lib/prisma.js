@@ -5,9 +5,6 @@ import ws from "ws";
 
 const globalForPrisma = globalThis;
 
-const NEON_POOLER_URL =
-  "postgresql://neondb_owner:npg_s9WljCPnZiT8@ep-wild-glade-alswwsa8-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require";
-
 function normalizeDbUrl(value) {
   if (!value) return null;
   return String(value).trim().replace(/^["']|["']$/g, "");
@@ -40,7 +37,6 @@ function getDbUrl() {
     process.env.POSTGRES_URL_NON_POOLING,
     process.env.NEON_DATABASE_URL,
     process.env.NEON_DATABASE_URL_POOLED,
-    NEON_POOLER_URL,
   ];
 
   for (const candidate of candidates) {
@@ -71,7 +67,7 @@ export function getPrismaConnectionSummary() {
         "POSTGRES_URL_NON_POOLING",
         "NEON_DATABASE_URL",
         "NEON_DATABASE_URL_POOLED",
-      ].find((key) => isValidPostgresUrl(process.env[key])) || "fallback",
+      ].find((key) => isValidPostgresUrl(process.env[key])) || "runtime_env",
     };
   } catch (error) {
     return {
