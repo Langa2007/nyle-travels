@@ -130,7 +130,7 @@ export default function Navbar() {
   const [activeMegaMenu, setActiveMegaMenu] = useState(null);
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, isLoggingOut } = useAuth();
   const userInitials = getUserInitials(user);
   const { wishlistCount } = useWishlist();
   const { cartCount } = useCart();
@@ -384,9 +384,10 @@ export default function Navbar() {
                     <hr className="my-2" />
                     <button
                       onClick={logout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      disabled={isLoggingOut}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {t('nav.signOut')}
+                      {isLoggingOut ? 'Signing out…' : t('nav.signOut')}
                     </button>
                   </div>
                 </div>
@@ -516,7 +517,13 @@ export default function Navbar() {
                           {userInitials}
                         </div>
                       </Link>
-                      <button onClick={logout} className="text-sm font-bold uppercase tracking-widest text-red-500">{t('nav.signOut')}</button>
+                      <button
+                        onClick={logout}
+                        disabled={isLoggingOut}
+                        className="text-sm font-bold uppercase tracking-widest text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isLoggingOut ? 'Signing out…' : t('nav.signOut')}
+                      </button>
                     </div>
                   ) : (
                     <Link href="/login" className="text-sm font-bold uppercase tracking-widest text-primary-500" onClick={() => setIsOpen(false)}>{t('nav.signIn')}</Link>

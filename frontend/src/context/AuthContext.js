@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect, useContext, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import Cookies from 'js-cookie';
@@ -14,7 +14,12 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
+
+  // Rate-limit refs — tracked without triggering re-renders
+  const logoutAttemptsRef = useRef(0);
+  const logoutBlockedUntilRef = useRef(null);
 
   useEffect(() => {
     checkUser();
@@ -73,16 +78,41 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    // --- Rate limiter: block after 3 failed/repeated attempts ---
+    const now = Date.now();
+    if (logoutBlockedUntilRef.current && now < logoutBlockedUntilRef.current) {
+      const secondsLeft = Math.ceil((logoutBlockedUntilRef.current - now) / 1000);
+      toast.error(`Too many sign-out attempts. Please try again in ${secondsLeft}s.`);
+      return;
+    }
+
+    logoutAttemptsRef.current += 1;
+
+    if (logoutAttemptsRef.current > 3) {
+      logoutBlockedUntilRef.current = now + 60 * 1000; // block for 60 seconds
+      logoutAttemptsRef.current = 0;
+      toast.error('Too many sign-out attempts. Please try again in 60 seconds.');
+      return;
+    }
+
+    // --- In-flight guard: prevent concurrent calls ---
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
     try {
       await authAPI.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      // Non-fatal: even if backend call fails, we still clear local session
+      console.error('Logout API error:', error);
     } finally {
       Cookies.remove('token');
       Cookies.remove('refreshToken');
       localStorage.removeItem('user');
       await signOut({ redirect: false });
       setUser(null);
+      setIsLoggingOut(false);
+      logoutAttemptsRef.current = 0; // reset counter on success
+      logoutBlockedUntilRef.current = null;
       toast.success('Logged out successfully');
       router.push('/');
     }
@@ -114,6 +144,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
+    isLoggingOut,
     login,
     register,
     logout,

@@ -44,7 +44,7 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, isLoggingOut } = useAuth();
   const userInitials = getUserInitials(user);
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
@@ -182,9 +182,10 @@ export default function Header() {
                     <hr className="my-2" />
                     <button
                       onClick={logout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      disabled={isLoggingOut}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Logout
+                      {isLoggingOut ? 'Signing out…' : 'Logout'}
                     </button>
                   </div>
                 </div>
@@ -349,9 +350,10 @@ export default function Header() {
                       logout();
                       setIsOpen(false);
                     }}
-                    className="block w-full text-left py-2 text-red-600 hover:text-red-700"
+                    disabled={isLoggingOut}
+                    className="block w-full text-left py-2 text-red-600 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Logout
+                    {isLoggingOut ? 'Signing out…' : 'Logout'}
                   </button>
                 </div>
               )}
