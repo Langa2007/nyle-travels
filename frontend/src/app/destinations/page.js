@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import StaticPageHeader from '@/components/ui/StaticPageHeader';
 import { fetchAllSettings } from '@/utils/settings';
+import { destinationsAPI } from '@/lib/api';
 import { destinations as seedDestinations } from '@/app/destination';
 import { FiMapPin, FiSearch, FiStar } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
@@ -13,7 +14,7 @@ const SETTINGS_KEY = 'destinations_catalog';
 
 function parseList(value) {
   if (Array.isArray(value)) {
-    return value.filter(Boolean);
+    return value.filter(Boolean).map((item) => String(item).trim()).filter(Boolean);
   }
 
   if (!value) {
@@ -26,7 +27,53 @@ function parseList(value) {
     .filter(Boolean);
 }
 
+function firstString(...values) {
+  return values.find((value) => typeof value === 'string' && value.trim())?.trim() || '';
+}
+
+function uniqueList(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
+function destinationKey(destination) {
+  return firstString(destination?.slug, destination?.name).toLowerCase();
+}
+
+function readApiDestinations(response) {
+  const rawData = response?.data;
+
+  if (Array.isArray(rawData?.data?.destinations)) {
+    return rawData.data.destinations;
+  }
+
+  if (Array.isArray(rawData?.destinations)) {
+    return rawData.destinations;
+  }
+
+  if (Array.isArray(rawData)) {
+    return rawData;
+  }
+
+  return [];
+}
+
 function normalizeDestination(destination, index = 0) {
+  const image = firstString(
+    destination.image,
+    destination.featured_image,
+    destination.featuredImage,
+    destination.coverImage,
+    destination.defaultImage,
+    destination.default_image
+  );
+  const gallery = parseList(destination.gallery ?? destination.gallery_images);
+  const imageFallbacks = uniqueList([
+    ...parseList(destination.imageFallbacks),
+    ...gallery,
+    firstString(destination.featured_image, destination.featuredImage),
+    firstString(destination.defaultImage, destination.default_image),
+  ]).filter((fallback) => fallback !== image);
+
   return {
     ...destination,
     id: destination.id ?? `destination-${index + 1}`,
@@ -35,20 +82,48 @@ function normalizeDestination(destination, index = 0) {
     region: destination.region ?? '',
     country: destination.country ?? 'Kenya',
     description: destination.description ?? '',
-    shortDescription: destination.shortDescription ?? '',
-    bestTimeToVisit: destination.bestTimeToVisit ?? '',
+    shortDescription: destination.shortDescription ?? destination.short_description ?? '',
+    bestTimeToVisit: destination.bestTimeToVisit ?? destination.best_time_to_visit ?? '',
     weather: destination.weather ?? '',
     activities: parseList(destination.activities),
     wildlife: parseList(destination.wildlife),
-    image: destination.image ?? '',
-    gallery: parseList(destination.gallery),
+    image,
+    imageFallbacks,
+    gallery,
     rating: Number(destination.rating ?? 0),
-    featured: Boolean(destination.featured),
-    tourCount: Number(destination.tourCount ?? 0),
-    hotelCount: Number(destination.hotelCount ?? 0),
+    featured: Boolean(destination.featured ?? destination.is_featured),
+    tourCount: Number(destination.tourCount ?? destination.tour_count ?? 0),
+    hotelCount: Number(destination.hotelCount ?? destination.hotel_count ?? 0),
     area: destination.area ? String(destination.area) : '',
     established: destination.established ? String(destination.established) : '',
   };
+}
+
+function mergeDestinationCatalog(catalog, apiDestinations) {
+  const apiBySlug = new Map(apiDestinations.map((destination) => [destinationKey(destination), destination]));
+  const sourceCatalog = Array.isArray(catalog) && catalog.length > 0 ? catalog : apiDestinations;
+
+  return sourceCatalog.map((destination, index) => {
+    const apiDestination = apiBySlug.get(destinationKey(destination));
+    const apiImage = firstString(apiDestination?.featured_image, apiDestination?.image, apiDestination?.featuredImage);
+    const catalogImage = firstString(destination.image, destination.featured_image, destination.featuredImage);
+
+    return normalizeDestination(
+      {
+        ...(apiDestination || {}),
+        ...destination,
+        image: apiImage || catalogImage,
+        imageFallbacks: uniqueList([
+          apiImage,
+          catalogImage,
+          ...parseList(apiDestination?.gallery_images),
+          ...parseList(destination.gallery),
+          ...parseList(destination.gallery_images),
+        ]),
+      },
+      index
+    );
+  });
 }
 
 export default function DestinationsPage() {
@@ -60,17 +135,23 @@ export default function DestinationsPage() {
   const [regionFilter, setRegionFilter] = useState('all');
   const [featuredOnly, setFeaturedOnly] = useState(false);
   const [bookingDestination, setBookingDestination] = useState(null);
+  const [imageOverrides, setImageOverrides] = useState({});
 
   useEffect(() => {
     let mounted = true;
 
     async function loadCatalog() {
       try {
-        const settings = await fetchAllSettings();
+        const [settingsResult, apiResult] = await Promise.allSettled([
+          fetchAllSettings(),
+          destinationsAPI.getAll({ limit: 200 }),
+        ]);
+        const settings = settingsResult.status === 'fulfilled' ? settingsResult.value : null;
+        const apiDestinations = apiResult.status === 'fulfilled' ? readApiDestinations(apiResult.value) : [];
         const savedCatalog = settings?.[SETTINGS_KEY];
 
-        if (mounted && Array.isArray(savedCatalog) && savedCatalog.length > 0) {
-          setDestinations(savedCatalog.map((destination, index) => normalizeDestination(destination, index)));
+        if (mounted && ((Array.isArray(savedCatalog) && savedCatalog.length > 0) || apiDestinations.length > 0)) {
+          setDestinations(mergeDestinationCatalog(savedCatalog, apiDestinations));
         }
       } finally {
         if (mounted) {
@@ -105,6 +186,22 @@ export default function DestinationsPage() {
   const headerImage =
     destinations.find((destination) => destination.image)?.image ||
     'https://picsum.photos/seed/nyle_destinations/1920/1080';
+
+  function getDestinationImage(destination) {
+    return Object.prototype.hasOwnProperty.call(imageOverrides, destination.id)
+      ? imageOverrides[destination.id]
+      : destination.image;
+  }
+
+  function handleImageError(destination) {
+    const currentImage = getDestinationImage(destination);
+    const nextImage = destination.imageFallbacks.find((image) => image && image !== currentImage) || '';
+
+    setImageOverrides((current) => ({
+      ...current,
+      [destination.id]: nextImage,
+    }));
+  }
 
   return (
     <div className="min-h-screen bg-[#faf8f2]">
@@ -175,15 +272,24 @@ export default function DestinationsPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {filteredDestinations.map((destination) => (
+          {filteredDestinations.map((destination) => {
+            const imageSrc = getDestinationImage(destination);
+
+            return (
             <article
               key={destination.id}
               id={destination.slug}
               className="scroll-mt-32 overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-sm"
             >
               <div className="relative h-72 bg-gray-100">
-                {destination.image ? (
-                  <Image src={destination.image} alt={destination.name} fill className="object-cover" />
+                {imageSrc ? (
+                  <Image
+                    src={imageSrc}
+                    alt={destination.name}
+                    fill
+                    className="object-cover"
+                    onError={() => handleImageError(destination)}
+                  />
                 ) : (
                   <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300" />
                 )}
@@ -290,7 +396,7 @@ export default function DestinationsPage() {
                     variant="primary"
                     onClick={() => setBookingDestination({
                       ...destination,
-                      image: destination.image,
+                      image: imageSrc,
                       estimated_price: 15000,
                     })}
                   >
@@ -299,7 +405,8 @@ export default function DestinationsPage() {
                 </div>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
 
         {filteredDestinations.length === 0 && (
