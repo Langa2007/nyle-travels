@@ -12,6 +12,7 @@ import InstagramFeed from '@/components/home/InstagramFeed';
 import Stats from '@/components/home/Stats';
 import VideoShowcase from '@/components/home/VideoShowcase';
 import ExclusiveOffers from '@/components/home/ExclusiveOffers';
+import CustomJourneyTeaser from '@/components/home/CustomJourneyTeaser';
 import TravelBlog from '@/components/home/TravelBlog';
 import Partners from '@/components/home/Partners';
 import GroupTripPayments from '@/components/home/GroupTripPayments';
@@ -147,6 +148,9 @@ export default function Home() {
 
       {/* Exclusive Offers */}
       <ExclusiveOffers />
+
+      {/* Custom Journey */}
+      <CustomJourneyTeaser />
 
       {/* Testimonials */}
       <motion.section 
