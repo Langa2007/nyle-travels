@@ -121,7 +121,7 @@ export default function CustomJourneyPage() {
   };
 
   return (
-    <div className="bg-[#fbf7ef] text-gray-950">
+    <div className="bg-gradient-to-b from-white via-primary-50/45 to-white text-gray-950">
       <section className="relative min-h-[92vh] overflow-hidden">
         <Image
           src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=1920&q=85"
@@ -131,8 +131,8 @@ export default function CustomJourneyPage() {
           sizes="100vw"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/10" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#fbf7ef] to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-950/90 via-secondary-900/65 to-primary-900/20" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-white to-transparent" />
 
         <div className="relative z-10 flex min-h-[92vh] items-center">
           <div className="container mx-auto px-4 py-28">
@@ -149,7 +149,7 @@ export default function CustomJourneyPage() {
                 <FiArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
                 Back to Nyle
               </Link>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-luxury-gold">
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary-200">
                 Private Journey Atelier
               </p>
               <h1 className="mt-5 font-serif text-5xl font-bold leading-[1.05] md:text-7xl">
@@ -164,7 +164,7 @@ export default function CustomJourneyPage() {
                   ['Private', 'travel consult'],
                   ['End-to-end', 'itinerary care'],
                 ].map(([value, label]) => (
-                  <div key={value} className="border-l border-luxury-gold/70 pl-4">
+                  <div key={value} className="border-l border-primary-300/80 pl-4">
                     <div className="font-serif text-3xl font-bold">{value}</div>
                     <div className="mt-1 text-sm uppercase tracking-[0.18em] text-white/70">{label}</div>
                   </div>
@@ -199,9 +199,9 @@ export default function CustomJourneyPage() {
 
               <div className="grid gap-4">
                 {promiseCards.map(({ icon: Icon, title, copy }) => (
-                  <div key={title} className="rounded-2xl border border-black/5 bg-white p-6 shadow-sm">
+                  <div key={title} className="rounded-2xl border border-primary-100 bg-white p-6 shadow-sm">
                     <div className="flex gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-700">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-50 to-secondary-50 text-primary-700">
                         <Icon className="h-5 w-5" aria-hidden="true" />
                       </div>
                       <div>
@@ -219,7 +219,7 @@ export default function CustomJourneyPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.7 }}
-              className="rounded-[2rem] border border-black/5 bg-white p-5 shadow-2xl sm:p-8 lg:p-10"
+              className="rounded-[2rem] border border-primary-100 bg-white p-5 shadow-2xl shadow-primary-900/10 sm:p-8 lg:p-10"
             >
               {isSubmitted ? (
                 <div className="flex min-h-[620px] flex-col items-center justify-center text-center">
@@ -242,7 +242,7 @@ export default function CustomJourneyPage() {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-7">
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.24em] text-luxury-rose">
+                    <p className="text-sm font-semibold uppercase tracking-[0.24em] text-secondary-700">
                       Custom Trip Brief
                     </p>
                     <h2 className="mt-3 font-serif text-3xl font-bold md:text-4xl">
@@ -442,7 +442,7 @@ export default function CustomJourneyPage() {
 
                   <Button
                     type="submit"
-                    variant="luxury"
+                    variant="primary"
                     size="lg"
                     fullWidth
                     loading={isSubmitting}
@@ -468,14 +468,14 @@ export default function CustomJourneyPage() {
 
       <section className="pb-20">
         <div className="container mx-auto px-4">
-          <div className="grid gap-4 rounded-[2rem] bg-gray-950 p-6 text-white shadow-2xl md:grid-cols-3 md:p-8">
+          <div className="grid gap-4 rounded-[2rem] bg-gradient-to-r from-primary-900 via-secondary-900 to-primary-800 p-6 text-white shadow-2xl shadow-primary-900/20 md:grid-cols-3 md:p-8">
             {[
               [FiMapPin, 'Name the place', 'A country, lodge, coast, event, or half-formed idea is enough.'],
               [FiUsers, 'Share the people', 'We tune the pace for couples, families, solo guests, or groups.'],
               [FiCheckCircle, 'Receive the direction', 'A consultant follows up with a refined route and next steps.'],
             ].map(([Icon, title, copy]) => (
               <div key={title} className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                <Icon className="h-6 w-6 text-luxury-gold" aria-hidden="true" />
+                <Icon className="h-6 w-6 text-primary-200" aria-hidden="true" />
                 <h3 className="mt-4 font-serif text-2xl font-bold">{title}</h3>
                 <p className="mt-2 leading-7 text-white/70">{copy}</p>
               </div>

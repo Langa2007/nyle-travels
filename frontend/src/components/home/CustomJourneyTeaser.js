@@ -26,8 +26,8 @@ const highlights = [
 
 export default function CustomJourneyTeaser() {
   return (
-    <section className="relative overflow-hidden bg-[#fbf7ef] py-20">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-luxury-gold/60 to-transparent" />
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-primary-50/60 to-white py-20">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-secondary-400/60 to-transparent" />
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 28 }}
@@ -44,9 +44,9 @@ export default function CustomJourneyTeaser() {
               sizes="(min-width: 1024px) 44vw, 100vw"
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-primary-950/90 via-secondary-900/35 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white sm:p-8">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-luxury-gold">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-primary-200">
                 Bespoke Travel Desk
               </p>
               <h3 className="max-w-md font-serif text-3xl font-bold leading-tight md:text-4xl">
@@ -68,8 +68,8 @@ export default function CustomJourneyTeaser() {
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               {highlights.map(({ icon: Icon, title, copy }) => (
-                <div key={title} className="rounded-2xl border border-black/5 bg-white/75 p-5 shadow-sm">
-                  <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary-50 text-primary-700">
+                <div key={title} className="rounded-2xl border border-primary-100 bg-white/85 p-5 shadow-sm">
+                  <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-primary-50 to-secondary-50 text-primary-700">
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <h3 className="font-serif text-xl font-bold text-gray-950">{title}</h3>
@@ -80,7 +80,7 @@ export default function CustomJourneyTeaser() {
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link href="/custom-journey">
-                <Button variant="luxury" size="lg" icon={FiArrowRight} iconPosition="right">
+                <Button variant="primary" size="lg" icon={FiArrowRight} iconPosition="right">
                   Design My Private Journey
                 </Button>
               </Link>
