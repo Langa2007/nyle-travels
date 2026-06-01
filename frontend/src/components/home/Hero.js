@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSearch, FiMapPin, FiCalendar, FiUsers, FiHome } from 'react-icons/fi';
+import { FiSearch, FiMapPin, FiCalendar, FiUsers, FiHome, FiCompass } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import DatePicker from '@/components/common/DatePicker';
 import { defaultHeroSlides, normalizeHeroSlides } from '@/data/heroSlides';
 import { fetchSettings } from '@/utils/settings';
-import { destinationsAPI } from '@/lib/api';
+import { destinationsAPI, toursAPI } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import useHotelCatalog from '@/hooks/useHotelCatalog';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -27,6 +27,7 @@ export default function Hero() {
   const router = useRouter();
   const [heroSlides, setHeroSlides] = useState(defaultHeroSlides);
   const [destinations, setDestinations] = useState([]);
+  const [tours, setTours] = useState([]);
   const [bestTimeToVisit, setBestTimeToVisit] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -57,6 +58,16 @@ export default function Hero() {
             setDestinations(rawData.destinations);
           }
         }
+
+        try {
+          const toursData = await toursAPI.getAll({ limit: 100 });
+          const packageData = toursData?.data?.data?.tours || [];
+          if (Array.isArray(packageData)) {
+            setTours(packageData);
+          }
+        } catch (tourError) {
+          console.error('[HERO] Failed to load tours and safaris:', tourError);
+        }
       } catch (error) {
         console.error('[HERO] Failed to load data:', error);
       } finally {
@@ -74,7 +85,22 @@ export default function Hero() {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  // Consolidate destinations and hotels into searchable list
+  const tourSearchItems = (Array.isArray(tours) ? tours : []).map((tour) => {
+    const isSafari = tour.type === 'safari';
+    const destinationName = tour.destination?.name || tour.destination_name || tour.destination || 'Kenya';
+    const duration = tour.duration_days ? `${tour.duration_days} days` : tour.duration || '';
+
+    return {
+      id: `tour-${tour.id || tour.slug}`,
+      name: tour.name,
+      slug: tour.slug,
+      type: isSafari ? 'safari' : 'tour',
+      subtitle: `${isSafari ? 'Safari' : 'Tour'}${destinationName ? ` in ${destinationName}` : ''}${duration ? ` - ${duration}` : ''}`,
+      bestTimeToVisit: ''
+    };
+  });
+
+  // Consolidate destinations, hotels, tours, and safaris into searchable list
   const searchableItems = [
     ...(Array.isArray(destinations) ? destinations : []).map(d => ({
       id: `dest-${d.id || d.slug}`,
@@ -91,7 +117,8 @@ export default function Hero() {
       type: 'hotel',
       subtitle: `Hotel in ${h.destination || 'Kenya'}`,
       bestTimeToVisit: ''
-    }))
+    })),
+    ...tourSearchItems
   ];
 
   const getFilteredItems = () => {
@@ -212,7 +239,7 @@ export default function Hero() {
                     <div className="absolute top-full left-0 right-0 mt-2 bg-white text-gray-900 rounded-xl shadow-2xl border border-gray-100 max-h-72 overflow-y-auto z-50 p-2 scrollbar-thin">
                       {searchQuery.trim() === '' ? (
                         <div className="p-4 text-center text-gray-400 text-sm italic">
-                          Type to search destinations or hotels...
+                          Type to search destinations, hotels, tours, or safaris...
                         </div>
                       ) : filteredItems.length > 0 ? (
                         filteredItems.map((item) => (
@@ -232,14 +259,18 @@ export default function Hero() {
                             }}
                           >
                             <div className={`p-2 rounded-xl shrink-0 ${
-                              item.type === 'destination' 
-                                ? 'bg-emerald-50 text-emerald-600' 
-                                : 'bg-amber-50 text-amber-600'
+                              item.type === 'destination'
+                                ? 'bg-emerald-50 text-emerald-600'
+                                : item.type === 'hotel'
+                                  ? 'bg-amber-50 text-amber-600'
+                                  : 'bg-sky-50 text-sky-600'
                             }`}>
                               {item.type === 'destination' ? (
                                 <FiMapPin className="w-4 h-4" />
-                              ) : (
+                              ) : item.type === 'hotel' ? (
                                 <FiHome className="w-4 h-4" />
+                              ) : (
+                                <FiCompass className="w-4 h-4" />
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
@@ -249,7 +280,9 @@ export default function Hero() {
                             <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
                               item.type === 'destination'
                                 ? 'bg-emerald-50/50 text-emerald-700 border-emerald-200/50'
-                                : 'bg-amber-50/50 text-amber-700 border-amber-200/50'
+                                : item.type === 'hotel'
+                                  ? 'bg-amber-50/50 text-amber-700 border-amber-200/50'
+                                  : 'bg-sky-50/50 text-sky-700 border-sky-200/50'
                             }`}>
                               {item.type}
                             </span>
@@ -350,7 +383,7 @@ export default function Hero() {
                     }
 
                     if (!activeItem) {
-                      alert("Please type and select a destination or hotel!");
+                      alert("Please type and select a destination, hotel, tour, or safari!");
                       return;
                     }
 
@@ -361,6 +394,12 @@ export default function Hero() {
                       router.push(route);
                     } else if (activeItem.type === 'hotel') {
                       const route = dateStr ? `/hotels/${activeItem.slug}?${dateStr}` : `/hotels/${activeItem.slug}`;
+                      router.push(route);
+                    } else if (activeItem.type === 'safari') {
+                      const route = dateStr ? `/safaris/${activeItem.slug}?${dateStr}` : `/safaris/${activeItem.slug}`;
+                      router.push(route);
+                    } else if (activeItem.type === 'tour') {
+                      const route = dateStr ? `/tours/${activeItem.slug}?${dateStr}` : `/tours/${activeItem.slug}`;
                       router.push(route);
                     }
                   }}
