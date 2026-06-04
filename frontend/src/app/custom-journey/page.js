@@ -131,7 +131,7 @@ export default function CustomJourneyPage() {
           sizes="100vw"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-950/90 via-secondary-900/65 to-primary-900/20" />
+        <div className="absolute inset-0 bg-black/55" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-white to-transparent" />
 
         <div className="relative z-10 flex min-h-[92vh] items-center">
