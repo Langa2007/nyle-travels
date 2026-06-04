@@ -42,6 +42,7 @@ const navItems = [
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
   const { user, logout, isLoggingOut } = useAuth();
@@ -50,10 +51,21 @@ export default function Header() {
   const { wishlistCount } = useWishlist();
 
   useEffect(() => {
+    let lastY = window.scrollY;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const currentY = window.scrollY;
+      setIsScrolled(currentY > 50);
+
+      // if scrolling up even slightly, show header; if scrolling down, hide
+      if (currentY < lastY) {
+        setVisible(true);
+      } else if (currentY > lastY) {
+        setVisible(false);
+      }
+      lastY = currentY;
     };
-    window.addEventListener('scroll', handleScroll);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -65,11 +77,9 @@ export default function Header() {
   return (
     <>
       <header
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          isScrolled
-            ? 'bg-white/95 backdrop-blur-md shadow-lg py-2'
-            : 'bg-transparent py-4'
-        }`}
+        className={`fixed left-0 right-0 top-0 w-full z-50 transform transition-transform duration-200 ${
+          visible ? 'translate-y-0' : '-translate-y-full'
+        } ${isScrolled ? 'bg-white/95 backdrop-blur-md shadow-lg py-2' : 'bg-transparent py-4'}`}
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
