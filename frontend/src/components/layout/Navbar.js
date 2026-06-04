@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -127,6 +127,7 @@ export default function Navbar() {
   
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [activeMegaMenu, setActiveMegaMenu] = useState(null);
   const pathname = usePathname();
   const router = useRouter();
@@ -146,11 +147,29 @@ export default function Navbar() {
   const featuredHotels = getFeaturedHotels(hotels, 3);
   const hotelDestinations = Array.isArray(hotels) ? [...new Set(hotels.map((hotel) => hotel.destination).filter(Boolean))].slice(0, 6) : [];
 
+  const lastScrollY = useRef(0);
+
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const currentScrollY = window.scrollY;
+      
+      // Always show navbar at the top
+      if (currentScrollY < 10) {
+        setIsVisible(true);
+      } else {
+        // Disappear on scroll down, appear immediately on scroll up
+        if (currentScrollY > lastScrollY.current) {
+          setIsVisible(false);
+        } else if (currentScrollY < lastScrollY.current) {
+          setIsVisible(true);
+        }
+      }
+      
+      setIsScrolled(currentScrollY > 50);
+      lastScrollY.current = currentScrollY;
     };
-    window.addEventListener('scroll', handleScroll);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -186,6 +205,10 @@ export default function Navbar() {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 px-4 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
           isScrolled ? 'pt-4' : 'pt-0'
+        } ${
+          (isVisible || isOpen || activeMegaMenu)
+            ? 'translate-y-0 opacity-100'
+            : '-translate-y-full opacity-0 pointer-events-none'
         }`}
       >
         <div 
