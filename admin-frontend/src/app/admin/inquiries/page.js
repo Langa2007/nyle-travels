@@ -11,7 +11,7 @@ export default function InquiriesPage() {
   const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedInquiry, setSelectedInquiry] = useState(null);
-  const [filter, setFilter] = useState('all'); // all, unread, read, replied
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     fetchInquiries();
@@ -55,9 +55,13 @@ export default function InquiriesPage() {
       case 'unread': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'read': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'replied': return 'bg-green-100 text-green-800 border-green-200';
+      case 'approved': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'not_approved': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
+
+  const formatStatusLabel = (status = '') => status.replace(/_/g, ' ');
 
   return (
     <div className="space-y-6">
@@ -70,7 +74,7 @@ export default function InquiriesPage() {
 
         {/* Filters */}
         <div className="flex items-center space-x-2 bg-white p-1 rounded-xl shadow-sm border border-gray-100">
-          {['all', 'unread', 'read', 'replied'].map((f) => (
+          {['all', 'unread', 'read', 'replied', 'approved', 'not_approved'].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -80,7 +84,7 @@ export default function InquiriesPage() {
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
-              {f}
+              {formatStatusLabel(f)}
             </button>
           ))}
         </div>
@@ -135,7 +139,7 @@ export default function InquiriesPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusColor(inquiry.status)}`}>
-                        {inquiry.status}
+                        {formatStatusLabel(inquiry.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -216,12 +220,15 @@ export default function InquiriesPage() {
                       className={`text-sm border-0 rounded-lg ring-1 ring-inset pl-3 pr-8 py-1.5 focus:ring-2 focus:ring-primary-600 ${
                         selectedInquiry.status === 'unread' ? 'ring-yellow-300 bg-yellow-50 text-yellow-800' :
                         selectedInquiry.status === 'read' ? 'ring-blue-300 bg-blue-50 text-blue-800' :
+                        selectedInquiry.status === 'not_approved' ? 'ring-red-300 bg-red-50 text-red-800' :
                         'ring-green-300 bg-green-50 text-green-800'
                       }`}
                     >
                       <option value="unread">Unread</option>
                       <option value="read">Read</option>
                       <option value="replied">Replied</option>
+                      <option value="approved">Approved</option>
+                      <option value="not_approved">Not Approved</option>
                     </select>
                   </div>
                   <button

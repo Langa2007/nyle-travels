@@ -17,8 +17,20 @@ const EMAIL_TEMPLATES = {
   EMAIL_VERIFICATION: 'email-verification',
   REVIEW_REQUEST: 'review-request',
   NEWSLETTER: 'newsletter',
-  NEWSLETTER_WELCOME: 'newsletter-welcome'
+  NEWSLETTER_WELCOME: 'newsletter-welcome',
+  CUSTOM_JOURNEY_APPROVED: 'custom-journey-approved',
+  CUSTOM_JOURNEY_REJECTED: 'custom-journey-rejected'
 };
+
+const escapeHtml = (value = '') =>
+  String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const nl2br = (value = '') => escapeHtml(value).replace(/\n/g, '<br>');
 
 // Log email to database
 const logEmail = async (userId, emailTo, subject, template, status, messageId, error = null) => {
@@ -276,6 +288,68 @@ const generateEmailHtml = (template, data) => {
         </body>
         </html>
       `;
+
+    case EMAIL_TEMPLATES.CUSTOM_JOURNEY_APPROVED:
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Your Custom Journey Request - Nyle Travel</title>
+        </head>
+        <body style="font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #2d2d2d; max-width: 640px; margin: 0 auto; padding: 20px; background: #f7f7f7;">
+          <div style="background: #111827; padding: 36px 24px; text-align: center; border-radius: 12px 12px 0 0;">
+            <h1 style="color: #d6b46a; margin: 0; font-size: 28px; font-family: Georgia, serif;">Your Journey Has Been Approved</h1>
+          </div>
+          <div style="background: #ffffff; padding: 34px 28px; border: 1px solid #eeeeee; border-top: none; border-radius: 0 0 12px 12px;">
+            <p style="font-size: 16px;">Dear <strong>${escapeHtml(data.name)}</strong>,</p>
+            <p>Thank you for trusting Nyle Travel & Tours with your custom journey idea. We have reviewed your request and we are pleased to let you know that your journey can move forward for planning.</p>
+            <div style="background: #fbf7ee; border: 1px solid #ead9b7; border-radius: 10px; padding: 22px; margin: 26px 0;">
+              <p style="margin: 0 0 8px 0;"><strong>Destination:</strong> ${escapeHtml(data.destination || 'Custom journey')}</p>
+              <p style="margin: 0;"><strong>Preferred timing:</strong> ${escapeHtml(data.travelDate || data.dateFlexibility || 'Flexible')}</p>
+            </div>
+            ${data.adminNote ? `<p>${nl2br(data.adminNote)}</p>` : ''}
+            <p>Our team will now begin shaping the route, stays, experiences, and next steps for your approval. A travel consultant will contact you shortly with the details.</p>
+            <div style="margin-top: 30px; padding-top: 24px; border-top: 1px solid #eeeeee;">
+              <p style="margin-bottom: 4px;">Warm regards,</p>
+              <p style="margin-top: 0;"><strong>Nyle Travel & Tours</strong></p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+    case EMAIL_TEMPLATES.CUSTOM_JOURNEY_REJECTED:
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Your Custom Journey Request - Nyle Travel</title>
+        </head>
+        <body style="font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #2d2d2d; max-width: 640px; margin: 0 auto; padding: 20px; background: #f7f7f7;">
+          <div style="background: #111827; padding: 36px 24px; text-align: center; border-radius: 12px 12px 0 0;">
+            <h1 style="color: #d6b46a; margin: 0; font-size: 28px; font-family: Georgia, serif;">About Your Journey Request</h1>
+          </div>
+          <div style="background: #ffffff; padding: 34px 28px; border: 1px solid #eeeeee; border-top: none; border-radius: 0 0 12px 12px;">
+            <p style="font-size: 16px;">Dear <strong>${escapeHtml(data.name)}</strong>,</p>
+            <p>Thank you sincerely for sharing your custom journey request with us. We know travel plans can carry a lot of hope, time, and personal meaning, so we are sorry that we cannot approve this journey as submitted.</p>
+            <div style="background: #fff7f7; border: 1px solid #f1c7c7; border-radius: 10px; padding: 22px; margin: 26px 0;">
+              <p style="margin-top: 0;"><strong>Reason:</strong></p>
+              <p style="margin-bottom: 0;">${nl2br(data.reason)}</p>
+            </div>
+            ${data.adminNote ? `<p>${nl2br(data.adminNote)}</p>` : ''}
+            <p>Please accept our heartfelt apology for the disappointment. If you would like, we would still be glad to help you reshape the idea into a safer, more practical, or more available alternative.</p>
+            <div style="margin-top: 30px; padding-top: 24px; border-top: 1px solid #eeeeee;">
+              <p style="margin-bottom: 4px;">With care,</p>
+              <p style="margin-top: 0;"><strong>Nyle Travel & Tours</strong></p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
   }
 };
 
@@ -357,11 +431,42 @@ export const sendBookingConfirmation = async (user, booking, tour) => {
   });
 };
 
+export const sendCustomJourneyApprovalEmail = async (contact, brief = {}, adminNote = '') => {
+  return sendEmail({
+    to: contact.email,
+    subject: 'Your Custom Journey Request Has Been Approved',
+    template: EMAIL_TEMPLATES.CUSTOM_JOURNEY_APPROVED,
+    data: {
+      name: contact.name,
+      destination: brief.Destination,
+      travelDate: brief['Preferred travel date'],
+      dateFlexibility: brief['Date flexibility'],
+      adminNote
+    }
+  });
+};
+
+export const sendCustomJourneyRejectionEmail = async (contact, brief = {}, reason, adminNote = '') => {
+  return sendEmail({
+    to: contact.email,
+    subject: 'An Update on Your Custom Journey Request',
+    template: EMAIL_TEMPLATES.CUSTOM_JOURNEY_REJECTED,
+    data: {
+      name: contact.name,
+      destination: brief.Destination,
+      reason,
+      adminNote
+    }
+  });
+};
+
 export default {
   sendWelcomeEmail,
   sendPasswordResetEmail,
   sendNewsletterWelcomeEmail,
   sendVerificationEmail,
   sendBookingConfirmation,
+  sendCustomJourneyApprovalEmail,
+  sendCustomJourneyRejectionEmail,
   sendEmail
 };

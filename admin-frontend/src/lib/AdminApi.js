@@ -119,6 +119,12 @@ export const adminAPI = {
   updateContactStatus: (id, status) =>
     api.patch(`/admin/contacts/${id}/status`, { status }),
 
+  sendCustomJourneyApproval: (id, data) =>
+    api.post(`/admin/contacts/${id}/journey-approval`, data),
+
+  sendCustomJourneyRejection: (id, data) =>
+    api.post(`/admin/contacts/${id}/journey-rejection`, data),
+
   // User Reports
   getReports: (params) =>
     api.get('/admin/reports/user', { params }),

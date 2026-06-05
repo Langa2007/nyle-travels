@@ -36,6 +36,10 @@ router.get('/contacts', contactController.getContacts);
 router.get('/contact', contactController.getContacts);
 router.patch('/contacts/:id/status', contactController.updateContactStatus);
 router.patch('/contact/:id/status', contactController.updateContactStatus);
+router.post('/contacts/:id/journey-approval', contactController.sendCustomJourneyApproval);
+router.post('/contact/:id/journey-approval', contactController.sendCustomJourneyApproval);
+router.post('/contacts/:id/journey-rejection', contactController.sendCustomJourneyRejection);
+router.post('/contact/:id/journey-rejection', contactController.sendCustomJourneyRejection);
 
 router.get('/reports/user', reportController.getReports);
 router.patch('/reports/user/:id/status', reportController.updateReportStatus);

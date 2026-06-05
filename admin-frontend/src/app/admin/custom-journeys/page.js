@@ -2,16 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiCalendar, FiEye, FiX, FiMail, FiCompass, FiRefreshCw, FiUser } from 'react-icons/fi';
+import { FiCalendar, FiCheckCircle, FiEye, FiX, FiMail, FiCompass, FiRefreshCw, FiUser, FiXCircle } from 'react-icons/fi';
 import { formatDistanceToNow } from 'date-fns';
 import { adminAPI } from '@/lib/AdminApi';
 import toast from 'react-hot-toast';
 import Button from '@/components/ui/Button';
+import Modal from '@/components/ui/Modal';
+import Textarea from '@/components/ui/TextArea';
 
 const statusStyles = {
   unread: 'bg-sky-50 text-sky-700 border-sky-200',
   read: 'bg-gray-100 text-gray-700 border-gray-200',
   replied: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  approved: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  not_approved: 'bg-red-50 text-red-700 border-red-200',
 };
 
 const briefLabels = {
@@ -53,10 +57,19 @@ function getJourneySummary(brief) {
   return parts.length ? parts.join(' · ') : 'Custom journey brief';
 }
 
+function formatStatusLabel(status = '') {
+  return status.replace(/_/g, ' ');
+}
+
 export default function CustomJourneysPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
+  const [emailAction, setEmailAction] = useState(null);
+  const [approvalNote, setApprovalNote] = useState('');
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [rejectionNote, setRejectionNote] = useState('');
+  const [sendingEmail, setSendingEmail] = useState(false);
   const selectedBrief = selected ? parseJourneyBrief(selected.message) : {};
 
   useEffect(() => {
@@ -85,6 +98,69 @@ export default function CustomJourneysPage() {
     } catch (err) {
       console.error(err);
       toast.error('Failed to update status');
+    }
+  };
+
+  const openEmailAction = (action) => {
+    setEmailAction(action);
+    setApprovalNote('');
+    setRejectionReason('');
+    setRejectionNote('');
+  };
+
+  const closeEmailAction = () => {
+    if (!sendingEmail) {
+      setEmailAction(null);
+    }
+  };
+
+  const updateSelectedStatus = (status) => {
+    setItems((current) => current.map((item) => item.id === selected.id ? { ...item, status } : item));
+    setSelected((current) => current ? { ...current, status } : current);
+  };
+
+  const sendJourneyApproval = async () => {
+    if (!selected) return;
+
+    setSendingEmail(true);
+    try {
+      const response = await adminAPI.sendCustomJourneyApproval(selected.id, {
+        adminNote: approvalNote.trim(),
+      });
+      updateSelectedStatus(response.data?.data?.contact?.status || 'approved');
+      toast.success('Approval email sent to the user');
+      setEmailAction(null);
+    } catch (error) {
+      console.error('Failed to send approval email:', error);
+      toast.error(error.response?.data?.message || 'Failed to send approval email');
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
+  const sendJourneyRejection = async () => {
+    if (!selected) return;
+
+    const reason = rejectionReason.trim();
+    if (reason.length < 10) {
+      toast.error('Please add a clear reason before sending.');
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      const response = await adminAPI.sendCustomJourneyRejection(selected.id, {
+        reason,
+        adminNote: rejectionNote.trim(),
+      });
+      updateSelectedStatus(response.data?.data?.contact?.status || 'not_approved');
+      toast.success('Not-approved email sent to the user');
+      setEmailAction(null);
+    } catch (error) {
+      console.error('Failed to send not-approved email:', error);
+      toast.error(error.response?.data?.message || 'Failed to send not-approved email');
+    } finally {
+      setSendingEmail(false);
     }
   };
 
@@ -150,7 +226,7 @@ export default function CustomJourneysPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border capitalize ${statusClass}`}>{it.status}</span>
+                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border capitalize ${statusClass}`}>{formatStatusLabel(it.status)}</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDistanceToNow(new Date(it.created_at), { addSuffix: true })}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -201,7 +277,7 @@ export default function CustomJourneysPage() {
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Details</p>
                     <p className="text-sm text-gray-900"><span className="font-medium">Interest:</span> {selected.interest}</p>
                     <p className="text-sm text-gray-900 mt-1"><span className="font-medium">Date:</span> {new Date(selected.created_at).toLocaleString()}</p>
-                    <p className="mt-3 text-sm text-gray-700"><span className="font-medium">Status:</span> <span className="capitalize">{selected.status}</span></p>
+                    <p className="mt-3 text-sm text-gray-700"><span className="font-medium">Status:</span> <span className="capitalize">{formatStatusLabel(selected.status)}</span></p>
                   </div>
                 </div>
 
@@ -239,7 +315,8 @@ export default function CustomJourneysPage() {
                   <div className="flex flex-wrap items-center gap-3">
                     <Button variant="outline" onClick={() => updateStatus(selected.id, 'read')}>Mark Read</Button>
                     <Button variant="outline" onClick={() => updateStatus(selected.id, 'replied')}>Mark Replied</Button>
-                    <a href={`mailto:${selected.email}?subject=Re: Your Custom Journey`}><Button variant="primary">Reply by Email</Button></a>
+                    <Button variant="success" icon={FiCheckCircle} onClick={() => openEmailAction('approve')}>Approve Journey</Button>
+                    <Button variant="danger" icon={FiXCircle} onClick={() => openEmailAction('reject')}>Not Approved</Button>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
                     <Button variant="outline" href={`/admin/tours/new?source=contact&id=${selected.id}`}>Create Tour</Button>
@@ -251,6 +328,82 @@ export default function CustomJourneysPage() {
           </div>
         )}
       </AnimatePresence>
+
+      <Modal
+        isOpen={Boolean(emailAction && selected)}
+        onClose={closeEmailAction}
+        title={emailAction === 'approve' ? 'Send Approval Email' : 'Send Not-Approved Email'}
+        size="lg"
+        closeOnClickOutside={!sendingEmail}
+        footer={
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <Button variant="outline" onClick={closeEmailAction} disabled={sendingEmail}>Cancel</Button>
+            {emailAction === 'approve' ? (
+              <Button variant="success" loading={sendingEmail} icon={FiCheckCircle} onClick={sendJourneyApproval}>
+                Send Approval
+              </Button>
+            ) : (
+              <Button
+                variant="danger"
+                loading={sendingEmail}
+                disabled={rejectionReason.trim().length < 10}
+                icon={FiXCircle}
+                onClick={sendJourneyRejection}
+              >
+                Send Not Approved
+              </Button>
+            )}
+          </div>
+        }
+      >
+        {selected && emailAction === 'approve' && (
+          <div className="space-y-5">
+            <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
+              This sends a Resend email to <span className="font-semibold">{selected.email}</span> confirming that the custom journey can move forward for planning.
+            </div>
+            <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-700">
+              <p><span className="font-semibold text-gray-900">Destination:</span> {selectedBrief.Destination || 'Not specified'}</p>
+              <p className="mt-1"><span className="font-semibold text-gray-900">Preferred date:</span> {selectedBrief['Preferred travel date'] || selectedBrief['Date flexibility'] || 'Flexible'}</p>
+            </div>
+            <Textarea
+              label="Optional note to include"
+              rows={5}
+              maxLength={1000}
+              value={approvalNote}
+              onChange={(event) => setApprovalNote(event.target.value)}
+              placeholder="Add any next steps, consultation timing, or reassurance for the traveler."
+            />
+            <p className="text-xs text-gray-500">{approvalNote.length}/1000 characters</p>
+          </div>
+        )}
+
+        {selected && emailAction === 'reject' && (
+          <div className="space-y-5">
+            <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm leading-6 text-red-900">
+              This sends a heartfelt apology and explains why the journey cannot be approved as submitted. A clear reason is required.
+            </div>
+            <Textarea
+              label="Reason for not approving"
+              rows={5}
+              maxLength={1200}
+              value={rejectionReason}
+              onChange={(event) => setRejectionReason(event.target.value)}
+              placeholder="Explain the practical reason, such as availability, safety, feasibility, timing, budget mismatch, or policy limits."
+              error={rejectionReason && rejectionReason.trim().length < 10 ? 'Reason must be at least 10 characters.' : ''}
+            />
+            <p className="text-xs text-gray-500">{rejectionReason.length}/1200 characters</p>
+            <Textarea
+              label="Optional supportive note"
+              rows={4}
+              maxLength={1000}
+              value={rejectionNote}
+              onChange={(event) => setRejectionNote(event.target.value)}
+              placeholder="Offer an alternative direction or invite the traveler to reshape the journey."
+            />
+            <p className="text-xs text-gray-500">{rejectionNote.length}/1000 characters</p>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
