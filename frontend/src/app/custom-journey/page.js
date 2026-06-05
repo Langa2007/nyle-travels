@@ -18,6 +18,7 @@ import {
   FiUsers,
 } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
+import DatePicker from '@/components/common/DatePicker';
 import { contactAPI } from '@/lib/api';
 
 const journeyStyles = [
@@ -52,7 +53,8 @@ const initialForm = {
   email: '',
   phone: '',
   destination: '',
-  travelWindow: '',
+  travelDate: null,
+  dateFlexibility: 'Flexible within a few weeks',
   travelers: '',
   budget: '',
   pace: 'Balanced luxury',
@@ -60,16 +62,88 @@ const initialForm = {
   planningStage: 'I have a dream destination',
   styles: [],
   message: '',
+  website: '',
+};
+
+const fieldLimits = {
+  name: 120,
+  email: 255,
+  phone: 50,
+  destination: 180,
+  travelers: 120,
+  budget: 120,
+  occasion: 160,
+  message: 1400,
+};
+
+const stripControlCharacters = (value) =>
+  typeof value === 'string'
+    ? value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
+    : value;
+
+const trimToLimit = (value, limit) => stripControlCharacters(value).slice(0, limit);
+
+const formatTravelDate = (date) => {
+  if (!date) return 'Flexible';
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
+const validateCustomJourney = (data) => {
+  const nextErrors = {};
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (data.website) {
+    nextErrors.form = 'Invalid submission. Please refresh and try again.';
+  }
+
+  if (data.name.trim().length < 2) {
+    nextErrors.name = 'Enter your full name.';
+  }
+
+  if (!emailPattern.test(data.email.trim())) {
+    nextErrors.email = 'Enter a valid email address.';
+  }
+
+  if (data.phone && !/^[+()\-\s0-9.]*$/.test(data.phone)) {
+    nextErrors.phone = 'Use only numbers, spaces, +, -, dots, or brackets.';
+  }
+
+  if (data.destination.trim().length < 2) {
+    nextErrors.destination = 'Tell us the destination or travel idea.';
+  }
+
+  if (data.travelDate) {
+    const selectedDate = new Date(data.travelDate);
+    selectedDate.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+      nextErrors.travelDate = 'Choose today or a future date.';
+    }
+  }
+
+  if (data.message.length > fieldLimits.message) {
+    nextErrors.message = `Keep notes under ${fieldLimits.message} characters.`;
+  }
+
+  return nextErrors;
 };
 
 export default function CustomJourneyPage() {
   const [formData, setFormData] = useState(initialForm);
+  const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData((current) => ({ ...current, [name]: value }));
+    const nextValue = fieldLimits[name] ? trimToLimit(value, fieldLimits[name]) : stripControlCharacters(value);
+    setFormData((current) => ({ ...current, [name]: nextValue }));
+    setErrors((current) => ({ ...current, [name]: undefined, form: undefined }));
   };
 
   const toggleStyle = (style) => {
@@ -86,12 +160,21 @@ export default function CustomJourneyPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    const nextErrors = validateCustomJourney(formData);
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      toast.error(nextErrors.form || 'Please check the highlighted fields.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     const message = [
       'Custom journey request',
       `Destination: ${formData.destination}`,
-      `Travel window: ${formData.travelWindow || 'Flexible'}`,
+      `Preferred travel date: ${formatTravelDate(formData.travelDate)}`,
+      `Date flexibility: ${formData.dateFlexibility}`,
       `Travelers: ${formData.travelers || 'Not specified'}`,
       `Budget range: ${formData.budget || 'Not specified'}`,
       `Preferred pace: ${formData.pace}`,
@@ -108,9 +191,11 @@ export default function CustomJourneyPage() {
         phone: formData.phone,
         interest: 'Custom Journey Request',
         message,
+        website: formData.website,
       });
       setIsSubmitted(true);
       setFormData(initialForm);
+      setErrors({});
       toast.success('Your private journey brief has been sent.');
     } catch (error) {
       console.error('Failed to submit custom journey:', error);
@@ -241,6 +326,17 @@ export default function CustomJourneyPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-7">
+                  <input
+                    type="text"
+                    name="website"
+                    value={formData.website}
+                    onChange={handleChange}
+                    className="hidden"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                  />
+
                   <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.24em] text-secondary-700">
                       Custom Trip Brief
@@ -251,47 +347,58 @@ export default function CustomJourneyPage() {
                     <p className="mt-3 leading-7 text-gray-600">
                       Share as much as you know. Flexible answers are welcome.
                     </p>
+                    {errors.form && (
+                      <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700" role="alert">
+                        {errors.form}
+                      </p>
+                    )}
                   </div>
 
                   <div className="grid gap-5 md:grid-cols-2">
-                    <Field label="Full name" htmlFor="name" required>
+                    <Field label="Full name" htmlFor="name" required error={errors.name}>
                       <input
                         id="name"
                         name="name"
                         type="text"
                         required
+                        maxLength={fieldLimits.name}
                         autoComplete="name"
                         value={formData.name}
                         onChange={handleChange}
                         className="input-field"
+                        aria-invalid={Boolean(errors.name)}
                         placeholder="Your name"
                       />
                     </Field>
-                    <Field label="Email address" htmlFor="email" required>
+                    <Field label="Email address" htmlFor="email" required error={errors.email}>
                       <input
                         id="email"
                         name="email"
                         type="email"
                         required
+                        maxLength={fieldLimits.email}
                         autoComplete="email"
                         value={formData.email}
                         onChange={handleChange}
                         className="input-field"
+                        aria-invalid={Boolean(errors.email)}
                         placeholder="you@example.com"
                       />
                     </Field>
                   </div>
 
                   <div className="grid gap-5 md:grid-cols-2">
-                    <Field label="Phone number" htmlFor="phone">
+                    <Field label="Phone number" htmlFor="phone" error={errors.phone}>
                       <input
                         id="phone"
                         name="phone"
                         type="tel"
+                        maxLength={fieldLimits.phone}
                         autoComplete="tel"
                         value={formData.phone}
                         onChange={handleChange}
                         className="input-field"
+                        aria-invalid={Boolean(errors.phone)}
                         placeholder="+254 ..."
                       />
                     </Field>
@@ -300,6 +407,7 @@ export default function CustomJourneyPage() {
                         id="travelers"
                         name="travelers"
                         type="text"
+                        maxLength={fieldLimits.travelers}
                         value={formData.travelers}
                         onChange={handleChange}
                         className="input-field"
@@ -308,7 +416,7 @@ export default function CustomJourneyPage() {
                     </Field>
                   </div>
 
-                  <Field label="Place you want to go" htmlFor="destination" required>
+                  <Field label="Place you want to go" htmlFor="destination" required error={errors.destination}>
                     <div className="relative">
                       <FiMapPin className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary-600" aria-hidden="true" />
                       <input
@@ -316,34 +424,60 @@ export default function CustomJourneyPage() {
                         name="destination"
                         type="text"
                         required
+                        maxLength={fieldLimits.destination}
                         value={formData.destination}
                         onChange={handleChange}
                         className="input-field pl-12"
+                        aria-invalid={Boolean(errors.destination)}
                         placeholder="A destination, hotel, island, reserve, country, or dream idea"
                       />
                     </div>
                   </Field>
 
-                  <div className="grid gap-5 md:grid-cols-2">
-                    <Field label="When are you thinking?" htmlFor="travelWindow">
+                  <div className="grid gap-5 lg:grid-cols-3">
+                    <Field
+                      label="Preferred travel date"
+                      htmlFor="travelDate"
+                      error={errors.travelDate}
+                      helper="Use the calendar, or leave it empty if your dates are open."
+                    >
                       <div className="relative">
                         <FiCalendar className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary-600" aria-hidden="true" />
-                        <input
-                          id="travelWindow"
-                          name="travelWindow"
-                          type="text"
-                          value={formData.travelWindow}
-                          onChange={handleChange}
+                        <DatePicker
+                          id="travelDate"
+                          selected={formData.travelDate}
+                          onChange={(date) => {
+                            setFormData((current) => ({ ...current, travelDate: date }));
+                            setErrors((current) => ({ ...current, travelDate: undefined, form: undefined }));
+                          }}
+                          minDate={new Date()}
+                          isClearable
+                          placeholderText="Select a date"
                           className="input-field pl-12"
-                          placeholder="Dates, month, season, or flexible"
+                          aria-invalid={Boolean(errors.travelDate)}
                         />
                       </div>
+                    </Field>
+                    <Field label="Date flexibility" htmlFor="dateFlexibility">
+                      <select
+                        id="dateFlexibility"
+                        name="dateFlexibility"
+                        value={formData.dateFlexibility}
+                        onChange={handleChange}
+                        className="input-field cursor-pointer bg-white"
+                      >
+                        <option>Flexible within a few weeks</option>
+                        <option>Exact date preferred</option>
+                        <option>Flexible by month</option>
+                        <option>Need advice on best timing</option>
+                      </select>
                     </Field>
                     <Field label="Comfortable budget range" htmlFor="budget">
                       <input
                         id="budget"
                         name="budget"
                         type="text"
+                        maxLength={fieldLimits.budget}
                         value={formData.budget}
                         onChange={handleChange}
                         className="input-field"
@@ -391,6 +525,7 @@ export default function CustomJourneyPage() {
                         id="occasion"
                         name="occasion"
                         type="text"
+                        maxLength={fieldLimits.occasion}
                         value={formData.occasion}
                         onChange={handleChange}
                         className="input-field pl-12"
@@ -428,14 +563,21 @@ export default function CustomJourneyPage() {
                     </div>
                   </fieldset>
 
-                  <Field label="Details that would make it unforgettable" htmlFor="message">
+                  <Field
+                    label="Details that would make it unforgettable"
+                    htmlFor="message"
+                    error={errors.message}
+                    helper={`${formData.message.length}/${fieldLimits.message} characters`}
+                  >
                     <textarea
                       id="message"
                       name="message"
                       rows={5}
+                      maxLength={fieldLimits.message}
                       value={formData.message}
                       onChange={handleChange}
                       className="input-field resize-none"
+                      aria-invalid={Boolean(errors.message)}
                       placeholder="Tell us about must-see places, hotel style, dietary needs, accessibility needs, preferred flight class, surprise moments, or anything you want handled quietly."
                     />
                   </Field>
@@ -487,7 +629,7 @@ export default function CustomJourneyPage() {
   );
 }
 
-function Field({ label, htmlFor, required = false, children }) {
+function Field({ label, htmlFor, required = false, error, helper, children }) {
   return (
     <div className="space-y-2">
       <label htmlFor={htmlFor} className="block text-sm font-semibold text-gray-800">
@@ -495,6 +637,13 @@ function Field({ label, htmlFor, required = false, children }) {
         {required && <span className="ml-1 text-primary-700">*</span>}
       </label>
       {children}
+      {error ? (
+        <p className="text-sm font-medium text-red-700" role="alert">
+          {error}
+        </p>
+      ) : helper ? (
+        <p className="text-xs leading-5 text-gray-500">{helper}</p>
+      ) : null}
     </div>
   );
 }

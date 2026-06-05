@@ -2,14 +2,29 @@ import prisma from '../lib/prisma.js';
 import catchAsync from '../utils/CatchAsync.js';
 import AppError from '../utils/AppError.js';
 
+const cleanText = (value, maxLength) => {
+  if (typeof value !== 'string') return undefined;
+  return value
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
+    .trim()
+    .slice(0, maxLength);
+};
+
 export const submitContact = catchAsync(async (req, res, next) => {
+  if (req.body.website) {
+    return res.status(201).json({
+      status: 'success',
+      data: { contact: null },
+    });
+  }
+
   const contact = await prisma.contact.create({
     data: {
-      name: req.body.name,
-      email: req.body.email,
-      phone: req.body.phone,
-      interest: req.body.interest,
-      message: req.body.message,
+      name: cleanText(req.body.name, 120),
+      email: cleanText(req.body.email, 255)?.toLowerCase(),
+      phone: cleanText(req.body.phone, 50) || null,
+      interest: cleanText(req.body.interest, 255),
+      message: cleanText(req.body.message, 5000),
     },
   });
 

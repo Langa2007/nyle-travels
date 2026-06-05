@@ -2,7 +2,7 @@ import AppError from '../utils/AppError.js';
 import catchAsync from '../utils/CatchAsync.js';
 
 export const restrictToAdmin = catchAsync(async (req, res, next) => {
-  if (!req.user || req.user.role !== 'admin') {
+  if (!req.user || !['admin', 'super_admin'].includes(req.user.role)) {
     return next(new AppError('You do not have permission to perform this action', 403));
   }
   next();
